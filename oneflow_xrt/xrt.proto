@@ -1,0 +1,51 @@
+syntax = "proto2";
+package oneflow.xrt;
+
+import "oneflow/core/operator/op_conf.proto";
+import "oneflow/core/job/sbp_parallel.proto";
+import "oneflow/core/register/blob_desc.proto";
+
+enum XrtDevice {
+  CPU_X86 = 1;
+  GPU_CUDA = 2;
+  GPU_CL = 3;
+  CPU_ARM = 4;
+}
+
+enum XrtEngine {
+  DEFAULT = 1;
+  XLA = 2;
+  TENSORRT = 3;
+  TVM = 4;
+  OPENVINO = 5;
+}
+
+message CommonOptionsProto {
+  required XrtEngine engine = 1;
+  required XrtDevice device = 2;
+
+  optional bool use_fp16 = 3 [default = false];
+  optional bool use_int8 = 4 [default = false];
+  optional string int8_calibration = 5;
+  
+  optional int64 max_workspace_size = 6 [default = 0];
+
+  optional bool force_compile = 7 [default = false];
+}
+
+message FunctionProto {
+  repeated string input = 1;
+  repeated string output = 2;
+  repeated OperatorConf node = 3;
+}
+
+message XrtLaunchProto {
+  required CommonOptionsProto options = 1;
+
+  required FunctionProto function = 2;
+  repeated string liveout_entries = 3;
+
+  // nd sbp signature for each folded node
+  map<string, NdSbpSignature> nd_sbp_signatures = 5;
+  map<string, BlobDescProto> logical_blob_desc = 6;
+};
