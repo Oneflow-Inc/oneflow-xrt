@@ -20,13 +20,13 @@ namespace oneflow {
 namespace xrt {
 
 constexpr char const _XrtLaunchOpType[] = "XrtLaunch";
-constexpr char const _XrtArgumentOpType[] = "XrtArgument";
+constexpr char const _XrtEntryOpType[] = "XrtEntry";
 constexpr char const _XrtReturnOpType[] = "XrtReturn";
 constexpr char const _XrtUnsupportedOpType[] = "XrtUnsupported";
 
 constexpr char const _XrtLaunchPrefix[] = "_xrt_launch_";
-constexpr char const _XrtArgumentPrefix[] = "_xrt_argument_";
-constexpr char const _XrtReturnPrefix[] = "_xrt_return_";
+constexpr char const _XrtEntryName[] = "_xrt_entry";
+constexpr char const _XrtReturnName[] = "_xrt_return";
 
 }  // namespace xrt
 }  // namespace oneflow

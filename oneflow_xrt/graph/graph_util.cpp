@@ -82,14 +82,14 @@ GraphBuilder::GraphBuilder(const Job& job)
 GraphBuilder::GraphBuilder(const FunctionProto& function)
     : graph_(std::make_shared<XrtGraph>()) {
   for (const auto& input : function.input()) {
-    XrtNode* node = graph_->AddArgumentNode(input);
-    producers_[input] = node;
-    node_info_[node].input_output_keys.emplace(input, "value");
+    XrtNode* node = graph_->AddEntryNode(input.name());
+    producers_[input.value()] = node;
+    node_info_[node].input_output_keys.emplace(input.value(), "value");
   }
   for (const auto& output : function.output()) {
-    XrtNode* node = graph_->AddArgumentNode(output);
-    node_info_[node].inputs.insert(output);
-    node_info_[node].input_output_keys.emplace(output, "value");
+    XrtNode* node = graph_->AddEntryNode(output.name());
+    node_info_[node].inputs.insert(output.value());
+    node_info_[node].input_output_keys.emplace(output.value(), "value");
   }
 
   for (const auto& node_conf : function.node()) {

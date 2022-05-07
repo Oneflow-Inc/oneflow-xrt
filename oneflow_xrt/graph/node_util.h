@@ -25,6 +25,9 @@ bool IsCanbeCompiledNode(const XrtNode* node, const XrtEngine& engine,
                          const XrtDevice& device);
 bool IsModelUpdateNode(const XrtNode* node);
 
+bool IsMutableVariable(const Argument& argument, const std::string& op_type,
+                       const XrtEngine& engine);
+
 bool IsNodeInput(const XrtNode* node, const Argument& argument);
 bool IsNodeOutput(const XrtNode* node, const Argument& argument);
 

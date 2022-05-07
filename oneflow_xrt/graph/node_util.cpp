@@ -18,6 +18,7 @@ limitations under the License.
 #include <string>
 
 #include "oneflow_xrt/common/registry.h"
+#include "oneflow_xrt/compiler/kernel/op_kernel_registry.h"
 #include "oneflow_xrt/compiler/kernel/op_kernel_registry_id.h"
 
 namespace oneflow {
@@ -31,6 +32,14 @@ bool IsCanbeCompiledNode(const XrtNode* node, const XrtEngine& engine,
 
 bool IsModelUpdateNode(const XrtNode* node) {
   return XRT_REGISTER_HAS(ModelUpdateRegId, node->type());
+}
+
+bool IsMutableVariable(const Argument& argument, const std::string& op_type,
+                       const XrtEngine& engine) {
+  const auto& kernel_attrs = XRT_REGISTER_LOOKUP(
+      OpKernelAttrRegId, (OpKernelAttrRegKey{op_type, engine}));
+  const auto& mutable_variables = kernel_attrs.mutable_variables;
+  return mutable_variables.count(argument.meta_data().consume_key);
 }
 
 bool IsNodeInput(const XrtNode* node, const Argument& argument) {

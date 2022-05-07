@@ -56,7 +56,7 @@ bool XrtNode::IsSourceNode() const { return in_edges_.size() == 0; }
 
 bool XrtNode::IsFinishNode() const { return out_edges_.size() == 0; }
 
-bool XrtNode::IsArgumentNode() const { return type_ == _XrtArgumentOpType; }
+bool XrtNode::IsEntryNode() const { return type_ == _XrtEntryOpType; }
 
 bool XrtNode::IsReturnNode() const { return type_ == _XrtReturnOpType; }
 

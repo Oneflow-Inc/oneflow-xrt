@@ -83,7 +83,9 @@ void InitClusteringOptionsApis(py::module_& m) {
           [](ClusteringOptions& opt, const std::string& dump_subgraph_dir) {
             opt.dump_subgraph_dir = dump_subgraph_dir;
           });
+}
 
+void InitReBuildJobOptionsApis(py::module_& m) {
   py::class_<ReBuildJobOptions, std::shared_ptr<ReBuildJobOptions>>(
       m, "ReBuildJobOptions")
       .def(py::init())

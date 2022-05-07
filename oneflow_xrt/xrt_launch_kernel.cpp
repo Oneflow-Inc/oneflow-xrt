@@ -34,7 +34,7 @@ class XrtLaunchKernelState : public user_op::OpKernelState {
       liveout_entries_.insert(entry);
     }
   }
-  const xrt::CommonOptionsProto& options() const { return proto_.options(); }
+  const xrt::ExecuteOptionsProto& options() const { return proto_.options(); }
   const xrt::FunctionProto& function() const { return proto_.function(); }
   const std::set<std::string>& liveout_entries() { return liveout_entries_; }
 
@@ -184,6 +184,6 @@ void XrtLaunchKernel::Compute(user_op::KernelComputeContext* ctx,
   }
 }
 
-REGISTER_USER_KERNEL("xrt_launch").SetCreateFn<XrtLaunchKernel>();
+REGISTER_USER_KERNEL(xrt::_XrtLaunchOpType).SetCreateFn<XrtLaunchKernel>();
 
 }  // namespace oneflow

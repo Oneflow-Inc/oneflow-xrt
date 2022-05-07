@@ -27,6 +27,7 @@ using google::protobuf::TextFormat;
 
 extern void InitXrtGraphApis(py::module_& m);
 extern void InitClusteringOptionsApis(py::module_& m);
+extern void InitReBuildJobOptionsApis(py::module_& m);
 
 PYBIND11_MODULE(_oneflow_xrt_internal, m) {
   m.def("rebuild_job", [](XrtGraph* graph, const std::string& origin,
@@ -44,4 +45,5 @@ PYBIND11_MODULE(_oneflow_xrt_internal, m) {
 
   InitXrtGraphApis(m);
   InitClusteringOptionsApis(m);
+  InitReBuildJobOptionsApis(m);
 }

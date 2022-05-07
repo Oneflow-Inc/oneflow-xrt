@@ -73,9 +73,9 @@ XrtNode* XrtGraph::AddNode(std::unique_ptr<XrtNode>&& node) {
   return nodes_.back();
 }
 
-XrtNode* XrtGraph::AddArgumentNode(const std::string& name) {
+XrtNode* XrtGraph::AddEntryNode(const std::string& name) {
   XrtNode* node = AddNode(name);
-  node->type_ = _XrtArgumentOpType;
+  node->type_ = _XrtEntryOpType;
   return node;
 }
 

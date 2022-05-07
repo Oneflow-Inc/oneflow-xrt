@@ -16,8 +16,8 @@ file(GLOB_RECURSE XRT_SRCS
   compiler/compilation_cache.cpp
   compiler/kernel/*.cpp
   compiler/passes/*.cpp
-  launch_kernel.cpp
-  launch_op.cpp
+  xrt_launch_kernel.cpp
+  xrt_launch_op.cpp
 )
 
 if(WITH_XLA)

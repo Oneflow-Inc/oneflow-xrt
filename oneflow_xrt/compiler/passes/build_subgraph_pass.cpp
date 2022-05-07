@@ -44,7 +44,7 @@ class BuildSubGraphPass {
   void CreateLaunchNodes(XrtGraph* graph,
                          std::map<int64_t, XrtNode*>* launch_nodes);
 
-  void DivideArgumentAndReturnNodes(XrtGraph* sub_graph);
+  void DivideEntryAndReturnNodes(XrtGraph* sub_graph);
   void DumpSubgraphs(const XrtGraph* graph, const std::string& path);
 };
 
@@ -101,7 +101,7 @@ void BuildSubGraphPass::Run(XrtGraph* graph, const ClusteringOptions& options) {
     }
     // divide argument nodes if they have multiple inputs or outputs with
     // different argument (or `LogicalBlobId`), and then fill their names
-    DivideArgumentAndReturnNodes(sub_graph);
+    DivideEntryAndReturnNodes(sub_graph);
   }
 
   for (const XrtNode* node : graph->Nodes()) {
@@ -134,16 +134,15 @@ void BuildSubGraphPass::CreateLaunchNodes(
   }
 }
 
-void BuildSubGraphPass::DivideArgumentAndReturnNodes(XrtGraph* sub_graph) {
+void BuildSubGraphPass::DivideEntryAndReturnNodes(XrtGraph* sub_graph) {
   // find all argument and return nodes
   std::vector<XrtNode*> nodes;
   for (XrtNode* node : sub_graph->Nodes()) {
-    if (node->IsArgumentNode() || node->IsReturnNode()) {
+    if (node->IsEntryNode() || node->IsReturnNode()) {
       nodes.emplace_back(node);
     }
   }
   // start to divide nodes
-  int argument_id = 0;
   for (XrtNode* node : nodes) {
     std::list<XrtEdge*> in_edges = node->in_edges();
     std::list<XrtEdge*> out_edges = node->out_edges();
@@ -158,13 +157,12 @@ void BuildSubGraphPass::DivideArgumentAndReturnNodes(XrtGraph* sub_graph) {
     for (XrtEdge* edge : in_edges) {
       const Argument& arg = edge->argument();
       if (node->in_edges().size() == 0) {
-        node->set_name(absl::StrCat(_XrtReturnPrefix, argument_id++));
+        node->set_name(arg.name());
         divided_nodes.emplace(arg, node);
       }
       const auto& it = divided_nodes.find(arg);
       if (it == divided_nodes.end()) {
-        XrtNode* argument = sub_graph->AddReturnNode(
-            absl::StrCat(_XrtReturnPrefix, argument_id++));
+        XrtNode* argument = sub_graph->AddReturnNode(arg.name());
         argument->set_device(node->device());
         argument->AddInEdge(edge);
         edge->SetEnd(argument);
@@ -178,13 +176,12 @@ void BuildSubGraphPass::DivideArgumentAndReturnNodes(XrtGraph* sub_graph) {
     for (XrtEdge* edge : out_edges) {
       const Argument& arg = edge->argument();
       if (node->out_edges().size() == 0) {
-        node->set_name(absl::StrCat(_XrtArgumentPrefix, argument_id++));
+        node->set_name(arg.name());
         divided_nodes.emplace(arg, node);
       }
       const auto& it = divided_nodes.find(arg);
       if (it == divided_nodes.end()) {
-        XrtNode* argument = sub_graph->AddArgumentNode(
-            absl::StrCat(_XrtArgumentPrefix, argument_id++));
+        XrtNode* argument = sub_graph->AddEntryNode(arg.name());
         argument->set_device(node->device());
         argument->AddOutEdge(edge);
         edge->SetStart(argument);
@@ -206,7 +203,7 @@ void BuildSubGraphPass::RebuildSubgraphInputs(
     if (e->end()->unique_id() != n->unique_id()) {
       XrtNode* argument = nullptr;
       if (sub_graph_nodes->count(start_id) == 0) {
-        argument = sub_graph->AddArgumentNode("^unused");
+        argument = sub_graph->AddEntryNode("^unused");
         argument->set_device(e->start()->device());
         sub_graph_nodes->emplace(start_id, argument);
       } else {
@@ -255,7 +252,10 @@ void BuildSubGraphPass::DumpSubgraphs(const XrtGraph* graph,
     if (node->type() == _XrtLaunchOpType) {
       std::string file = absl::StrCat(path, "/cluster_", node->cluster_id());
       std::ofstream ost(file.c_str());
-      if (ost.good()) ost << node->sub_graph()->ToDot();
+      CHECK(ost.good())
+          << "can not dump subgraph, please check if the directory (" << path
+          << ") exists";
+      ost << node->sub_graph()->ToDot();
     }
   }
 }

@@ -17,6 +17,7 @@ limitations under the License.
 #include "google/protobuf/text_format.h"
 #include "oneflow/core/framework/framework.h"
 #include "oneflow_xrt/api/api.h"
+#include "oneflow_xrt/common/typedef.h"
 
 using google::protobuf::TextFormat;
 
@@ -151,9 +152,9 @@ Maybe<void> XrtLaunchOpModifyInputArg(
   }
 }
 
-REGISTER_USER_OP("xrt_launch")
-    .Input("in")
-    .Output("out")
+REGISTER_USER_OP(xrt::_XrtLaunchOpType)
+    .Input(xrt::_XrtEntryName)
+    .Output(xrt::_XrtReturnName)
     .Attr<std::string>("proto")
     .NoGrad()
     .SetNdSbpInferFn(&XrtLaunchOpInferNdSbp)

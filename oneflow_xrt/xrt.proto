@@ -20,7 +20,7 @@ enum XrtEngine {
   OPENVINO = 5;
 }
 
-message CommonOptionsProto {
+message ExecuteOptionsProto {
   required XrtEngine engine = 1;
   required XrtDevice device = 2;
 
@@ -33,17 +33,25 @@ message CommonOptionsProto {
   optional bool force_compile = 7 [default = false];
 }
 
+message FunctionArgumentProto {
+  required string name = 1;
+  required string value = 2;
+}
+
 message FunctionProto {
-  repeated string input = 1;
-  repeated string output = 2;
+  repeated FunctionArgumentProto input = 1;
+  repeated FunctionArgumentProto output = 2;
   repeated OperatorConf node = 3;
 }
 
 message XrtLaunchProto {
-  required CommonOptionsProto options = 1;
+  required ExecuteOptionsProto options = 1;
 
   required FunctionProto function = 2;
   repeated string liveout_entries = 3;
+
+  // alias xrt launch input/output to function argument/return
+  map<string, string> aliases = 4;
 
   // nd sbp signature for each folded node
   map<string, NdSbpSignature> nd_sbp_signatures = 5;

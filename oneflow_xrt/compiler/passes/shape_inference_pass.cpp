@@ -35,7 +35,7 @@ namespace shape_inference {
 //     lbn2logical_blob_desc_proto, std::map<std::string, BlobDesc>* blob_descs)
 //     {
 //   algorithm::TopologyVisit(*graph, [&](XrtNode* node) {
-//     if (!node->IsArgumentNode()) {
+//     if (!node->IsEntryNode()) {
 //       DeviceType device_type = XrtDeviceToDeviceType(node->device());
 //       const auto& conf = *dynamic_cast<const OperatorConf*>(&node->param());
 //       auto op = CHECK_JUST(ConstructOp(conf, device_type));
