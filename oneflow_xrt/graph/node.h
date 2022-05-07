@@ -16,8 +16,6 @@ limitations under the License.
 #ifndef ONEFLOW_XRT_GRAPH_NODE_H_
 #define ONEFLOW_XRT_GRAPH_NODE_H_
 
-#include "oneflow/core/common/shape.h"
-#include "oneflow/core/job/sbp_parallel.pb.h"
 #include "oneflow_xrt/common/device.h"
 #include "oneflow_xrt/common/typedef.h"
 #include "oneflow_xrt/graph/algorithm.h"
@@ -57,12 +55,6 @@ class XrtEdge {
   XrtNode* end_ = nullptr;
   Argument arg_;
   int64_t unique_id_ = -1;
-
- public:
-  // nd sbp for start and end node
-  NdSbp nd_sbp[2];
-  // time shape for start and end node
-  Shape time_shape[2];
 };
 
 class XrtNode {

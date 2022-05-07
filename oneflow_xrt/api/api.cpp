@@ -30,7 +30,7 @@ namespace oneflow {
 namespace xrt {
 
 std::shared_ptr<XrtGraph> RunClusterSubGraphPass(
-    XrtGraph* graph, const ClusteringOptions& options) {
+    const XrtGraph* graph, const ClusteringOptions& options) {
   auto new_graph = RunMarkClusterIdPass(graph, options);
   return RunBuildSubGraphPass(new_graph.get(), options);
 }

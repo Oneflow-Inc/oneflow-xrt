@@ -66,7 +66,7 @@ void FixupOpInputBlobName(OperatorConf* op_conf, const std::string& input,
 
 class FoldSubgraphBuilder {
  public:
-  FoldSubgraphBuilder(const XrtGraph* graph, Job* job,
+  FoldSubgraphBuilder(XrtGraph* graph, Job* job,
                       const ReBuildJobOptions& options);
 
   virtual ~FoldSubgraphBuilder() {}
@@ -100,7 +100,7 @@ class FoldSubgraphBuilder {
   std::string FixedName(const std::string& name);
 
  private:
-  const XrtGraph* graph_;
+  XrtGraph* graph_;
   const ReBuildJobOptions options_;
 
   std::shared_ptr<JobBuilder> builder_;
@@ -114,7 +114,7 @@ class FoldSubgraphBuilder {
   std::map<std::string /*op name*/, XrtLaunchProto> launch_attrs_;
 };
 
-FoldSubgraphBuilder::FoldSubgraphBuilder(const XrtGraph* graph, Job* job,
+FoldSubgraphBuilder::FoldSubgraphBuilder(XrtGraph* graph, Job* job,
                                          const ReBuildJobOptions& options)
     : graph_(graph), options_(options) {
   for (const XrtNode* node : graph_->Nodes()) {
@@ -229,12 +229,12 @@ void FoldSubgraphBuilder::BuildXrtLaunchOps() {
       NdSbpSignature nd_sbp_signature;
       auto* bn_in_op2nd_sbp = nd_sbp_signature.mutable_bn_in_op2nd_sbp();
       for (const XrtEdge* edge : node->in_edges()) {
-        const std::string& bn = edge->argument().meta_data().consume_key;
-        (*bn_in_op2nd_sbp)[bn] = edge->nd_sbp[1];
+        const auto& meta_data = edge->argument().meta_data();
+        (*bn_in_op2nd_sbp)[meta_data.consume_key] = meta_data.nd_sbp[1];
       }
       for (const XrtEdge* edge : node->out_edges()) {
-        const std::string& bn = edge->argument().meta_data().produce_key;
-        (*bn_in_op2nd_sbp)[bn] = edge->nd_sbp[0];
+        const auto& meta_data = edge->argument().meta_data();
+        (*bn_in_op2nd_sbp)[meta_data.produce_key] = meta_data.nd_sbp[0];
       }
       builder_->AddNdSbpSignature4OpName(node->name(), nd_sbp_signature);
     }
@@ -361,11 +361,7 @@ void FoldSubgraphBuilder::FixupInOutBlobNames() {
                  .emplace(arg.name(), absl::StrCat(_XrtEntryName, "_", index))
                  .first;
       }
-      ArgumentMetaData metadata;
-      metadata.consume_key = it->second;
-      metadata.produce_key = arg.meta_data().produce_key;
-      Argument fixed_arg(arg.name(), arg.shape(), arg.data_type(), metadata);
-      edge->SetArgument(fixed_arg);
+      edge->argument().meta_data().consume_key = it->second;
     }
 
     // fixup output blob names
@@ -393,12 +389,7 @@ void FoldSubgraphBuilder::FixupInOutBlobNames() {
         const std::string& consume_key = arg.meta_data().consume_key;
         FixupOpInputBlobName(op_conf, consume_key, arg.name(), fixed_blob_name);
       }
-      ArgumentMetaData metadata;
-      metadata.consume_key = arg.meta_data().consume_key;
-      metadata.produce_key = it->second;
-      Argument fixed_arg(fixed_blob_name, arg.shape(), arg.data_type(),
-                         metadata);
-      edge->SetArgument(fixed_arg);
+      edge->argument().meta_data().produce_key = it->second;
     }
 
     // fix subgraph entry and return nodes name
@@ -433,10 +424,11 @@ void FoldSubgraphBuilder::RemoveLaunchFoldedOps() {
 // the job, We will add several launch operators in the job, and remove the
 // folded operators. In each launch operator, we wll reconstruct the subgraph
 // and insert argument nodes if necessary
-std::shared_ptr<Job> RunRebuildJobPass(XrtGraph* graph, const Job& origin,
+std::shared_ptr<Job> RunRebuildJobPass(const XrtGraph* graph, const Job& origin,
                                        const ReBuildJobOptions& options) {
   auto job = std::make_shared<Job>(origin);
-  FoldSubgraphBuilder(graph, job.get(), options).Build();
+  auto new_graph = graph->clone();
+  FoldSubgraphBuilder(new_graph.get(), job.get(), options).Build();
   return job;
 }
 

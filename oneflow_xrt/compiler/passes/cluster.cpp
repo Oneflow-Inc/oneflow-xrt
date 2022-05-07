@@ -184,10 +184,11 @@ ClusterEdgePtr BuildClusterEdge(const ClusterNode* start,
 
 void SetupClusterEdge(ClusterEdge* cluster_edge, const XrtEdge* xrt_edge) {
   cluster_edge->set_is_control_edge(xrt_edge->IsControlEdge());
-  cluster_edge->set_start_nd_sbp(xrt_edge->nd_sbp[0]);
-  cluster_edge->set_end_nd_sbp(xrt_edge->nd_sbp[1]);
-  cluster_edge->set_start_time_shape(xrt_edge->time_shape[0]);
-  cluster_edge->set_end_time_shape(xrt_edge->time_shape[1]);
+  const auto& meta_data = xrt_edge->argument().meta_data();
+  cluster_edge->set_start_nd_sbp(meta_data.nd_sbp[0]);
+  cluster_edge->set_end_nd_sbp(meta_data.nd_sbp[1]);
+  cluster_edge->set_start_time_shape(meta_data.time_shape[0]);
+  cluster_edge->set_end_time_shape(meta_data.time_shape[1]);
 }
 
 bool IsNodeDirectChildren(const ClusterNode* parent,

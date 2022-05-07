@@ -50,9 +50,6 @@ message XrtLaunchProto {
   required FunctionProto function = 2;
   repeated string liveout_entries = 3;
 
-  // alias xrt launch input/output to function argument/return
-  map<string, string> aliases = 4;
-
   // nd sbp signature for each folded node
   map<string, NdSbpSignature> nd_sbp_signatures = 5;
   map<string, BlobDescProto> logical_blob_desc = 6;

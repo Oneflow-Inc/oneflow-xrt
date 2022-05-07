@@ -16,6 +16,7 @@ limitations under the License.
 #include "oneflow_xrt/graph/graph.h"
 
 #include "oneflow_xrt/graph/argument.h"
+#include "oneflow_xrt/graph/node.h"
 
 namespace oneflow {
 namespace xrt {
@@ -102,10 +103,35 @@ XrtEdge* XrtGraph::AddEdge(const XrtNode* start, const XrtNode* end) {
 }
 
 XrtGraph* XrtGraph::AddSubgraphForNode(int64_t node_id) {
-  std::unique_ptr<XrtGraph> subgraph(new XrtGraph);
+  std::shared_ptr<XrtGraph> subgraph(new XrtGraph);
   nodes_[node_id]->sub_graph_ = subgraph.get();
-  subgraphs_[node_id] = std::move(subgraph);
+  subgraphs_[node_id] = subgraph;
   return nodes_.at(node_id)->sub_graph_;
+}
+
+XrtGraph* XrtGraph::AddSubgraphForNode(
+    int64_t node_id, const std::shared_ptr<XrtGraph>& subgraph) {
+  nodes_[node_id]->sub_graph_ = subgraph.get();
+  subgraphs_[node_id] = subgraph;
+  return nodes_.at(node_id)->sub_graph_;
+}
+
+std::shared_ptr<XrtGraph> XrtGraph::clone() const {
+  std::unordered_map<const XrtNode*, const XrtNode*> cloned_nodes;
+  auto new_graph = std::make_shared<XrtGraph>();
+  algorithm::TopologyVisit(*this, [&](const XrtNode* node) {
+    XrtNode* new_node = new_graph->AddNode(node->clone());
+    if (node->sub_graph()) {
+      new_graph->AddSubgraphForNode(new_node->unique_id(),
+                                    node->sub_graph()->clone());
+    }
+    cloned_nodes.emplace(node, new_node);
+    for (const XrtEdge* edge : node->in_edges()) {
+      const XrtNode* start = cloned_nodes.at(edge->start());
+      new_graph->Connect(start, new_node, edge->argument());
+    }
+  });
+  return new_graph;
 }
 
 std::vector<Argument> XrtGraph::Arguments() const {

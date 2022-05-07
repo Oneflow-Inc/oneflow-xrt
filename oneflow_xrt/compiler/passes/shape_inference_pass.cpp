@@ -85,7 +85,7 @@ namespace shape_inference {
 
 }  // namespace shape_inference
 
-void RunShapeInferencePass(XrtGraph* graph,
+void RunShapeInferencePass(const XrtGraph* graph,
                            const ShapeInferenceOptions& options) {
   // shape_inference::InferShape(graph, options);
 }

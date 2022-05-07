@@ -20,6 +20,7 @@ limitations under the License.
 
 #include "oneflow/core/common/data_type.pb.h"
 #include "oneflow/core/common/shape.h"
+#include "oneflow/core/job/sbp_parallel.pb.h"
 
 namespace oneflow {
 namespace xrt {
@@ -38,8 +39,16 @@ namespace xrt {
 // \"out\" produced by node A and a `consume_key` named \"in\" consumed by
 // node B.
 struct ArgumentMetaData {
+  ArgumentMetaData() : produce_key(""), consume_key("") {
+    nd_sbp.resize(2);
+    time_shape.resize(2);
+  }
   std::string produce_key;
   std::string consume_key;
+  // nd sbp for produce and consume
+  std::vector<NdSbp> nd_sbp;
+  // time shape for produce and consume
+  std::vector<Shape> time_shape;
 };
 
 // descriptor of data flow on graph edges include data name, shape and
@@ -77,6 +86,7 @@ class Argument {
     meta_data_ = meta_data;
   }
   const ArgumentMetaData& meta_data() const { return meta_data_; }
+  ArgumentMetaData& meta_data() { return meta_data_; }
 
   bool initialized() const { return initialized_; }
 

@@ -23,7 +23,7 @@ namespace oneflow {
 namespace xrt {
 
 std::shared_ptr<XrtGraph> RunMarkClusterIdPass(
-    XrtGraph* graph, const ClusteringOptions& options);
+    const XrtGraph* graph, const ClusteringOptions& options);
 
 }  // namespace xrt
 }  // namespace oneflow

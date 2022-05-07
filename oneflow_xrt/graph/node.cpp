@@ -72,6 +72,7 @@ std::unique_ptr<XrtNode> XrtNode::clone() const {
     node->attrs_ = MakeAttrMapFromUserOpConf(conf_.user_conf());
   }
   node->device_ = device_;
+  node->cluster_id_ = cluster_id_;
   return node;
 }
 

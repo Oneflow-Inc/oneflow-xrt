@@ -50,6 +50,8 @@ class XrtGraph : public std::enable_shared_from_this<XrtGraph> {
 
   // create a subgraph for node which unique id is `node_id`
   XrtGraph* AddSubgraphForNode(int64_t node_id);
+  XrtGraph* AddSubgraphForNode(int64_t node_id,
+                               const std::shared_ptr<XrtGraph>& subgraph);
 
   const std::vector<XrtNode*>& Nodes() const { return nodes_; }
   std::vector<XrtNode*>& Nodes() { return nodes_; }
@@ -57,25 +59,19 @@ class XrtGraph : public std::enable_shared_from_this<XrtGraph> {
   const std::vector<XrtEdge*>& Edges() const { return edges_; }
   std::vector<XrtEdge*>& Edges() { return edges_; }
 
+  std::shared_ptr<XrtGraph> clone() const;
   std::string ToDot() const;
 
   std::vector<Argument> Arguments() const;
 
  protected:
   std::vector<XrtNode*> nodes_;
-  // all allocated nodes in the graph. The node unique id is related to it's
-  // index in the vector. The node in `nodes_` can be nullptr since we will
-  // always keep it in `nodes_` even if it has been removed from the graph
   std::vector<std::unique_ptr<XrtNode>> allocated_nodes_;
 
   std::vector<XrtEdge*> edges_;
-  // all allocated edges in the graph. The edge unique id is related to it's
-  // index in the vector. And the xrt edge in `edges_` can also be nullptr
   std::vector<std::unique_ptr<XrtEdge>> allocated_edges_;
 
-  // all allocated subgraphs. The key of the map means node unique id, and the
-  // value is the subgraph which belongs to the node
-  std::map<int64_t, std::unique_ptr<XrtGraph>> subgraphs_;
+  std::map<int64_t, std::shared_ptr<XrtGraph>> subgraphs_;
 };
 
 namespace algorithm {

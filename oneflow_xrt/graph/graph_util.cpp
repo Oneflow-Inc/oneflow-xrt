@@ -140,11 +140,12 @@ void GraphBuilder::UpdateEdgeTimeShapeAndNdSbp() {
     const auto& dst = node_info_.at(edge->end());
     const std::string& name = edge->argument().name();
 
-    edge->time_shape[0] = src.time_shape;
-    edge->time_shape[1] = dst.time_shape;
+    auto& meta_data = edge->argument().meta_data();
+    meta_data.time_shape[0] = src.time_shape;
+    meta_data.time_shape[1] = dst.time_shape;
     if (!src.nd_sbp.empty() && !dst.nd_sbp.empty()) {
-      edge->nd_sbp[0] = src.nd_sbp.at(name);
-      edge->nd_sbp[1] = dst.nd_sbp.at(name);
+      meta_data.nd_sbp[0] = src.nd_sbp.at(name);
+      meta_data.nd_sbp[1] = dst.nd_sbp.at(name);
     }
   }
 }

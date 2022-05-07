@@ -261,9 +261,10 @@ void BuildSubGraphPass::DumpSubgraphs(const XrtGraph* graph,
 }
 
 std::shared_ptr<XrtGraph> RunBuildSubGraphPass(
-    XrtGraph* graph, const ClusteringOptions& options) {
-  BuildSubGraphPass().Run(graph, options);
-  return graph->shared_from_this();
+    const XrtGraph* graph, const ClusteringOptions& options) {
+  auto new_graph = graph->clone();
+  BuildSubGraphPass().Run(new_graph.get(), options);
+  return new_graph;
 }
 
 }  // namespace xrt

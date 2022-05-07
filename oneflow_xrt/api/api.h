@@ -31,13 +31,13 @@ extern std::shared_ptr<XrtGraph> BuildGraph(const FunctionProto& function);
 extern std::shared_ptr<XrtGraph> BuildGraph(const Job& job);
 
 std::shared_ptr<XrtGraph> RunClusterSubGraphPass(
-    XrtGraph* graph, const ClusteringOptions& options);
+    const XrtGraph* graph, const ClusteringOptions& options);
 
-extern std::shared_ptr<Job> RunRebuildJobPass(XrtGraph* graph,
+extern std::shared_ptr<Job> RunRebuildJobPass(const XrtGraph* graph,
                                               const Job& origin,
                                               const ReBuildJobOptions& options);
 
-extern void RunShapeInferencePass(XrtGraph* graph,
+extern void RunShapeInferencePass(const XrtGraph* graph,
                                   const ShapeInferenceOptions& options);
 
 Parameter BuildParameter(const std::string& name,
