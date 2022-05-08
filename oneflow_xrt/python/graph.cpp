@@ -24,12 +24,12 @@ using namespace oneflow::xrt;
 
 void InitXrtGraphApis(py::module_& m) {
   py::class_<XrtGraph, std::shared_ptr<XrtGraph>>(m, "Graph")
-      .def(py::init([](const std::string& job) {
-        oneflow::Job proto;
-        if (!proto.ParseFromString(job)) {
+      .def(py::init([](const std::string& serialized_job) {
+        oneflow::Job job;
+        if (!job.ParseFromString(serialized_job)) {
           PyErr_SetString(PyExc_RuntimeError,
                           "the first argument is not a valid job");
         }
-        return BuildGraph(proto);
+        return BuildGraph(job);
       }));
 }

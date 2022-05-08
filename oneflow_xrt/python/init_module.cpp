@@ -16,31 +16,29 @@ limitations under the License.
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
-#include "google/protobuf/text_format.h"
 #include "oneflow_xrt/api/api.h"
 
 namespace py = pybind11;
 
 using namespace oneflow;
 using namespace oneflow::xrt;
-using google::protobuf::TextFormat;
 
 extern void InitXrtGraphApis(py::module_& m);
 extern void InitClusteringOptionsApis(py::module_& m);
 extern void InitReBuildJobOptionsApis(py::module_& m);
 
 PYBIND11_MODULE(_oneflow_xrt_internal, m) {
-  m.def("rebuild_job", [](XrtGraph* graph, const std::string& origin,
-                          const ReBuildJobOptions& options) {
-    Job _origin;
-    if (!_origin.ParseFromString(origin)) {
-      PyErr_SetString(PyExc_TypeError, "origin is not a valid job");
-    }
-    auto job = RunRebuildJobPass(graph, _origin, options);
-    std::string output;
-    TextFormat::PrintToString(*job, &output);
-    return output;
-  });
+  m.def("rebuild_job",
+        [](XrtGraph* graph, const std::string& serialized_origin_job,
+           const ReBuildJobOptions& options) {
+          Job origin_job;
+          if (!origin_job.ParseFromString(serialized_origin_job)) {
+            PyErr_SetString(PyExc_TypeError,
+                            "the second argument is not a valid job");
+          }
+          auto job = RunRebuildJobPass(graph, origin_job, options);
+          return py::bytes(job->SerializeAsString());
+        });
   m.def("cluster_subgraph", &RunClusterSubGraphPass);
 
   InitXrtGraphApis(m);

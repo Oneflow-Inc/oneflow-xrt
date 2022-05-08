@@ -24,6 +24,7 @@ limitations under the License.
 #include "oneflow/core/job/job_builder.h"
 #include "oneflow/core/operator/op_conf.pb.h"
 #include "oneflow/core/operator/operator.h"
+#include "oneflow_xrt/common/typedef.h"
 #include "oneflow_xrt/compiler/passes/options.h"
 #include "oneflow_xrt/graph/argument.h"
 #include "oneflow_xrt/graph/graph.h"
@@ -85,7 +86,7 @@ class FoldSubgraphBuilder {
   }
 
  private:
-  void buildFunction(const XrtGraph* sub_graph, const XrtEngine& engine,
+  void buildFunction(const XrtNode* launch_node, const XrtEngine& engine,
                      std::set<std::string>* liveout_entries,
                      FunctionProto* function) const;
 
@@ -143,11 +144,11 @@ std::string FoldSubgraphBuilder::FixedName(const std::string& name) {
   return name;
 }
 
-void FoldSubgraphBuilder::buildFunction(const XrtGraph* sub_graph,
+void FoldSubgraphBuilder::buildFunction(const XrtNode* launch_node,
                                         const XrtEngine& engine,
                                         std::set<std::string>* liveout_entries,
                                         FunctionProto* function) const {
-  for (const XrtNode* node : sub_graph->Nodes()) {
+  for (const XrtNode* node : launch_node->sub_graph()->Nodes()) {
     if (node->IsEntryNode()) {
       std::string value;
       bool is_mutable = false;
@@ -186,7 +187,7 @@ void AddInOutBlobNames(const XrtNode* node, UserOpConf* launch_conf) {
     std::string consume_key = absl::StrCat(_XrtEntryName, "_", i);
     CHECK_GT(input_args.count(consume_key), 0);
     const std::string& val = input_args.at(consume_key);
-    (*launch_conf->mutable_input())["input"].mutable_s()->Add()->assign(val);
+    (*launch_conf->mutable_input())[_XrtEntryName].add_s(val);
   }
 
   std::map<std::string, std::string> output_args;
@@ -199,8 +200,8 @@ void AddInOutBlobNames(const XrtNode* node, UserOpConf* launch_conf) {
   for (int i = 0; i < output_args.size(); ++i) {
     std::string produce_key = absl::StrCat(_XrtReturnName, "_", i);
     CHECK_GT(output_args.count(produce_key), 0);
-    (*launch_conf->mutable_output())["output"].mutable_s()->Add()->assign(
-        produce_key);
+    (*launch_conf->mutable_output())[_XrtReturnName].add_s(
+        absl::StrCat(node->name(), "/", produce_key));
   }
 }
 
@@ -241,8 +242,19 @@ void FoldSubgraphBuilder::BuildXrtLaunchOps() {
 
     std::set<std::string> liveout_entries;
     XrtLaunchProto& proto = launch_attrs_[node->name()];
+
+    // add execute options
+    auto* options = proto.mutable_options();
+    options->set_engine(options_.engine);
+    options->set_device(node->device());
+    options->set_use_fp16(options_.use_fp16);
+    options->set_use_int8(options_.use_int8);
+    options->set_int8_calibration(options_.int8_calibration);
+    options->set_force_compile(options_.force_compile);
+    options->set_max_workspace_size(options_.max_workspace_size);
+
     // build function
-    buildFunction(node->sub_graph(), options_.engine, &liveout_entries,
+    buildFunction(node, options_.engine, &liveout_entries,
                   proto.mutable_function());
 
     // add liveout entries

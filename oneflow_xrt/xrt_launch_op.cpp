@@ -150,6 +150,11 @@ Maybe<void> XrtLaunchOpModifyInputArg(
         GetInputArgModifierFn(/*name*/ arg_name, /*index*/ index);
     arg_modifier->set_is_mutable(true);
   }
+  return Maybe<void>::Ok();
+}
+
+Maybe<void> XrtLaunchOpGetSbp(user_op::SbpContext* ctx) {
+  return Maybe<void>::Ok();
 }
 
 REGISTER_USER_OP(xrt::_XrtLaunchOpType)
@@ -158,6 +163,7 @@ REGISTER_USER_OP(xrt::_XrtLaunchOpType)
     .Attr<std::string>("proto")
     .NoGrad()
     .SetNdSbpInferFn(&XrtLaunchOpInferNdSbp)
+    .SetGetSbpFn(&XrtLaunchOpGetSbp)
     .SetLogicalTensorDescInferFn(&XrtLaunchOpInferLogicalTensorDesc)
     .SetPhysicalTensorDescInferFn(&XrtLaunchOpInferPhysicalTensorDesc)
     .SetDataTypeInferFn(&XrtLaunchOpInferDataType)
