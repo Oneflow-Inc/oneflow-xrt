@@ -262,34 +262,28 @@ void FoldSubgraphBuilder::BuildXrtLaunchOps() {
       proto.add_liveout_entries(entry);
     }
 
-    // save logical blob descs
-    auto CopyLogicalBlobDesc4Lbn = [&](const std::string& lbn) -> void {
-      const auto& src_map = builder_->job().helper().lbn2logical_blob_desc();
-      auto* dst_map = proto.mutable_logical_blob_desc();
-      const auto src_it = src_map.find(lbn);
-      CHECK(src_it != src_map.end());
-      auto dst_it = dst_map->find(lbn);
-      if (dst_it != dst_map->end()) {
-        CHECK(dst_it->second == src_it->second);
-      } else {
-        (*dst_map)[lbn] = src_it->second;
-      }
-    };
-
-    const auto& op_name2arg_signature =
-        builder_->job().helper().op_name2arg_signature();
+    // save function logical blob descs
+    const auto& lbn2logical_blob_desc =
+        builder_->job().helper().lbn2logical_blob_desc();
+    auto* logical_blob_desc = proto.mutable_logical_blob_desc();
     for (const XrtNode* sub_node : node->sub_graph()->Nodes()) {
-      if (sub_node->IsEntryNode() || sub_node->IsReturnNode()) {
-        continue;
+      for (const XrtEdge* edge : sub_node->in_edges()) {
+        const auto& arg_name = edge->argument().name();
+        const auto it = lbn2logical_blob_desc.find(arg_name);
+        CHECK(it != lbn2logical_blob_desc.end());
+        auto dst_it = logical_blob_desc->find(arg_name);
+        if (dst_it != logical_blob_desc->end()) {
+          CHECK(dst_it->second == it->second);
+        } else {
+          (*logical_blob_desc)[arg_name] = it->second;
+        }
       }
-      const auto op_name2arg_signature_it =
-          op_name2arg_signature.find(sub_node->name());
-      CHECK(op_name2arg_signature_it != op_name2arg_signature.end());
-      for (const auto& pair : op_name2arg_signature_it->second.bn_in_op2lbi()) {
-        const LogicalBlobId& lbi = pair.second;
-        std::string blob_name = GenLogicalBlobName(lbi);
-        CopyLogicalBlobDesc4Lbn(blob_name);
-      }
+    }
+    // save the launch op outputs logical blob descs
+    for (const auto& output : proto.function().output()) {
+      const auto& it = logical_blob_desc->find(output.value());
+      CHECK(it != logical_blob_desc->end());
+      (*logical_blob_desc)[output.name()] = it->second;
     }
 
     // save sbp signatures for the folded nodes
@@ -313,7 +307,7 @@ void FoldSubgraphBuilder::BuildXrtLaunchOps() {
 
 void FoldSubgraphBuilder::FixupControlInOpNames() {
   CHECK_EQ(launch_nodes_.size(), folded_nodes_.size());
-  // map folded node names to cluster node
+  // mapping the folded node name to cluster node
   std::map<std::string, const XrtNode*> folded_op_names;
   for (int i = 0; i < launch_nodes_.size(); ++i) {
     for (const XrtNode* node : folded_nodes_[i]) {

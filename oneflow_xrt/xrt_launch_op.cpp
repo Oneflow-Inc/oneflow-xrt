@@ -73,8 +73,8 @@ Maybe<void> XrtLaunchOpInferLogicalTensorDesc(user_op::InferContext* ctx) {
     const auto& it = logical_blob_desc.find(name);
     if (it == logical_blob_desc.end()) {
       return Error::RuntimeError()
-             << "failed to infer input (" << name
-             << ") tensor desc for xrt launch op " << ctx->op_name();
+             << "failed to infer output (" << name
+             << ") logical tensor desc for xrt launch op " << ctx->op_name();
     }
     const auto& blob_desc = it->second;
     auto* output_tensor_desc =
@@ -111,8 +111,8 @@ Maybe<void> XrtLaunchOpInferPhysicalTensorDesc(user_op::InferContext* ctx) {
     const auto& it = tensor_descs.find(name);
     if (it == tensor_descs.end()) {
       return Error::RuntimeError()
-             << "failed to infer input (" << name
-             << ") tensor desc for xrt launch op " << ctx->op_name();
+             << "failed to infer output (" << name
+             << ") physical tensor desc for xrt launch op " << ctx->op_name();
     }
     const user_op::TensorDesc* tensor_desc = it->second;
     auto* output_tensor_desc =

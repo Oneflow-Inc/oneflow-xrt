@@ -25,8 +25,8 @@ limitations under the License.
 namespace oneflow {
 namespace xrt {
 
-// each data flow will bind two keys, produce_key and consume_key.
-// Such as node A and B, there is a data flow named `a_output` on edge A->B.
+// each dataflow will bind two keys, produce_key and consume_key.
+// Such as node A and B, there is a dataflow named `a_output` on edge A->B.
 //  node A {
 //    in: "a_input"
 //    out: "a_output"
@@ -35,7 +35,7 @@ namespace xrt {
 //    in: "a_output"
 //    out: "b_output"
 //  }
-// In this case, the data flow named `a_output` has a `produce_key` named
+// In this case, the dataflow named `a_output` has a `produce_key` named
 // \"out\" produced by node A and a `consume_key` named \"in\" consumed by
 // node B.
 struct ArgumentMetaData {
