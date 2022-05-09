@@ -194,7 +194,7 @@ void XrtLaunchKernel::Compute(user_op::KernelComputeContext* ctx,
     block_until_done = false;
 #else
     UNIMPLEMENTED()
-        << "CUDA device is not supported since XRT was compiled without CUDA";
+        << "Unable access cuda device since XRT was compiled without CUDA";
 #endif  // WITH_CUDA
   }
   bool status = executable->Run(entry_params, run_options, block_until_done);
