@@ -52,5 +52,5 @@ message XrtLaunchProto {
 
   // nd sbp signature for each folded node
   map<string, NdSbpSignature> nd_sbp_signatures = 5;
-  map<string, BlobDescProto> logical_blob_desc = 6;
+  map<string, BlobDescProto> logical_blob_descs = 6;
 };

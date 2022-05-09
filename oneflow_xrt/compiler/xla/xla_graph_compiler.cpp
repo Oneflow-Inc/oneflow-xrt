@@ -52,6 +52,15 @@ void XlaGraphCompiler::SetupKernelContextParam(
   std::unordered_map<std::string /* produce/consume key */, Argument>
       input_output_args;
   std::vector<std::string> output_names;
+  if (node->IsEntryNode()) {
+    const Argument& arg = arguments_.at(node->name());
+    input_output_args.emplace("variable", arg);
+    input_ops.emplace(arg, operands_.at(arg));
+  } else if (node->IsReturnNode()) {
+    const Argument& arg = arguments_.at(node->name());
+    input_output_args.emplace("variable", arg);
+    output_names.emplace_back(node->name());
+  }
   for (const XrtEdge* edge : node->in_edges()) {
     if (!edge->IsControlEdge()) {
       const Argument& arg = edge->argument();
@@ -70,10 +79,9 @@ void XlaGraphCompiler::SetupKernelContextParam(
       output_names.emplace_back(k);
     }
   }
-
   size_t num_outputs = input_output_args.size() - input_ops.size();
   CHECK_GE(num_outputs, 0) << "Output num should not less than 0.";
-  context_param->device = node->device();
+  context_param->device = this->device_;
   context_param->builder = builder_.get();
   context_param->attrs = node->attrs();
   context_param->arguments = std::move(input_output_args);
@@ -93,7 +101,7 @@ void XlaGraphCompiler::BuildComputation(
     SetupKernelContextParam(node, &param);
     XlaOpContext op_context(param);
     // Do compile, lower the operator computation to HLO instructions.
-    auto op_kernel = BuildOpKernel(node->device(), node->type());
+    auto op_kernel = BuildOpKernel(this->device_, node->type());
     op_kernel->Compile(&op_context);
 
     ClearOpMetadata();

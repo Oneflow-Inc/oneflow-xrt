@@ -90,17 +90,6 @@ void InitReBuildJobOptionsApis(py::module_& m) {
       m, "ReBuildJobOptions")
       .def(py::init())
       .def_property(
-          "engine", /*getter*/
-          [](const ReBuildJobOptions& opt) {
-            return XrtEngine_Name(opt.engine);
-          },
-          /*setter*/
-          [](ReBuildJobOptions& opt, const std::string& engine) {
-            XrtEngine _engine;
-            XrtEngine_Parse(engine, &_engine);
-            opt.engine = _engine;
-          })
-      .def_property(
           "use_fp16", /*getter*/
           [](const ReBuildJobOptions& opt) { return opt.use_fp16; },
           /*setter*/

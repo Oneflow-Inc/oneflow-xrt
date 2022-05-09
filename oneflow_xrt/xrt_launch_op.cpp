@@ -67,11 +67,11 @@ Maybe<void> XrtLaunchOpInferLogicalTensorDesc(user_op::InferContext* ctx) {
     return Error::RuntimeError()
            << "failed to parse proto for xrt launch op " << ctx->op_name();
   }
-  const auto& logical_blob_desc = proto.logical_blob_desc();
+  const auto& logical_blob_descs = proto.logical_blob_descs();
   for (const auto& output : ctx->outputs()) {
     std::string name = absl::StrCat(output.first, "_", output.second);
-    const auto& it = logical_blob_desc.find(name);
-    if (it == logical_blob_desc.end()) {
+    const auto& it = logical_blob_descs.find(name);
+    if (it == logical_blob_descs.end()) {
       return Error::RuntimeError()
              << "failed to infer output (" << name
              << ") logical tensor desc for xrt launch op " << ctx->op_name();
@@ -93,33 +93,35 @@ Maybe<void> XrtLaunchOpInferPhysicalTensorDesc(user_op::InferContext* ctx) {
     return Error::RuntimeError()
            << "failed to parse proto for xrt launch op " << ctx->op_name();
   }
-  std::map<std::string, const user_op::TensorDesc*> entry_tensor_descs;
+  std::map<std::string, BlobDesc> entry_blob_descs;
   for (const auto& input : ctx->inputs()) {
     std::string name = absl::StrCat(input.first, "_", input.second);
-    const auto& input_tensor_desc =
+    const auto& tensor_desc =
         ctx->InputTensorDesc(/*name*/ input.first, /*index*/ input.second);
-    entry_tensor_descs.emplace(name, &input_tensor_desc);
+    entry_blob_descs.emplace(
+        name, BlobDesc(tensor_desc.shape(), tensor_desc.data_type(),
+                       tensor_desc.is_dynamic()));
   }
-  xrt::ShapeInferenceOptions options;
-  // options.entry_tensor_descs = entry_tensor_descs;
+  xrt::ShapeInferenceContext context(
+      &entry_blob_descs, &proto.logical_blob_descs(), &ctx->parallel_ctx(),
+      &ctx->parallel_desc(), &proto.nd_sbp_signatures());
   auto graph = xrt::BuildGraph(proto.function());
-  xrt::RunShapeInferencePass(graph.get(), options);
+  xrt::RunShapeInferencePass(graph.get(), context);
 
-  std::map<std::string, const user_op::TensorDesc*> tensor_descs;
+  const auto* infered_blob_descs = context.infered_physical_blob_descs();
   for (const auto& output : ctx->outputs()) {
     std::string name = absl::StrCat(output.first, "_", output.second);
-    const auto& it = tensor_descs.find(name);
-    if (it == tensor_descs.end()) {
+    const auto& it = infered_blob_descs->find(name);
+    if (it == infered_blob_descs->end()) {
       return Error::RuntimeError()
              << "failed to infer output (" << name
              << ") physical tensor desc for xrt launch op " << ctx->op_name();
     }
-    const user_op::TensorDesc* tensor_desc = it->second;
     auto* output_tensor_desc =
         ctx->OutputTensorDesc(/*name*/ output.first, /*index*/ output.second);
-    *(output_tensor_desc->mut_shape()) = tensor_desc->shape();
-    *(output_tensor_desc->mut_data_type()) = tensor_desc->data_type();
-    *(output_tensor_desc->mut_is_dynamic()) = tensor_desc->is_dynamic();
+    *(output_tensor_desc->mut_shape()) = it->second.shape();
+    *(output_tensor_desc->mut_data_type()) = it->second.data_type();
+    *(output_tensor_desc->mut_is_dynamic()) = it->second.is_dynamic();
   }
   return Maybe<void>::Ok();
 }

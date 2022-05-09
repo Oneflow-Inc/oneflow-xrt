@@ -131,6 +131,7 @@ std::shared_ptr<XrtGraph> XrtGraph::clone() const {
       new_graph->Connect(start, new_node, edge->argument());
     }
   });
+  new_graph->engine_ = engine_;
   return new_graph;
 }
 

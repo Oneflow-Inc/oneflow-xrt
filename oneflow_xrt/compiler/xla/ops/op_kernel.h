@@ -41,16 +41,16 @@ class XlaOpKernel : public OpKernel<XlaOpContext> {
           OpKernelRegistrar(#OpName)                  \
               .SetEngine(XrtEngine::XLA)              \
               .EnableTrainPhase()                     \
-              .SetFactory(                            \
-                  []() -> OpKernel<XlaOpContext>* { return new KernelType; })
+              .SetFactory([]() -> OpKernelBase* { return new KernelType; })
 
-inline std::shared_ptr<OpKernel<XlaOpContext>> BuildOpKernel(
-    const XrtDevice& device, const std::string& op_name) {
-  const auto& f = XRT_REGISTER_LOOKUP(
-      OpKernelRegId, (OpKernelRegKey{op_name, XrtEngine::XLA, device}));
-  auto* xla_kernel = dynamic_cast<OpKernel<XlaOpContext>*>(f());
-  CHECK(!xla_kernel) << "failed to build xla op kernel";
-  return std::shared_ptr<OpKernel<XlaOpContext>>(xla_kernel);
+inline std::shared_ptr<XlaOpKernel> BuildOpKernel(const XrtDevice& device,
+                                                  const std::string& op_name) {
+  OpKernelRegKey reg_key{op_name, XrtEngine::XLA, device};
+  const auto& f = XRT_REGISTER_LOOKUP(OpKernelRegId, reg_key);
+  auto res = f();
+  auto* xla_kernel = dynamic_cast<XlaOpKernel*>(f());
+  CHECK(xla_kernel) << "failed to build xla op kernel for " << reg_key;
+  return std::shared_ptr<XlaOpKernel>(xla_kernel);
 }
 
 }  // namespace mola

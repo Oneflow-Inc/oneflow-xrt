@@ -20,12 +20,15 @@ limitations under the License.
 #include "oneflow/core/job/job.pb.h"
 #include "oneflow_xrt/compiler/parameter.h"
 #include "oneflow_xrt/compiler/passes/options.h"
-#include "oneflow_xrt/compiler/passes/shape_inference_options.h"
+#include "oneflow_xrt/compiler/passes/shape_inference_context.h"
 #include "oneflow_xrt/graph/graph.h"
 #include "oneflow_xrt/xrt.pb.h"
 
 namespace oneflow {
 namespace xrt {
+
+Parameter BuildParameter(const std::string& name,
+                         const user_op::Tensor* tensor);
 
 extern std::shared_ptr<XrtGraph> BuildGraph(const FunctionProto& function);
 extern std::shared_ptr<XrtGraph> BuildGraph(const Job& job);
@@ -38,10 +41,7 @@ extern std::shared_ptr<Job> RunRebuildJobPass(const XrtGraph* graph,
                                               const ReBuildJobOptions& options);
 
 extern void RunShapeInferencePass(const XrtGraph* graph,
-                                  const ShapeInferenceOptions& options);
-
-Parameter BuildParameter(const std::string& name,
-                         const user_op::Tensor* tensor);
+                                  ShapeInferenceContext& context);
 
 #ifdef WITH_TENSORRT
 void CacheInt8Calibration();

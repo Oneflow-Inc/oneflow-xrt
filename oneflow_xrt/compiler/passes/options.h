@@ -45,8 +45,6 @@ struct ClusteringOptions {
 };
 
 struct ReBuildJobOptions {
-  XrtEngine engine = XrtEngine::DEFAULT;
-
   bool use_fp16 = false;
   bool use_int8 = false;
 

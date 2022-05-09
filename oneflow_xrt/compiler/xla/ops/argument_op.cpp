@@ -21,15 +21,24 @@ namespace oneflow {
 namespace xrt {
 namespace mola {
 
-class ArgumentOp : public XlaOpKernel {
+class XrtEntryOp : public XlaOpKernel {
  public:
   void Compile(XlaOpContext* ctx) override {
-    // xla::XlaOp value = ctx->Variable("value");
-    // ctx->SetOutput("value", value);
+    xla::XlaOp value = ctx->Variable();
+    ctx->SetOutput("value", value);
   }
 };
 
-REGISTER_XLA_OP_KERNEL(argument, ArgumentOp).Finalize();
+class XrtReturnOp : public XlaOpKernel {
+ public:
+  void Compile(XlaOpContext* ctx) override {
+    xla::XlaOp value = ctx->Input("value");
+    ctx->SetVariable(value);
+  }
+};
+
+REGISTER_XLA_OP_KERNEL(XrtEntry, XrtEntryOp).Finalize();
+REGISTER_XLA_OP_KERNEL(XrtReturn, XrtReturnOp).Finalize();
 
 }  // namespace mola
 }  // namespace xrt

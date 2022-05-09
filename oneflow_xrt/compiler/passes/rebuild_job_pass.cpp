@@ -243,9 +243,10 @@ void FoldSubgraphBuilder::BuildXrtLaunchOps() {
     std::set<std::string> liveout_entries;
     XrtLaunchProto& proto = launch_attrs_[node->name()];
 
+    const auto& engine = node->sub_graph()->engine();
     // add execute options
     auto* options = proto.mutable_options();
-    options->set_engine(options_.engine);
+    options->set_engine(engine);
     options->set_device(node->device());
     options->set_use_fp16(options_.use_fp16);
     options->set_use_int8(options_.use_int8);
@@ -254,8 +255,7 @@ void FoldSubgraphBuilder::BuildXrtLaunchOps() {
     options->set_max_workspace_size(options_.max_workspace_size);
 
     // build function
-    buildFunction(node, options_.engine, &liveout_entries,
-                  proto.mutable_function());
+    buildFunction(node, engine, &liveout_entries, proto.mutable_function());
 
     // add liveout entries
     for (const auto& entry : liveout_entries) {
@@ -265,25 +265,25 @@ void FoldSubgraphBuilder::BuildXrtLaunchOps() {
     // save function logical blob descs
     const auto& lbn2logical_blob_desc =
         builder_->job().helper().lbn2logical_blob_desc();
-    auto* logical_blob_desc = proto.mutable_logical_blob_desc();
+    auto* logical_blob_descs = proto.mutable_logical_blob_descs();
     for (const XrtNode* sub_node : node->sub_graph()->Nodes()) {
       for (const XrtEdge* edge : sub_node->in_edges()) {
         const auto& arg_name = edge->argument().name();
         const auto it = lbn2logical_blob_desc.find(arg_name);
         CHECK(it != lbn2logical_blob_desc.end());
-        auto dst_it = logical_blob_desc->find(arg_name);
-        if (dst_it != logical_blob_desc->end()) {
+        auto dst_it = logical_blob_descs->find(arg_name);
+        if (dst_it != logical_blob_descs->end()) {
           CHECK(dst_it->second == it->second);
         } else {
-          (*logical_blob_desc)[arg_name] = it->second;
+          (*logical_blob_descs)[arg_name] = it->second;
         }
       }
     }
     // save the launch op outputs logical blob descs
     for (const auto& output : proto.function().output()) {
-      const auto& it = logical_blob_desc->find(output.value());
-      CHECK(it != logical_blob_desc->end());
-      (*logical_blob_desc)[output.name()] = it->second;
+      const auto& it = logical_blob_descs->find(output.value());
+      CHECK(it != logical_blob_descs->end());
+      (*logical_blob_descs)[output.name()] = it->second;
     }
 
     // save sbp signatures for the folded nodes

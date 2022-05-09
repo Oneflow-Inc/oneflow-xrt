@@ -86,6 +86,7 @@ void BuildSubGraphPass::Run(XrtGraph* graph, const ClusteringOptions& options) {
     int64_t cluster_id = kv.first;
     XrtNode* launch_node = launch_nodes[cluster_id];
     XrtGraph* sub_graph = graph->AddSubgraphForNode(launch_node->unique_id());
+    sub_graph->set_engine(options.engine);
 
     std::map<int64_t, XrtNode*> sub_graph_nodes;
     for (XrtNode* n : kv.second) {

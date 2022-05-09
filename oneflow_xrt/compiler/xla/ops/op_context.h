@@ -90,6 +90,8 @@ class XlaOpContext : public OpContext {
   xla::XlaOp Output(const Argument& arg);
   xla::XlaOp SoleOutput();
 
+  xla::XlaOp Variable();
+
   int num_inputs() const { return param_.inputs.size(); }
   int num_outputs() const { return param_.num_outputs; }
   // returns inputs as XlaValues
@@ -108,6 +110,8 @@ class XlaOpContext : public OpContext {
   // setup the output `output_name` with XlaValue
   void SetOutput(const std::string& name, const XlaValue& handle);
   void SetSoleOutput(const xla::XlaOp& handle);
+
+  void SetVariable(const xla::XlaOp& handle);
 
   // returns input `name` shape as Shape
   Shape InputShape(const std::string& name) const;

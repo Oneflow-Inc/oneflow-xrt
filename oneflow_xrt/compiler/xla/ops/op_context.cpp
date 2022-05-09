@@ -105,6 +105,8 @@ xla::XlaOp XlaOpContext::SoleOutput() {
   return (it->second).AsXlaOp(builder());
 }
 
+xla::XlaOp XlaOpContext::Variable() { return Input("variable"); }
+
 void XlaOpContext::SetOutput(const std::string& name,
                              const xla::XlaOp& handle) {
   SetOutput(name, XlaValue::XlaOp(handle));
@@ -122,6 +124,10 @@ void XlaOpContext::SetOutput(const std::string& name, const XlaValue& handle) {
 void XlaOpContext::SetSoleOutput(const xla::XlaOp& handle) {
   CHECK_EQ(outputs_.size(), 0);
   SetOutput(SoleOutputName(), handle);
+}
+
+void XlaOpContext::SetVariable(const xla::XlaOp& handle) {
+  SetOutput("variable", handle);
 }
 
 DataType XlaOpContext::InputType(const std::string& name) const {

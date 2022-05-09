@@ -64,6 +64,9 @@ class XrtGraph : public std::enable_shared_from_this<XrtGraph> {
 
   std::vector<Argument> Arguments() const;
 
+  const XrtEngine& engine() const { return engine_; }
+  void set_engine(const XrtEngine& engine) { engine_ = engine; }
+
  protected:
   std::vector<XrtNode*> nodes_;
   std::vector<std::unique_ptr<XrtNode>> allocated_nodes_;
@@ -72,6 +75,9 @@ class XrtGraph : public std::enable_shared_from_this<XrtGraph> {
   std::vector<std::unique_ptr<XrtEdge>> allocated_edges_;
 
   std::map<int64_t, std::shared_ptr<XrtGraph>> subgraphs_;
+
+  // engine_ will be set after clustering subgraph
+  XrtEngine engine_ = XrtEngine::DEFAULT;
 };
 
 namespace algorithm {

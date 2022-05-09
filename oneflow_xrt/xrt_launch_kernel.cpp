@@ -28,15 +28,19 @@ namespace oneflow {
 
 class XrtLaunchKernelState : public user_op::OpKernelState {
  public:
-  XrtLaunchKernelState(const xrt::XrtLaunchProto& proto)
-      : proto_(proto), compilation_cache_(new xrt::CompilationCache) {
+  XrtLaunchKernelState(const xrt::XrtLaunchProto& proto,
+                       const ParallelDesc& parallel_desc)
+      : proto_(proto),
+        parallel_desc_(parallel_desc),
+        compilation_cache_(new xrt::CompilationCache) {
     for (const auto& entry : proto.liveout_entries()) {
       liveout_entries_.insert(entry);
     }
   }
-  const xrt::ExecuteOptionsProto& options() const { return proto_.options(); }
-  const xrt::FunctionProto& function() const { return proto_.function(); }
+  const xrt::XrtLaunchProto& proto() const { return proto_; }
   const std::set<std::string>& liveout_entries() { return liveout_entries_; }
+
+  const ParallelDesc& parallel_desc() const { return parallel_desc_; }
 
   xrt::CompilationCache* compilation_cache() {
     return compilation_cache_.get();
@@ -45,6 +49,7 @@ class XrtLaunchKernelState : public user_op::OpKernelState {
  private:
   xrt::XrtLaunchProto proto_;
   std::set<std::string> liveout_entries_;
+  ParallelDesc parallel_desc_;
   std::shared_ptr<xrt::CompilationCache> compilation_cache_;
 };
 
@@ -61,12 +66,12 @@ class XrtLaunchKernel : public user_op::OpKernel {
                const user_op::OpKernelCache*) const override;
 
   std::shared_ptr<xrt::Executable> BuildExecutable(
-      const std::string& op_name,
+      user_op::KernelComputeContext* ctx, XrtLaunchKernelState* launch_state,
       const std::vector<xrt::Parameter>& entry_params,
       const std::vector<xrt::Parameter>& return_params,
       const std::vector<xrt::InputOutputAlias>& aliases,
-      const xrt::FunctionProto& function, const xrt::XrtEngine& engine,
-      const xrt::XrtDevice& device, const int device_ordinal) const;
+      const xrt::XrtEngine& engine, const xrt::XrtDevice& device,
+      const int device_ordinal) const;
 
   void MakeInputOutputAlias(const std::set<std::string>& liveout_entries,
                             const std::vector<xrt::Parameter>& entry_params,
@@ -83,18 +88,36 @@ std::shared_ptr<user_op::OpKernelState> XrtLaunchKernel::CreateOpKernelState(
   if (!TextFormat::ParseFromString(string_proto, &proto)) {
     LOG(FATAL) << "failed to parse proto for xrt launch op " << ctx->op_name();
   }
-  return std::make_shared<XrtLaunchKernelState>(proto);
+  return std::make_shared<XrtLaunchKernelState>(proto, ctx->parallel_desc());
 }
 
 std::shared_ptr<xrt::Executable> XrtLaunchKernel::BuildExecutable(
-    const std::string& op_name, const std::vector<xrt::Parameter>& entry_params,
+    user_op::KernelComputeContext* ctx, XrtLaunchKernelState* launch_state,
+    const std::vector<xrt::Parameter>& entry_params,
     const std::vector<xrt::Parameter>& return_params,
     const std::vector<xrt::InputOutputAlias>& aliases,
-    const xrt::FunctionProto& function, const xrt::XrtEngine& engine,
-    const xrt::XrtDevice& device, const int device_ordinal) const {
-  VLOG(2) << "build an executable for launch op " << op_name;
-  auto graph = xrt::BuildGraph(function);
-  xrt::GraphCompiler compiler(op_name, engine, device, device_ordinal);
+    const xrt::XrtEngine& engine, const xrt::XrtDevice& device,
+    const int device_ordinal) const {
+  VLOG(2) << "build an executable for launch op " << ctx->op_name();
+  auto graph = xrt::BuildGraph(launch_state->proto().function());
+
+  std::map<std::string, BlobDesc> entry_blob_descs;
+  for (const auto& input : ctx->inputs()) {
+    std::string name = absl::StrCat(input.first, "_", input.second);
+    const auto& tensor_desc = ctx->TensorDesc4ArgNameAndIndex(
+        /*name*/ input.first, /*index*/ input.second);
+    entry_blob_descs.emplace(
+        name, BlobDesc(tensor_desc->shape(), tensor_desc->data_type(),
+                       tensor_desc->is_dynamic()));
+  }
+  // the infered shape will be filled to the graph
+  xrt::ShapeInferenceContext context(
+      &entry_blob_descs, &launch_state->proto().logical_blob_descs(),
+      &ctx->parallel_ctx(), &launch_state->parallel_desc(),
+      &launch_state->proto().nd_sbp_signatures());
+  xrt::RunShapeInferencePass(graph.get(), context);
+
+  xrt::GraphCompiler compiler(ctx->op_name(), engine, device, device_ordinal);
   return compiler.Compile(graph.get(), entry_params, return_params, aliases);
 }
 
@@ -140,20 +163,20 @@ void XrtLaunchKernel::Compute(user_op::KernelComputeContext* ctx,
   MakeInputOutputAlias(launch_state->liveout_entries(), entry_params,
                        &return_params, &aliases);
 
-  xrt::XrtDevice device = launch_state->options().device();
+  const auto& options = launch_state->proto().options();
+  xrt::XrtDevice device = options.device();
   int device_ordinal = xrt::GetDeviceId(device);
 
   xrt::Executable* executable = nullptr;
   xrt::Signature signature =
       xrt::ComputeSignature(ctx->op_name(), device_ordinal, entry_params);
-  if (!launch_state->options().force_compile()) {
+  if (!options.force_compile()) {
     executable = launch_state->compilation_cache()->GetRecord(signature);
   }
   if (!executable) {
-    const auto& engine = launch_state->options().engine();
-    auto result = BuildExecutable(ctx->op_name(), entry_params, return_params,
-                                  aliases, launch_state->function(), engine,
-                                  device, device_ordinal);
+    auto result =
+        BuildExecutable(ctx, launch_state, entry_params, return_params, aliases,
+                        options.engine(), device, device_ordinal);
     if (!result) {
       LOG(FATAL) << "failed to build an executable";
     }
@@ -184,6 +207,8 @@ void XrtLaunchKernel::Compute(user_op::KernelComputeContext* ctx,
   }
 }
 
-REGISTER_USER_KERNEL(xrt::_XrtLaunchOpType).SetCreateFn<XrtLaunchKernel>();
+REGISTER_USER_KERNEL(xrt::_XrtLaunchOpType)
+    .SetCreateFn<XrtLaunchKernel>()
+    .SetIsMatchedHob(user_op::HobTrue());
 
 }  // namespace oneflow

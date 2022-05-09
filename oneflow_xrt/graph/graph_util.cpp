@@ -87,7 +87,7 @@ GraphBuilder::GraphBuilder(const FunctionProto& function)
     node_info_[node].input_output_keys.emplace(input.value(), "value");
   }
   for (const auto& output : function.output()) {
-    XrtNode* node = graph_->AddEntryNode(output.name());
+    XrtNode* node = graph_->AddReturnNode(output.name());
     node_info_[node].inputs.insert(output.value());
     node_info_[node].input_output_keys.emplace(output.value(), "value");
   }
@@ -95,7 +95,7 @@ GraphBuilder::GraphBuilder(const FunctionProto& function)
   for (const auto& node_conf : function.node()) {
     XrtNode* node = graph_->AddNode(node_conf);
     auto& input_output_keys = node_info_[node].input_output_keys;
-    auto op = CHECK_JUST(ConstructOp(node_conf, DeviceType::kCPU));
+    auto op = CHECK_JUST(ConstructOp(node_conf));
     for (const std::string& bn : op->output_bns()) {
       std::string output = GenLogicalBlobName(op->BnInOp2Lbi(bn));
       producers_[output] = node;
