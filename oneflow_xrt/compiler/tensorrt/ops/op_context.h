@@ -13,18 +13,17 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-#ifndef ONEFLOW_XRT_TENSORRT_OPS_OP_CONTEXT_H_
-#define ONEFLOW_XRT_TENSORRT_OPS_OP_CONTEXT_H_
+#ifndef ONEFLOW_XRT_COMPILER_TENSORRT_OPS_OP_CONTEXT_H_
+#define ONEFLOW_XRT_COMPILER_TENSORRT_OPS_OP_CONTEXT_H_
 
 #include "NvInfer.h"
 #include "oneflow/core/common/data_type.h"
-#include "oneflow/core/common/protobuf.h"
 #include "oneflow/core/common/shape.h"
-#include "oneflow/xrt/argument.h"
-#include "oneflow/xrt/kernel/op_context.h"
-#include "oneflow/xrt/tensorrt/trt_builder.h"
-#include "oneflow/xrt/tensorrt/trt_value.h"
-#include "oneflow/xrt/xrt.pb.h"
+#include "oneflow_xrt/compiler/kernel/op_context.h"
+#include "oneflow_xrt/compiler/tensorrt/trt_builder.h"
+#include "oneflow_xrt/compiler/tensorrt/trt_value.h"
+#include "oneflow_xrt/graph/argument.h"
+#include "oneflow_xrt/xrt.pb.h"
 
 namespace oneflow {
 namespace xrt {
@@ -36,18 +35,18 @@ class TrtOpContext : public OpContext {
     std::string op_name;
 
     TrtBuilder* builder;
-    // Config proto related to the operator
-    const PbMessage* message;
+    // attributes related to the op
+    AttrMap attrs;
     // Input operands
-    std::map<Argument, TrtValue> inputs;
+    std::unordered_map<Argument, TrtValue> inputs;
     std::vector<std::string> output_names;
     int num_outputs;
 
-    std::map<std::string, Argument> arguments;
+    std::unordered_map<std::string, Argument> arguments;
   };
 
   explicit TrtOpContext(const Param& param)
-      : OpContext(*param.message), param_(param) {}
+      : OpContext(param.attrs), param_(param) {}
 
   virtual ~TrtOpContext() = default;
 
@@ -75,9 +74,13 @@ class TrtOpContext : public OpContext {
   int num_inputs() const { return param_.inputs.size(); }
   int num_outputs() const { return param_.num_outputs; }
   // Return inputs as TrtValues
-  const std::map<Argument, TrtValue>& inputs() const { return param_.inputs; }
+  const std::unordered_map<Argument, TrtValue>& inputs() const {
+    return param_.inputs;
+  }
   // Return output as TrtValues
-  const std::map<Argument, TrtValue>& outputs() const { return outputs_; }
+  const std::unordered_map<Argument, TrtValue>& outputs() const {
+    return outputs_;
+  }
 
   // Setup the output `output_name` with XlaOp
   void SetOutput(const std::string& name, nvinfer1::ITensor* tensor);
@@ -107,11 +110,11 @@ class TrtOpContext : public OpContext {
 
   Param param_;
   // Output operands
-  std::map<Argument, TrtValue> outputs_;
+  std::unordered_map<Argument, TrtValue> outputs_;
 };
 
 }  // namespace tensorrt
 }  // namespace xrt
 }  // namespace oneflow
 
-#endif  // ONEFLOW_XRT_TENSORRT_OPS_OP_CONTEXT_H_
+#endif  // ONEFLOW_XRT_COMPILER_TENSORRT_OPS_OP_CONTEXT_H_

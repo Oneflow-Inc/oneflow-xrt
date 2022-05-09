@@ -13,11 +13,11 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-#ifndef ONEFLOW_XRT_TENSORRT_TRT_HELPERS_H_
-#define ONEFLOW_XRT_TENSORRT_TRT_HELPERS_H_
+#ifndef ONEFLOW_XRT_COMPILER_TENSORRT_TRT_HELPERS_H_
+#define ONEFLOW_XRT_COMPILER_TENSORRT_TRT_HELPERS_H_
 
-#include "oneflow/xrt/tensorrt/ops/op_context.h"
-#include "oneflow/xrt/tensorrt/trt_shape.h"
+#include "oneflow_xrt/compiler/tensorrt/ops/op_context.h"
+#include "oneflow_xrt/compiler/tensorrt/trt_shape.h"
 
 namespace oneflow {
 namespace xrt {
@@ -46,4 +46,4 @@ nvinfer1::ITensor* Transpose(TrtOpContext* ctx, nvinfer1::Weights in,
 }  // namespace xrt
 }  // namespace oneflow
 
-#endif  // ONEFLOW_XRT_TENSORRT_TRT_HELPERS_H_
+#endif  // ONEFLOW_XRT_COMPILER_TENSORRT_TRT_HELPERS_H_

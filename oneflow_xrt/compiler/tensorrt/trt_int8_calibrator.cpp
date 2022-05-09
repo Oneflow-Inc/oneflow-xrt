@@ -13,7 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-#include "oneflow/xrt/tensorrt/trt_int8_calibrator.h"
+#include "oneflow_xrt/compiler/tensorrt/trt_int8_calibrator.h"
 
 #include <mutex>
 #include <string>
@@ -32,7 +32,7 @@ void TRTInt8Calibrator::setBatchSize(const int batch_size) {  // NOLINT
 }
 
 // set the batch size before constructing the thread to execute engine
-int TRTInt8Calibrator::getBatchSize() const TRT_OPTIONAL_NOEXCEPT {  // NOLINT
+int TRTInt8Calibrator::getBatchSize() const TRT_NOEXCEPT {  // NOLINT
   return batch_size_;
 }
 
@@ -118,7 +118,7 @@ bool TRTInt8Calibrator::setBatch(const std::vector<const Parameter*>& params) {
 }
 
 bool TRTInt8Calibrator::getBatch(void** bindings, const char** names,  // NOLINT
-                                 int num_bindings) TRT_OPTIONAL_NOEXCEPT {
+                                 int num_bindings) TRT_NOEXCEPT {
   std::unique_lock<std::mutex> lk(cond_mtx_);
   // Notify finish of last round of calibration.
   calib_running_ = false;
@@ -156,15 +156,14 @@ bool TRTInt8Calibrator::isDone() const {
 }
 
 const void* TRTInt8Calibrator::readCalibrationCache(size_t& length)
-    TRT_OPTIONAL_NOEXCEPT {
+    TRT_NOEXCEPT {
   if (calibration_table_.empty()) return nullptr;
   length = calibration_table_.size();
   return calibration_table_.data();
 }
 
 void TRTInt8Calibrator::writeCalibrationCache(const void* ptr,  // NOLINT
-                                              std::size_t length)
-    TRT_OPTIONAL_NOEXCEPT {
+                                              std::size_t length) TRT_NOEXCEPT {
   calibration_table_ = std::string((const char*)ptr, length);
 }
 

@@ -13,8 +13,8 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-#ifndef ONEFLOW_XRT_TENSORRT_TRT_INT8_CALIBRATOR_H_
-#define ONEFLOW_XRT_TENSORRT_TRT_INT8_CALIBRATOR_H_
+#ifndef ONEFLOW_XRT_COMPILER_TENSORRT_TRT_INT8_CALIBRATOR_H_
+#define ONEFLOW_XRT_COMPILER_TENSORRT_TRT_INT8_CALIBRATOR_H_
 
 #include <mutex>
 #include <string>
@@ -22,9 +22,9 @@ limitations under the License.
 #include <vector>
 
 #include "NvInfer.h"
-#include "oneflow/xrt/parameter.h"
-#include "oneflow/xrt/tensorrt/common.h"
-#include "oneflow/xrt/tensorrt/trt_unique_ptr.h"
+#include "oneflow_xrt/compiler/parameter.h"
+#include "oneflow_xrt/compiler/tensorrt/common.h"
+#include "oneflow_xrt/compiler/tensorrt/trt_unique_ptr.h"
 
 namespace oneflow {
 namespace xrt {
@@ -33,7 +33,6 @@ namespace tensorrt {
 
 // Refered from tensorflow
 class TRTInt8Calibrator : public nvinfer1::IInt8EntropyCalibrator2 {
-  // class TRTInt8Calibrator : public nvinfer1::IInt8EntropyCalibrator {
  public:
   // Construct a calibrator for future calibration.
   TRTInt8Calibrator();
@@ -44,10 +43,10 @@ class TRTInt8Calibrator : public nvinfer1::IInt8EntropyCalibrator2 {
 
   ~TRTInt8Calibrator();
 
-  int getBatchSize() const TRT_OPTIONAL_NOEXCEPT override;
+  int getBatchSize() const TRT_NOEXCEPT override;
 
   bool getBatch(void* bindings[], const char* names[],  // NOLINT
-                int num_bindings) TRT_OPTIONAL_NOEXCEPT override;
+                int num_bindings) TRT_NOEXCEPT override;
 
   void setBatchSize(const int batch_size);
 
@@ -69,11 +68,10 @@ class TRTInt8Calibrator : public nvinfer1::IInt8EntropyCalibrator2 {
   void ReleaseDevBuffers();
 
   // If not null, calibration is skipped.
-  const void* readCalibrationCache(std::size_t& length)
-      TRT_OPTIONAL_NOEXCEPT override;
+  const void* readCalibrationCache(std::size_t& length) TRT_NOEXCEPT override;
 
   void writeCalibrationCache(const void* ptr,
-                             std::size_t length) TRT_OPTIONAL_NOEXCEPT override;
+                             std::size_t length) TRT_NOEXCEPT override;
 
   const std::string& getCalibrationTableAsString() {  // NOLINT
     return calibration_table_;
@@ -122,4 +120,4 @@ struct TRTInt8CalibratorResource {
 }  // namespace xrt
 }  // namespace oneflow
 
-#endif  // ONEFLOW_XRT_TENSORRT_TRT_INT8_CALIBRATOR_H_
+#endif  // ONEFLOW_XRT_COMPILER_TENSORRT_TRT_INT8_CALIBRATOR_H_

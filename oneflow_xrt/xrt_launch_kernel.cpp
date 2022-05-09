@@ -185,6 +185,7 @@ void XrtLaunchKernel::Compute(user_op::KernelComputeContext* ctx,
   }
 
   xrt::ExecutableRunOptions run_options;
+  run_options.common = options;
   run_options.device_ordinal = device_ordinal;
   run_options.return_params = return_params;
   bool block_until_done = true;

@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef ONEFLOW_XRT_TENSORRT_COMMON_H_
-#define ONEFLOW_XRT_TENSORRT_COMMON_H_
+#ifndef ONEFLOW_XRT_COMPILER_TENSORRT_COMMON_H_
+#define ONEFLOW_XRT_COMPILER_TENSORRT_COMMON_H_
 
 #include "NvInferVersion.h"
 
@@ -25,16 +25,16 @@ namespace tensorrt {
 
 #ifdef NV_TENSORRT_MAJOR
 #if NV_TENSORRT_MAJOR > 7
-#define TRT_OPTIONAL_NOEXCEPT noexcept
+#define TRT_NOEXCEPT noexcept
 #else
-#define TRT_OPTIONAL_NOEXCEPT
+#define TRT_NOEXCEPT
 #endif
 #else
-#define TRT_OPTIONAL_NOEXCEPT
+#define TRT_NOEXCEPT
 #endif
 
 }  // namespace tensorrt
 }  // namespace xrt
 }  // namespace oneflow
 
-#endif  // ONEFLOW_XRT_TENSORRT_COMMON_H_
+#endif  // ONEFLOW_XRT_COMPILER_TENSORRT_COMMON_H_

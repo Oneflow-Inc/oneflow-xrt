@@ -17,7 +17,6 @@ limitations under the License.
 #define ONEFLOW_XRT_COMPILER_XLA_OPS_OP_CONTEXT_H_
 
 #include "oneflow/core/common/data_type.h"
-#include "oneflow/core/common/protobuf.h"
 #include "oneflow/core/common/shape.h"
 #include "oneflow_xrt/common/device.h"
 #include "oneflow_xrt/compiler/kernel/op_context.h"

@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 #include "NvInfer.h"
-#include "oneflow/xrt/tensorrt/ops/op_context.h"
-#include "oneflow/xrt/tensorrt/ops/op_kernel.h"
+#include "oneflow_xrt/compiler/tensorrt/ops/op_context.h"
+#include "oneflow_xrt/compiler/tensorrt/ops/op_kernel.h"
 
 namespace oneflow {
 namespace xrt {

@@ -13,16 +13,16 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-#ifndef ONEFLOW_XRT_TENSORRT_TRT_EXECUTABLE_H_
-#define ONEFLOW_XRT_TENSORRT_TRT_EXECUTABLE_H_
+#ifndef ONEFLOW_XRT_COMPILER_TENSORRT_TRT_EXECUTABLE_H_
+#define ONEFLOW_XRT_COMPILER_TENSORRT_TRT_EXECUTABLE_H_
 
 #include <vector>
 
 #include "NvInfer.h"
-#include "oneflow/xrt/executable.h"
-#include "oneflow/xrt/parameter.h"
-#include "oneflow/xrt/tensorrt/trt_int8_calibrator.h"
-#include "oneflow/xrt/tensorrt/trt_unique_ptr.h"
+#include "oneflow_xrt/compiler/executable.h"
+#include "oneflow_xrt/compiler/parameter.h"
+#include "oneflow_xrt/compiler/tensorrt/trt_int8_calibrator.h"
+#include "oneflow_xrt/compiler/tensorrt/trt_unique_ptr.h"
 
 namespace oneflow {
 namespace xrt {
@@ -81,4 +81,4 @@ class TrtExecutable : public Executable {
 }  // namespace xrt
 }  // namespace oneflow
 
-#endif  // ONEFLOW_XRT_TENSORRT_TRT_EXECUTABLE_H_
+#endif  // ONEFLOW_XRT_COMPILER_TENSORRT_TRT_EXECUTABLE_H_

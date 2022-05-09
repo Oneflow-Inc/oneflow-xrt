@@ -26,28 +26,13 @@ namespace oneflow {
 namespace xrt {
 
 struct ExecutableRunOptions {
+  // user defined common options
+  ExecuteOptionsProto common;
   // specify the compute stream if the engine supports multiple streams
   // the default compute stream will be used if `stream` is nullptr
   void* stream = nullptr;
 
   int32_t device_ordinal = -1;
-
-  int32_t host_num_threads = -1;
-
-  // memory footprint limit
-  int64_t host_memory_limit = -1;
-  int64_t device_memory_limit = -1;
-
-  int64_t random_seed = -1;
-
-  // maximum batch size for tensorrt
-  int32_t max_batch_size = 1;
-
-  // enable tensorrt mixed-precision
-  bool tensorrt_fp16 = false;
-  bool tensorrt_int8 = false;
-
-  std::string tensorrt_int8_calibration = "";
 
   // populate the return parameters to reuse their storages while running
   // the executable

@@ -13,8 +13,8 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-#ifndef ONEFLOW_XRT_TENSORRT_TRT_SHAPE_H_
-#define ONEFLOW_XRT_TENSORRT_TRT_SHAPE_H_
+#ifndef ONEFLOW_XRT_COMPILER_TENSORRT_TRT_SHAPE_H_
+#define ONEFLOW_XRT_COMPILER_TENSORRT_TRT_SHAPE_H_
 
 #include "NvInfer.h"
 #include "glog/logging.h"
@@ -86,4 +86,4 @@ class TrtShape {
 }  // namespace xrt
 }  // namespace oneflow
 
-#endif  // ONEFLOW_XRT_TENSORRT_TRT_SHAPE_H_
+#endif  // ONEFLOW_XRT_COMPILER_TENSORRT_TRT_SHAPE_H_

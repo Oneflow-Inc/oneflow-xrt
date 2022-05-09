@@ -13,10 +13,10 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-#include "oneflow/xrt/tensorrt/trt_graph_compiler.h"
+#include "oneflow_xrt/compiler/tensorrt/trt_graph_compiler.h"
 
-#include "oneflow/xrt/node_util.h"
-#include "oneflow/xrt/tensorrt/ops/op_kernel.h"
+#include "oneflow_xrt/compiler/tensorrt/ops/op_kernel.h"
+#include "oneflow_xrt/graph/node_util.h"
 
 namespace oneflow {
 namespace xrt {
@@ -37,9 +37,19 @@ Argument TrtGraphCompiler::ArgFromParameter(const Parameter& param) {
 
 void TrtGraphCompiler::SetupKernelContextParam(
     const XrtNode* node, TrtOpContext::Param* context_param) {
-  std::map<Argument, TrtValue> input_ops;
-  std::map<std::string /* produce/consume key */, Argument> input_output_args;
+  std::unordered_map<Argument, TrtValue> input_ops;
+  std::unordered_map<std::string /* produce/consume key */, Argument>
+      input_output_args;
   std::vector<std::string> output_names;
+  if (node->IsEntryNode()) {
+    const Argument& arg = arguments_.at(node->name());
+    input_output_args.emplace("variable", arg);
+    input_ops.emplace(arg, operands_.at(arg));
+  } else if (node->IsReturnNode()) {
+    const Argument& arg = arguments_.at(node->name());
+    input_output_args.emplace("variable", arg);
+    output_names.emplace_back(node->name());
+  }
   for (const XrtEdge* edge : node->in_edges()) {
     if (!edge->IsControlEdge()) {
       const Argument& arg = edge->argument();
@@ -58,12 +68,11 @@ void TrtGraphCompiler::SetupKernelContextParam(
       output_names.emplace_back(k);
     }
   }
-
   size_t num_outputs = input_output_args.size() - input_ops.size();
   CHECK_GE(num_outputs, 0) << "Outputs number should >= 0.";
   context_param->op_name = node->name();
   context_param->builder = builder_.get();
-  context_param->message = OpMessage(node);
+  context_param->attrs = node->attrs();
   context_param->arguments = std::move(input_output_args);
   context_param->inputs = std::move(input_ops);
   context_param->output_names = std::move(output_names);
@@ -74,9 +83,8 @@ std::shared_ptr<Executable> TrtGraphCompiler::Compile(
     const XrtGraph* graph, const std::vector<Parameter>& entry_params,
     const std::vector<Parameter>& return_params,
     const std::vector<InputOutputAlias>& aliases) {
-  // Build entry and return trt values.
+  // Build entry trt values.
   PopulateEntryParams(entry_params);
-  // PopulateReturnParams(return_params);
 
   algorithm::TopologyVisit(*graph, [&](const XrtNode* node) {
     TrtOpContext::Param param;
@@ -98,9 +106,6 @@ std::shared_ptr<Executable> TrtGraphCompiler::Compile(
     const TrtValue& value = operands_.at(arg);
     builder_->MarkOutput(value.handle());
   }
-
-  // return std::make_shared<TrtExecutable>(builder_->name(),
-  // builder_->BuildCudaEngine());
   return std::make_shared<TrtExecutable>(
       builder_->name(), builder_->ReleaseBuilder(), builder_->ReleaseNetwork(),
       builder_->host_weights());

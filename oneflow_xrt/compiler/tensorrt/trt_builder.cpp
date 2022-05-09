@@ -16,7 +16,7 @@ limitations under the License.
 #ifdef WITH_CUDA
 #include "cuda_runtime.h"
 #endif
-#include "oneflow/xrt/tensorrt/trt_builder.h"
+#include "oneflow_xrt/compiler/tensorrt/trt_builder.h"
 
 namespace oneflow {
 namespace xrt {
@@ -56,7 +56,8 @@ nvinfer1::Weights& TrtBuilder::GetWeight(int64_t handle) {
     CHECK_EQ(cudaSuccess, cudaMemcpy(host_data->data(), param.data(), num_bytes,
                                      cudaMemcpyDefault));
 #else
-    LOG(FATAL) << "Recompile the project with CUDA please.";
+    LOG(FATAL)
+        << "Unable access cuda device since XRT was compiled without CUDA";
 #endif
     CHECK_EQ(host_weights_.count(param.name()), 0);
     host_weights_[param.name()] =

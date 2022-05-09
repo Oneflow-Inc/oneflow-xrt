@@ -13,13 +13,13 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-#ifndef ONEFLOW_XRT_TENSORRT_TRT_LOGGER_H_
-#define ONEFLOW_XRT_TENSORRT_TRT_LOGGER_H_
+#ifndef ONEFLOW_XRT_COMPILER_TENSORRT_TRT_LOGGER_H_
+#define ONEFLOW_XRT_COMPILER_TENSORRT_TRT_LOGGER_H_
 
 #include <string>
 
 #include "NvInfer.h"
-#include "oneflow/xrt/tensorrt/common.h"
+#include "oneflow_xrt/compiler/tensorrt/common.h"
 
 namespace oneflow {
 namespace xrt {
@@ -34,7 +34,7 @@ class Logger : public nvinfer1::ILogger {
   Logger(const std::string& name) : name_(name) {}
 
   void log(nvinfer1::ILogger::Severity severity,
-           const char* msg) TRT_OPTIONAL_NOEXCEPT override;
+           const char* msg) TRT_NOEXCEPT override;
 
  private:
   std::string name_ = "TensorRT Logging";
@@ -46,4 +46,4 @@ class Logger : public nvinfer1::ILogger {
 }  // namespace xrt
 }  // namespace oneflow
 
-#endif  // ONEFLOW_XRT_TENSORRT_TRT_LOGGER_H_
+#endif  // ONEFLOW_XRT_COMPILER_TENSORRT_TRT_LOGGER_H_

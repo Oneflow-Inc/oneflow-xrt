@@ -13,15 +13,15 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-#ifndef ONEFLOW_XRT_TENSORRT_TRT_BUILDER_H_
-#define ONEFLOW_XRT_TENSORRT_TRT_BUILDER_H_
+#ifndef ONEFLOW_XRT_COMPILER_TENSORRT_TRT_BUILDER_H_
+#define ONEFLOW_XRT_COMPILER_TENSORRT_TRT_BUILDER_H_
 
 #include "NvInfer.h"
 #include "glog/logging.h"
-#include "oneflow/xrt/parameter.h"
-#include "oneflow/xrt/tensorrt/trt_logger.h"
-#include "oneflow/xrt/tensorrt/trt_shape.h"
-#include "oneflow/xrt/tensorrt/trt_unique_ptr.h"
+#include "oneflow_xrt/compiler/parameter.h"
+#include "oneflow_xrt/compiler/tensorrt/trt_logger.h"
+#include "oneflow_xrt/compiler/tensorrt/trt_shape.h"
+#include "oneflow_xrt/compiler/tensorrt/trt_unique_ptr.h"
 
 namespace oneflow {
 namespace xrt {
@@ -173,4 +173,4 @@ class TrtBuilder {
 }  // namespace xrt
 }  // namespace oneflow
 
-#endif  // ONEFLOW_XRT_TENSORRT_TRT_BUILDER_H_
+#endif  // ONEFLOW_XRT_COMPILER_TENSORRT_TRT_BUILDER_H_

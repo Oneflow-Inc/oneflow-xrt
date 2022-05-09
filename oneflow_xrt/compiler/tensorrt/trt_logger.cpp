@@ -13,7 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-#include "oneflow/xrt/tensorrt/trt_logger.h"
+#include "oneflow_xrt/compiler/tensorrt/trt_logger.h"
 
 #include "glog/logging.h"
 
@@ -25,8 +25,7 @@ namespace nv {
 
 using ILogger = ::nvinfer1::ILogger;
 
-void Logger::log(ILogger::Severity severity,
-                 const char* msg) TRT_OPTIONAL_NOEXCEPT {
+void Logger::log(ILogger::Severity severity, const char* msg) TRT_NOEXCEPT {
   switch (severity) {
     case ILogger::Severity::kVERBOSE:
     case ILogger::Severity::kINFO: {

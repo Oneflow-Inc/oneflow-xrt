@@ -13,15 +13,15 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-#include "oneflow/xrt/tensorrt/trt_executable.h"
+#include "oneflow_xrt/compiler/tensorrt/trt_executable.h"
 
 #include <iostream>
 #include <sstream>
 
 #include "absl/strings/str_cat.h"
 #include "cuda_runtime.h"
-#include "oneflow/xrt/platform.h"
-#include "oneflow/xrt/tensorrt/trt_int8_calibrator.h"
+#include "oneflow_xrt/common/device.h"
+#include "oneflow_xrt/compiler/tensorrt/trt_int8_calibrator.h"
 
 namespace oneflow {
 namespace xrt {
@@ -33,16 +33,16 @@ nvinfer1::ICudaEngine* TrtExecutable::CreateExecutableEngine(
     TRTInt8Calibrator* calibrator /*= nullptr*/) {
   CHECK(builder_ && network_) << "Builder and network should be setup before.";
 
-  auto build_config =  // NOLINT
+  auto build_config =
       nv::unique_ptr<nvinfer1::IBuilderConfig>(builder_->createBuilderConfig());
-  int64_t max_workspace_size = 1U << 24;      // 16MiB
-  if (run_options.device_memory_limit > 0) {  // NOLINT
-    max_workspace_size = run_options.device_memory_limit;
+  int64_t max_workspace_size = 1U << 24;  // 16MiB
+  if (run_options.common.max_workspace_size() > 0) {
+    max_workspace_size = run_options.common.max_workspace_size();
   }
   build_config->setMaxWorkspaceSize(max_workspace_size);
 
   nvinfer1::BuilderFlags flags = 0U;
-  if (run_options.tensorrt_fp16) {
+  if (run_options.common.use_fp16()) {
     if (builder_->platformHasFastFp16()) {
       flags |= (1U << int(nvinfer1::BuilderFlag::kFP16));
     } else {
@@ -50,7 +50,7 @@ nvinfer1::ICudaEngine* TrtExecutable::CreateExecutableEngine(
                    "hardware does not support.";
     }
   }
-  if (run_options.tensorrt_int8) {
+  if (run_options.common.use_int8()) {
     if (builder_->platformHasFastInt8()) {
       if (calibrator) {
         flags |= (1U << int(nvinfer1::BuilderFlag::kINT8));
@@ -71,7 +71,8 @@ nvinfer1::ICudaEngine* TrtExecutable::CreateExecutableEngine(
   // flags |= (1U << int(nvinfer1::BuilderFlag::kREFIT));
   build_config->setFlags(flags);
 
-  int32_t max_batch_size = std::max(run_options.max_batch_size, batch_size);
+  int32_t max_batch_size = std::max(
+      static_cast<int32_t>(run_options.common.max_batch_size()), batch_size);
   builder_->setMaxBatchSize(max_batch_size);
   // builder_->setGpuAllocator();
   return builder_->buildEngineWithConfig(*network_, *build_config);
@@ -108,10 +109,10 @@ bool TrtExecutable::Run(const std::vector<Parameter>& inputs,
                         const ExecutableRunOptions& run_options,  // NOLINT
                         bool block_until_done) {
   // TODO(hjchen2): Refactor
-  if (run_options.tensorrt_int8 && !calibrator_ &&  // NOLINT
-      run_options.tensorrt_int8_calibration.size()) {
+  if (run_options.common.use_int8() && !calibrator_ &&  // NOLINT
+      run_options.common.int8_calibration().size()) {
     std::string calibration_data =  // NOLINT
-        LoadCalibrationTable(run_options.tensorrt_int8_calibration);
+        LoadCalibrationTable(run_options.common.int8_calibration());
     CHECK(calibration_data.size()) << "Calibration data is empty.";
     calibrator_.reset(new TRTInt8Calibrator(calibration_data));
   }
@@ -155,17 +156,17 @@ bool TrtExecutable::Run(const std::vector<Parameter>& inputs,
     execution_context_.reset(engine_->createExecutionContext());
   }
 
-  if (run_options.tensorrt_int8 && !calibrator_) {
+  if (run_options.common.use_int8() && !calibrator_) {
     auto* res = TRTInt8CalibratorResource::LookupOrCreate(this->name());
     {
       std::lock_guard<std::mutex> lock(res->mutex_);
       if (!res->calibrator_) {
         res->calibrator_.reset(new TRTInt8Calibrator());
-        int ordinal = platform::GetDeviceId(XrtDevice::GPU_CUDA);
+        int ordinal = GetDeviceId(XrtDevice::GPU_CUDA);
         res->thread_.reset(new std::thread([this, ordinal, batch_size,
                                             res,  // NOLINT
                                             run_options]() {
-          platform::SetDeviceId(XrtDevice::GPU_CUDA, ordinal);
+          SetDeviceId(XrtDevice::GPU_CUDA, ordinal);
           // TODO(hjchen2): TensorRT maybe crash if calibrator batch size > 1
           res->calibrator_->setBatchSize(1 /*batch_size*/);
           res->engine_.reset(                                        // NOLINT

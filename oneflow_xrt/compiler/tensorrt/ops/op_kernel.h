@@ -13,12 +13,13 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-#ifndef ONEFLOW_XRT_TENSORRT_OPS_OP_KERNEL_H_
-#define ONEFLOW_XRT_TENSORRT_OPS_OP_KERNEL_H_
+#ifndef ONEFLOW_XRT_COMPILER_TENSORRT_OPS_OP_KERNEL_H_
+#define ONEFLOW_XRT_COMPILER_TENSORRT_OPS_OP_KERNEL_H_
 
-#include "oneflow/xrt/kernel/op_kernel.h"
-#include "oneflow/xrt/tensorrt/ops/op_context.h"
-#include "oneflow/xrt/utility/registry.h"
+#include "oneflow_xrt/common/registry.h"
+#include "oneflow_xrt/compiler/kernel/op_kernel.h"
+#include "oneflow_xrt/compiler/kernel/op_kernel_registry.h"
+#include "oneflow_xrt/compiler/tensorrt/ops/op_context.h"
 
 namespace oneflow {
 namespace xrt {
@@ -32,24 +33,24 @@ class TrtOpKernel : public OpKernel<TrtOpContext> {
   virtual ~TrtOpKernel() = default;
 };
 
-using TrtOpKernelPtr = std::shared_ptr<OpKernel<TrtOpContext>>;
+#define REGISTER_TRT_OP_KERNEL(OpName, KernelType)    \
+  static OpKernelRegistrar _trt_op_kernel_##OpName##_ \
+      __attribute__((unused)) =                       \
+          OpKernelRegistrar(#OpName)                  \
+              .SetEngine(XrtEngine::TENSORRT)         \
+              .SetDevice({XrtDevice::GPU_CUDA})       \
+              .SetFactory([]() -> OpKernelBase* { return new KernelType; })
 
-#define REGISTER_TRT_OP_KERNEL(OpName, KernelType)                  \
-  static OpKernelRegistrar<TrtOpContext> _trt_op_kernel_##OpName##_ \
-      __attribute__((unused)) =                                     \
-          OpKernelRegistrar<TrtOpContext>(#OpName)                  \
-              .SetField(XrtEngine::TENSORRT)                        \
-              .SetDevice({XrtDevice::GPU_CUDA})                     \
-              .SetFactory(                                          \
-                  []() -> OpKernel<TrtOpContext>* { return new KernelType; })
-
-inline TrtOpKernelPtr BuildOpKernel(const std::string& op_name) {
-  auto field = MakeXrtField(XrtDevice::GPU_CUDA, XrtEngine::TENSORRT);
-  return TrtOpKernelPtr(OpKernelBuilder<TrtOpContext>()(field, op_name));
+inline std::shared_ptr<TrtOpKernel> BuildOpKernel(const std::string& op_name) {
+  OpKernelRegKey reg_key{op_name, XrtEngine::TENSORRT, XrtDevice::GPU_CUDA};
+  const auto& f = XRT_REGISTER_LOOKUP(OpKernelRegId, reg_key);
+  auto* trt_kernel = dynamic_cast<TrtOpKernel*>(f());
+  CHECK(trt_kernel) << "failed to build tensorrt op kernel for " << reg_key;
+  return std::shared_ptr<TrtOpKernel>(trt_kernel);
 }
 
 }  // namespace tensorrt
 }  // namespace xrt
 }  // namespace oneflow
 
-#endif  // ONEFLOW_XRT_TENSORRT_OPS_OP_KERNEL_H_
+#endif  // ONEFLOW_XRT_COMPILER_TENSORRT_OPS_OP_KERNEL_H_

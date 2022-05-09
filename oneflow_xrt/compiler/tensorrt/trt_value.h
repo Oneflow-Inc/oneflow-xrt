@@ -13,12 +13,12 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-#ifndef ONEFLOW_XRT_TENSORRT_TRT_VALUE_H_
-#define ONEFLOW_XRT_TENSORRT_TRT_VALUE_H_
+#ifndef ONEFLOW_XRT_COMPILER_TENSORRT_TRT_VALUE_H_
+#define ONEFLOW_XRT_COMPILER_TENSORRT_TRT_VALUE_H_
 
 #include "NvInfer.h"
-#include "oneflow/xrt/parameter.h"
-#include "oneflow/xrt/tensorrt/trt_builder.h"
+#include "oneflow_xrt/compiler/parameter.h"
+#include "oneflow_xrt/compiler/tensorrt/trt_builder.h"
 
 namespace oneflow {
 namespace xrt {
@@ -84,4 +84,4 @@ TrtValue TrtValue::Weight(TrtBuilder* builder, nvinfer1::Weights& weight) {
 }  // namespace xrt
 }  // namespace oneflow
 
-#endif  // ONEFLOW_XRT_TENSORRT_TRT_VALUE_H_
+#endif  // ONEFLOW_XRT_COMPILER_TENSORRT_TRT_VALUE_H_

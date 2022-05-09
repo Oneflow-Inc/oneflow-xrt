@@ -13,15 +13,15 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-#ifndef ONEFLOW_XRT_TENSORRT_TRT_GRAPH_COMPILER_H_
-#define ONEFLOW_XRT_TENSORRT_TRT_GRAPH_COMPILER_H_
+#ifndef ONEFLOW_XRT_COMPILER_TENSORRT_TRT_GRAPH_COMPILER_H_
+#define ONEFLOW_XRT_COMPILER_TENSORRT_TRT_GRAPH_COMPILER_H_
 
 #include "NvInfer.h"
-#include "oneflow/xrt/graph_compiler.h"
-#include "oneflow/xrt/tensorrt/ops/op_context.h"
-#include "oneflow/xrt/tensorrt/trt_builder.h"
-#include "oneflow/xrt/tensorrt/trt_executable.h"
-#include "oneflow/xrt/tensorrt/trt_value.h"
+#include "oneflow_xrt/compiler/graph_compiler.h"
+#include "oneflow_xrt/compiler/tensorrt/ops/op_context.h"
+#include "oneflow_xrt/compiler/tensorrt/trt_builder.h"
+#include "oneflow_xrt/compiler/tensorrt/trt_executable.h"
+#include "oneflow_xrt/compiler/tensorrt/trt_value.h"
 
 namespace oneflow {
 namespace xrt {
@@ -52,12 +52,12 @@ class TrtGraphCompiler : public GraphCompiler::Impl {
  private:
   std::shared_ptr<TrtBuilder> builder_;
 
-  std::map<std::string, Argument> arguments_;
-  std::map<Argument, TrtValue> operands_;
+  std::unordered_map<std::string, Argument> arguments_;
+  std::unordered_map<Argument, TrtValue> operands_;
 };
 
 }  // namespace tensorrt
 }  // namespace xrt
 }  // namespace oneflow
 
-#endif  // ONEFLOW_XRT_TENSORRT_TRT_GRAPH_COMPILER_H_
+#endif  // ONEFLOW_XRT_COMPILER_TENSORRT_TRT_GRAPH_COMPILER_H_

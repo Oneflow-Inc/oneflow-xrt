@@ -15,8 +15,8 @@ limitations under the License.
 */
 #include "NvInfer.h"
 #include "absl/strings/str_cat.h"
-#include "oneflow/xrt/tensorrt/ops/op_context.h"
-#include "oneflow/xrt/tensorrt/ops/op_kernel.h"
+#include "oneflow_xrt/compiler/tensorrt/ops/op_context.h"
+#include "oneflow_xrt/compiler/tensorrt/ops/op_kernel.h"
 
 namespace oneflow {
 namespace xrt {

@@ -13,7 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-#include "oneflow/xrt/tensorrt/trt_helpers.h"
+#include "oneflow_xrt/compiler/tensorrt/trt_helpers.h"
 
 namespace oneflow {
 namespace xrt {
