@@ -47,7 +47,6 @@ inline std::shared_ptr<XlaOpKernel> BuildOpKernel(const XrtDevice& device,
                                                   const std::string& op_name) {
   OpKernelRegKey reg_key{op_name, XrtEngine::XLA, device};
   const auto& f = XRT_REGISTER_LOOKUP(OpKernelRegId, reg_key);
-  auto res = f();
   auto* xla_kernel = dynamic_cast<XlaOpKernel*>(f());
   CHECK(xla_kernel) << "failed to build xla op kernel for " << reg_key;
   return std::shared_ptr<XlaOpKernel>(xla_kernel);
