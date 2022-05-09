@@ -57,15 +57,15 @@ class NormalizationOp : public TrtOpKernel {
     nvinfer1::ITensor* input = ctx->Input("x_0");
 
     nvinfer1::ScaleMode mode = nvinfer1::ScaleMode::kCHANNEL;
-    nvinfer1::IScaleLayer* layer =  // NOLINT
+    nvinfer1::IScaleLayer* layer =
         ctx->builder()->addScale(*input, mode, beta, gamma, power);
     layer->setName(ctx->op_name().c_str());
     nvinfer1::ITensor* out = layer->getOutput(0);
 
     if (ctx->HasInput("_add_to_output_0")) {
-      auto* add_layer = ctx->builder()->addElementWise(  // NOLINT
-          *out, *ctx->Input("_add_to_output_0"),
-          nvinfer1::ElementWiseOperation::kSUM);
+      auto* add_layer =
+          ctx->builder()->addElementWise(*out, *ctx->Input("_add_to_output_0"),
+                                         nvinfer1::ElementWiseOperation::kSUM);
       ctx->SetOutput("y_0", add_layer->getOutput(0));
     } else {
       ctx->SetOutput("y_0", out);

@@ -27,10 +27,10 @@ namespace helpers {
 
 bool DimsEqual(const nvinfer1::Dims& dim1, const nvinfer1::Dims& dim2);
 
-nvinfer1::ITensor* Reshape(TrtOpContext* ctx, nvinfer1::ITensor* in,  // NOLINT
+nvinfer1::ITensor* Reshape(TrtOpContext* ctx, nvinfer1::ITensor* in,
                            const Shape& shape);
 
-nvinfer1::ITensor* Reshape(TrtOpContext* ctx, nvinfer1::Weights in,  // NOLINT
+nvinfer1::ITensor* Reshape(TrtOpContext* ctx, nvinfer1::Weights in,
                            const Shape& shape);
 
 nvinfer1::ITensor* Transpose(TrtOpContext* ctx, nvinfer1::ITensor* in,

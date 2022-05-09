@@ -22,7 +22,7 @@ namespace xrt {
 namespace openvino {
 
 bool OpenvinoExecutable::Run(const std::vector<Parameter>& inputs,
-                             const ExecutableRunOptions& run_options,  // NOLINT
+                             const ExecutableRunOptions& run_options,
                              bool block_until_done) {
   InferenceEngine::InferRequest::Ptr infer_request =
       executable_network_->CreateInferRequestPtr();

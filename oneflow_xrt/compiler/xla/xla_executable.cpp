@@ -31,8 +31,7 @@ bool XlaExecutable::Run(const std::vector<Parameter>& inputs,
       << "Size mismatch between input params and input shapes.";
   XlaExecutableRunContext run_context(run_options, device_);
   // Translate inputs to ShapedBuffer for suitable running the executable.
-  const auto& input_buffers =                             // NOLINT
-      run_context.PopulateInputs(inputs, input_shapes_);  // NOLINT
+  const auto& input_buffers = run_context.PopulateInputs(inputs, input_shapes_);
 
   // Populate output params to reuse the buffers in allocator. This helps
   // to reduce memory occupancy and avoid extra copy between temporary

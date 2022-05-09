@@ -59,7 +59,7 @@ void CacheInt8Calibration() {
 void WriteInt8Calibration(const std::string& path) {
   const auto& calib_resources = TRTInt8CalibratorResource::All();
   for (const auto& res : calib_resources) {
-    CHECK(res.second->calibrator_->isDone())  // NOLINT
+    CHECK(res.second->calibrator_->isDone())
         << "Calibration table maybe has not been generated "
         << "since the calibrator has not been done.";
 
@@ -67,7 +67,7 @@ void WriteInt8Calibration(const std::string& path) {
         res.second->calibrator_->getCalibrationTableAsString();
     CHECK(calibration_table_data.size()) << "Calibration table data is empty.";
 
-    std::string calib_store_path =  // NOLINT
+    std::string calib_store_path =
         absl::StrCat(path, "/", res.first /*calibrator name*/);
     std::ofstream ofile(calib_store_path, std::ios::out);
     CHECK(ofile.good()) << "Could not open calibration file: "

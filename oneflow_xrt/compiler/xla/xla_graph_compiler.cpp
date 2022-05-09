@@ -140,8 +140,8 @@ void XlaGraphCompiler::BuildComputation(
 }
 
 std::shared_ptr<Executable> XlaGraphCompiler::BuildExecutable(
-    const std::vector<xla::Shape>& xla_input_shapes,  // NOLINT
-    const xla::Shape& xla_output_shape,               // NOLINT
+    const std::vector<xla::Shape>& xla_input_shapes,
+    const xla::Shape& xla_output_shape,
     const xla::XlaComputation& computation) {
   std::vector<const xla::Shape*> argument_layouts(xla_input_shapes.size());
   for (int i = 0; i < xla_input_shapes.size(); ++i) {

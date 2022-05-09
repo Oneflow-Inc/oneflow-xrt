@@ -54,7 +54,7 @@ nvinfer1::ICudaEngine* TrtExecutable::CreateExecutableEngine(
     if (builder_->platformHasFastInt8()) {
       if (calibrator) {
         flags |= (1U << int(nvinfer1::BuilderFlag::kINT8));
-        if (builder_->platformHasFastFp16()) {  // NOLINT
+        if (builder_->platformHasFastFp16()) {
           flags |= (1U << int(nvinfer1::BuilderFlag::kFP16));
         }
         build_config->setInt8Calibrator(calibrator);
@@ -80,25 +80,25 @@ nvinfer1::ICudaEngine* TrtExecutable::CreateExecutableEngine(
 
 bool TrtExecutable::ExecuteEngine(int batch_size, void** buffers, void* stream,
                                   bool block_until_done) {
-  if (!execution_context_) {  // NOLINT
+  if (!execution_context_) {
     execution_context_.reset(engine_->createExecutionContext());
   }
   cudaStream_t cu_stream = reinterpret_cast<cudaStream_t>(stream);
   bool status =
       // execution_context_->enqueue(batch_size, buffers, cu_stream, nullptr);
       execution_context_->enqueueV2(buffers, cu_stream, nullptr);
-  if (block_until_done) {  // NOLINT
+  if (block_until_done) {
     CHECK_EQ(cudaSuccess, cudaStreamSynchronize(cu_stream));
   }
   return status;
 }
 
-std::string TrtExecutable::LoadCalibrationTable(  // NOLINT
+std::string TrtExecutable::LoadCalibrationTable(
     const std::string& calibration_path) {
   std::string calib_restore_path(
       absl::StrCat(calibration_path, "/", this->name()));
   std::ifstream infile(calib_restore_path, std::ios::in);
-  CHECK(infile.good()) << "Could not open calibration file: "  // NOLINT
+  CHECK(infile.good()) << "Could not open calibration file: "
                        << calib_restore_path;
   std::stringstream buffer;
   buffer << infile.rdbuf();
@@ -106,19 +106,18 @@ std::string TrtExecutable::LoadCalibrationTable(  // NOLINT
 }
 
 bool TrtExecutable::Run(const std::vector<Parameter>& inputs,
-                        const ExecutableRunOptions& run_options,  // NOLINT
+                        const ExecutableRunOptions& run_options,
                         bool block_until_done) {
   // TODO(hjchen2): Refactor
-  if (run_options.common.use_int8() && !calibrator_ &&  // NOLINT
+  if (run_options.common.use_int8() && !calibrator_ &&
       run_options.common.int8_calibration().size()) {
-    std::string calibration_data =  // NOLINT
+    std::string calibration_data =
         LoadCalibrationTable(run_options.common.int8_calibration());
     CHECK(calibration_data.size()) << "Calibration data is empty.";
     calibrator_.reset(new TRTInt8Calibrator(calibration_data));
   }
   if (!execution_context_ && !engine_) {
-    engine_.reset(CreateExecutableEngine(run_options,
-                                         1 /*batch size*/,  // NOLINT
+    engine_.reset(CreateExecutableEngine(run_options, 1 /*batch size*/,
                                          calibrator_.get()));
     CHECK(engine_) << "Cannot create TensorRT executable engine.";
   }
@@ -128,11 +127,11 @@ bool TrtExecutable::Run(const std::vector<Parameter>& inputs,
 
   // TODO(hjchen2): Cache the parameters raw address.
   std::map<std::string, const Parameter*> all_params;
-  for (const Parameter& input : inputs) {      // NOLINT
-    all_params.emplace(input.name(), &input);  // NOLINT
+  for (const Parameter& input : inputs) {
+    all_params.emplace(input.name(), &input);
   }
-  for (const Parameter& output : this->results_) {  // NOLINT
-    all_params.emplace(output.name(), &output);     // NOLINT
+  for (const Parameter& output : this->results_) {
+    all_params.emplace(output.name(), &output);
   }
 
   const int num_bindings = engine_->getNbBindings();
@@ -147,11 +146,11 @@ bool TrtExecutable::Run(const std::vector<Parameter>& inputs,
   // TODO(hjchen2): Check batch size is same for all binding parameters.
   const int batch_size = binding_params[0]->shape().At(0);
   if (batch_size > engine_->getMaxBatchSize()) {
-    LOG(WARNING) << "Rebuild engine since the maximum batch size "  // NOLINT
-                 << engine_->getMaxBatchSize()                      // NOLINT
+    LOG(WARNING) << "Rebuild engine since the maximum batch size "
+                 << engine_->getMaxBatchSize()
                  << " is less than the input batch size " << batch_size;
-    engine_.reset(CreateExecutableEngine(run_options, batch_size,  // NOLINT
-                                         calibrator_.get()));
+    engine_.reset(
+        CreateExecutableEngine(run_options, batch_size, calibrator_.get()));
     CHECK(engine_) << "Failed to create engine with batch size " << batch_size;
     execution_context_.reset(engine_->createExecutionContext());
   }
@@ -163,24 +162,22 @@ bool TrtExecutable::Run(const std::vector<Parameter>& inputs,
       if (!res->calibrator_) {
         res->calibrator_.reset(new TRTInt8Calibrator());
         int ordinal = GetDeviceId(XrtDevice::GPU_CUDA);
-        res->thread_.reset(new std::thread([this, ordinal, batch_size,
-                                            res,  // NOLINT
-                                            run_options]() {
-          SetDeviceId(XrtDevice::GPU_CUDA, ordinal);
-          // TODO(hjchen2): TensorRT maybe crash if calibrator batch size > 1
-          res->calibrator_->setBatchSize(1 /*batch_size*/);
-          res->engine_.reset(                                        // NOLINT
-              this->CreateExecutableEngine(run_options, batch_size,  // NOLINT
-                                           res->calibrator_.get()));
-        }));
+        res->thread_.reset(
+            new std::thread([this, ordinal, batch_size, res, run_options]() {
+              SetDeviceId(XrtDevice::GPU_CUDA, ordinal);
+              // TODO(hjchen2): TensorRT maybe crash if calibrator batch size >
+              // 1
+              res->calibrator_->setBatchSize(1 /*batch_size*/);
+              res->engine_.reset(this->CreateExecutableEngine(
+                  run_options, batch_size, res->calibrator_.get()));
+            }));
       }
     }
 
     if (res->calibrator_->isDone()) {
-      CHECK_EQ(
-          cudaSuccess,
-          cudaStreamSynchronize(                                     // NOLINT
-              reinterpret_cast<cudaStream_t>(run_options.stream)));  // NOLINT
+      CHECK_EQ(cudaSuccess,
+               cudaStreamSynchronize(
+                   reinterpret_cast<cudaStream_t>(run_options.stream)));
       calibrator_ = res->calibrator_;
       // engine_ = std::move(res->engine_);
       execution_context_.reset(res->engine_->createExecutionContext());
@@ -189,8 +186,7 @@ bool TrtExecutable::Run(const std::vector<Parameter>& inputs,
     }
   }
 
-  return ExecuteEngine(batch_size, buffers.data(),
-                       run_options.stream,  // NOLINT
+  return ExecuteEngine(batch_size, buffers.data(), run_options.stream,
                        block_until_done);
 }
 

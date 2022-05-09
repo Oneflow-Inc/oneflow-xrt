@@ -45,7 +45,7 @@ class TRTInt8Calibrator : public nvinfer1::IInt8EntropyCalibrator2 {
 
   int getBatchSize() const TRT_NOEXCEPT override;
 
-  bool getBatch(void* bindings[], const char* names[],  // NOLINT
+  bool getBatch(void* bindings[], const char* names[],
                 int num_bindings) TRT_NOEXCEPT override;
 
   void setBatchSize(const int batch_size);
@@ -73,7 +73,7 @@ class TRTInt8Calibrator : public nvinfer1::IInt8EntropyCalibrator2 {
   void writeCalibrationCache(const void* ptr,
                              std::size_t length) TRT_NOEXCEPT override;
 
-  const std::string& getCalibrationTableAsString() {  // NOLINT
+  const std::string& getCalibrationTableAsString() {
     return calibration_table_;
   }
 
@@ -102,8 +102,7 @@ struct TRTInt8CalibratorResource {
  public:
   static TRTInt8CalibratorResource* LookupOrCreate(const std::string& name);
 
-  static const std::unordered_map<std::string,  // NOLINT
-                                  TRTInt8CalibratorResource*>&
+  static const std::unordered_map<std::string, TRTInt8CalibratorResource*>&
   All();
 
   // Individual mutex

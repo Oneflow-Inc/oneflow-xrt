@@ -27,16 +27,14 @@ namespace xrt {
 
 namespace tensorrt {
 
-void TRTInt8Calibrator::setBatchSize(const int batch_size) {  // NOLINT
+void TRTInt8Calibrator::setBatchSize(const int batch_size) {
   batch_size_ = batch_size;
 }
 
 // set the batch size before constructing the thread to execute engine
-int TRTInt8Calibrator::getBatchSize() const TRT_NOEXCEPT {  // NOLINT
-  return batch_size_;
-}
+int TRTInt8Calibrator::getBatchSize() const TRT_NOEXCEPT { return batch_size_; }
 
-TRTInt8Calibrator::TRTInt8Calibrator()  // NOLINT
+TRTInt8Calibrator::TRTInt8Calibrator()
     : done_(false), calib_running_(true), batch_is_set_(false) {}
 
 TRTInt8Calibrator::TRTInt8Calibrator(const std::string& calib_data)
@@ -60,9 +58,9 @@ void TRTInt8Calibrator::waitAndSetDone() {
 void* TRTInt8Calibrator::createDevBuffer(const size_t buffer_size) {
   LOG(INFO) << "Alloc memory buffer which size is " << buffer_size;
   void* dev_buffer = nullptr;
-  CHECK_EQ(cudaSuccess, cudaMalloc(&dev_buffer, buffer_size))  // NOLINT
+  CHECK_EQ(cudaSuccess, cudaMalloc(&dev_buffer, buffer_size))
       << "Failed to alloc " << buffer_size << " bytes for calibrator.";
-  CHECK(dev_buffer) << "Failed to alloc " << buffer_size  // NOLINT
+  CHECK(dev_buffer) << "Failed to alloc " << buffer_size
                     << " bytes for calibrator.";
   return dev_buffer;
 }
@@ -95,20 +93,19 @@ bool TRTInt8Calibrator::setBatch(const std::vector<const Parameter*>& params) {
     auto dataptr = dev_buffers_.find(it->name());
     if (dataptr == dev_buffers_.end()) {
       void* buffer = createDevBuffer(it->byte_size());
-      dataptr = dev_buffers_
-                    .emplace(it->name(),  // NOLINT
-                             std::make_pair(buffer, it->byte_size()))
-                    .first;
+      dataptr =
+          dev_buffers_
+              .emplace(it->name(), std::make_pair(buffer, it->byte_size()))
+              .first;
       // dataptr = dev_buffers_.emplace(it->name(), std::make_pair(it->data(),
       // it->byte_size())).first;
     }
-    CHECK(dataptr != dev_buffers_.end())  // NOLINT
+    CHECK(dataptr != dev_buffers_.end())
         << "Buffer '" << it->name() << "' does not exist.";
 
     const auto& d = dataptr->second;
-    CHECK_EQ(cudaSuccess,                               // NOLINT
-             cudaMemcpy(d.first, it->data(), d.second,  // NOLINT
-                        cudaMemcpyDeviceToDevice))      // NOLINT
+    CHECK_EQ(cudaSuccess, cudaMemcpy(d.first, it->data(), d.second,
+                                     cudaMemcpyDeviceToDevice))
         << "Fail to cudaMemcpy for " << it->name();
   }
 
@@ -117,7 +114,7 @@ bool TRTInt8Calibrator::setBatch(const std::vector<const Parameter*>& params) {
   return true;
 }
 
-bool TRTInt8Calibrator::getBatch(void** bindings, const char** names,  // NOLINT
+bool TRTInt8Calibrator::getBatch(void** bindings, const char** names,
                                  int num_bindings) TRT_NOEXCEPT {
   std::unique_lock<std::mutex> lk(cond_mtx_);
   // Notify finish of last round of calibration.
@@ -132,9 +129,8 @@ bool TRTInt8Calibrator::getBatch(void** bindings, const char** names,  // NOLINT
   for (int i = 0; i < num_bindings; i++) {
     auto it = dev_buffers_.find(names[i]);
     if (it == dev_buffers_.end()) {
-      LOG(FATAL)
-          << "Calibration engine asked for unknown tensor name '"  // NOLINT
-          << names[i] << "' at position " << i;
+      LOG(FATAL) << "Calibration engine asked for unknown tensor name '"
+                 << names[i] << "' at position " << i;
     }
     bindings[i] = it->second.first;
   }
@@ -162,16 +158,14 @@ const void* TRTInt8Calibrator::readCalibrationCache(size_t& length)
   return calibration_table_.data();
 }
 
-void TRTInt8Calibrator::writeCalibrationCache(const void* ptr,  // NOLINT
+void TRTInt8Calibrator::writeCalibrationCache(const void* ptr,
                                               std::size_t length) TRT_NOEXCEPT {
   calibration_table_ = std::string((const char*)ptr, length);
 }
 
-static std::unordered_map<std::string,  // NOLINT
-                          TRTInt8CalibratorResource*>
-    resources;
+static std::unordered_map<std::string, TRTInt8CalibratorResource*> resources;
 
-/* static */ TRTInt8CalibratorResource*  // NOLINT
+/* static */ TRTInt8CalibratorResource*
 TRTInt8CalibratorResource::LookupOrCreate(const std::string& name) {
   static std::mutex mutex;
   std::lock_guard<std::mutex> lock(mutex);
@@ -182,8 +176,7 @@ TRTInt8CalibratorResource::LookupOrCreate(const std::string& name) {
   return it->second;
 }
 
-/* static */ const std::unordered_map<std::string,  // NOLINT
-                                      TRTInt8CalibratorResource*>&
+/* static */ const std::unordered_map<std::string, TRTInt8CalibratorResource*>&
 TRTInt8CalibratorResource::All() {
   return resources;
 }

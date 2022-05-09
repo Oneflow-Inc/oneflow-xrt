@@ -33,7 +33,7 @@ bool DimsEqual(const nvinfer1::Dims& dim1, const nvinfer1::Dims& dim2) {
   return true;
 }
 
-nvinfer1::ITensor* Reshape(TrtOpContext* ctx, nvinfer1::ITensor* in,  // NOLINT
+nvinfer1::ITensor* Reshape(TrtOpContext* ctx, nvinfer1::ITensor* in,
                            const Shape& shape) {
   nvinfer1::Dims dims = ShapeToXrtDims(shape);
   if (DimsEqual(in->getDimensions(), dims)) {
@@ -44,7 +44,7 @@ nvinfer1::ITensor* Reshape(TrtOpContext* ctx, nvinfer1::ITensor* in,  // NOLINT
   return layer->getOutput(0);
 }
 
-nvinfer1::ITensor* Reshape(TrtOpContext* ctx, nvinfer1::Weights in,  // NOLINT
+nvinfer1::ITensor* Reshape(TrtOpContext* ctx, nvinfer1::Weights in,
                            const Shape& shape) {
   nvinfer1::Dims dims = ShapeToXrtDims(shape);
   auto* layer = ctx->builder()->addConstant(dims, in);
@@ -53,7 +53,7 @@ nvinfer1::ITensor* Reshape(TrtOpContext* ctx, nvinfer1::Weights in,  // NOLINT
 
 nvinfer1::ITensor* Transpose(TrtOpContext* ctx, nvinfer1::ITensor* in,
                              const std::vector<int>& permute) {
-  CHECK_LE(permute.size(), nvinfer1::Dims::MAX_DIMS)  // NOLINT
+  CHECK_LE(permute.size(), nvinfer1::Dims::MAX_DIMS)
       << "Exceed the allowed maximum dimension.";
   nvinfer1::Permutation permutation;
   for (int i = 0; i < permute.size(); ++i) {
@@ -67,7 +67,7 @@ nvinfer1::ITensor* Transpose(TrtOpContext* ctx, nvinfer1::ITensor* in,
 nvinfer1::ITensor* Transpose(TrtOpContext* ctx, nvinfer1::Weights in,
                              const Shape& shape,
                              const std::vector<int>& permute) {
-  CHECK_LE(permute.size(), nvinfer1::Dims::MAX_DIMS)  // NOLINT
+  CHECK_LE(permute.size(), nvinfer1::Dims::MAX_DIMS)
       << "Exceed the allowed maximum dimension.";
   nvinfer1::Permutation permutation;
   for (int i = 0; i < permute.size(); ++i) {

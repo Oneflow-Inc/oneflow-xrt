@@ -36,7 +36,7 @@ class TrtExecutable : public Executable {
       const std::map<std::string, std::shared_ptr<std::vector<uint8_t>>>&
           host_weights)
       : Executable(name, XrtEngine::TENSORRT),
-        engine_(std::move(engine)),  // NOLINT
+        engine_(std::move(engine)),
         host_weights_(host_weights) {}
 
   explicit TrtExecutable(

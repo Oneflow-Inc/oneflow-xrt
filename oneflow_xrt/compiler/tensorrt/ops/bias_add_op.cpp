@@ -42,7 +42,7 @@ class BiasAddOp : public TrtOpKernel {
     nvinfer1::ITensor* reshaped_bias =
         helpers::Reshape(ctx, bias, AsShape(dims));
     // Add bias to input by ElementWise layer.
-    auto* layer = ctx->builder()->addElementWise(  // NOLINT
+    auto* layer = ctx->builder()->addElementWise(
         *in, *reshaped_bias, nvinfer1::ElementWiseOperation::kSUM);
     layer->setName(ctx->op_name().c_str());
 
