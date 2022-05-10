@@ -73,7 +73,7 @@ class NormalizationOp : public TrtOpKernel {
   }
 };
 
-REGISTER_TRT_OP_KERNEL(Normalization, NormalizationOp).Finalize();
+REGISTER_TRT_OP_KERNEL(normalization, NormalizationOp).Finalize();
 
 }  // namespace tensorrt
 }  // namespace xrt

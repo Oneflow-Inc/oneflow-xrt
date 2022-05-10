@@ -39,7 +39,7 @@ class TopKOp : public TrtOpKernel {
   }
 };
 
-REGISTER_TRT_OP_KERNEL(TopK, TopKOp).EnableTrainPhase().Finalize();
+REGISTER_TRT_OP_KERNEL(top_k, TopKOp).EnableTrainPhase().Finalize();
 
 }  // namespace tensorrt
 }  // namespace xrt

@@ -34,7 +34,7 @@ class SoftmaxOp : public TrtOpKernel {
   }
 };
 
-REGISTER_TRT_OP_KERNEL(Softmax, SoftmaxOp).EnableTrainPhase().Finalize();
+REGISTER_TRT_OP_KERNEL(softmax, SoftmaxOp).EnableTrainPhase().Finalize();
 
 }  // namespace tensorrt
 }  // namespace xrt

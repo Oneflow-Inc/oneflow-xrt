@@ -45,7 +45,7 @@ class ConcatOp : public TrtOpKernel {
   }
 };
 
-REGISTER_TRT_OP_KERNEL(Concat, ConcatOp).EnableTrainPhase().Finalize();
+REGISTER_TRT_OP_KERNEL(concat, ConcatOp).EnableTrainPhase().Finalize();
 
 }  // namespace tensorrt
 }  // namespace xrt

@@ -84,9 +84,7 @@ bool TrtExecutable::ExecuteEngine(int batch_size, void** buffers, void* stream,
     execution_context_.reset(engine_->createExecutionContext());
   }
   cudaStream_t cu_stream = reinterpret_cast<cudaStream_t>(stream);
-  bool status =
-      // execution_context_->enqueue(batch_size, buffers, cu_stream, nullptr);
-      execution_context_->enqueueV2(buffers, cu_stream, nullptr);
+  bool status = execution_context_->enqueueV2(buffers, cu_stream, nullptr);
   if (block_until_done) {
     CHECK_EQ(cudaSuccess, cudaStreamSynchronize(cu_stream));
   }
@@ -108,42 +106,42 @@ std::string TrtExecutable::LoadCalibrationTable(
 bool TrtExecutable::Run(const std::vector<Parameter>& inputs,
                         const ExecutableRunOptions& run_options,
                         bool block_until_done) {
-  // TODO(hjchen2): Refactor
   if (run_options.common.use_int8() && !calibrator_ &&
       run_options.common.int8_calibration().size()) {
     std::string calibration_data =
         LoadCalibrationTable(run_options.common.int8_calibration());
-    CHECK(calibration_data.size()) << "Calibration data is empty.";
+    CHECK(calibration_data.size()) << "Calibration data is empty";
     calibrator_.reset(new TRTInt8Calibrator(calibration_data));
   }
   if (!execution_context_ && !engine_) {
     engine_.reset(CreateExecutableEngine(run_options, 1 /*batch size*/,
                                          calibrator_.get()));
-    CHECK(engine_) << "Cannot create TensorRT executable engine.";
+    CHECK(engine_) << "Cannot create TensorRT executable engine";
   }
 
-  // All return params are the results of the executable.
+  // all return params are the results of the executable
   this->results_ = run_options.return_params;
-
-  // TODO(hjchen2): Cache the parameters raw address.
-  std::map<std::string, const Parameter*> all_params;
-  for (const Parameter& input : inputs) {
-    all_params.emplace(input.name(), &input);
-  }
-  for (const Parameter& output : this->results_) {
-    all_params.emplace(output.name(), &output);
-  }
 
   const int num_bindings = engine_->getNbBindings();
   std::vector<const Parameter*> binding_params(num_bindings);
   std::vector<void*> buffers(num_bindings);
-  for (int i = 0; i < num_bindings; ++i) {
-    const char* binding_name = engine_->getBindingName(i);
-    CHECK_GT(all_params.count(binding_name), 0);
-    binding_params[i] = all_params.at(binding_name);
-    buffers[i] = binding_params[i]->data();
+  for (const Parameter& input : inputs) {
+    // returns -1 if the name is not found
+    int index = engine_->getBindingIndex(input.name().data());
+    if (index > -1) {
+      binding_params[index] = &input;
+      buffers[index] = input.data();
+    }
   }
-  // TODO(hjchen2): Check batch size is same for all binding parameters.
+  for (const Parameter& output : this->results_) {
+    // returns -1 if the name is not found
+    int index = engine_->getBindingIndex(output.name().data());
+    if (index > -1) {
+      binding_params[index] = &output;
+      buffers[index] = output.data();
+    }
+  }
+  // TODO(hjchen2): check batch size is same for all binding parameters
   const int batch_size = binding_params[0]->shape().At(0);
   if (batch_size > engine_->getMaxBatchSize()) {
     LOG(WARNING) << "Rebuild engine since the maximum batch size "
@@ -179,7 +177,6 @@ bool TrtExecutable::Run(const std::vector<Parameter>& inputs,
                cudaStreamSynchronize(
                    reinterpret_cast<cudaStream_t>(run_options.stream)));
       calibrator_ = res->calibrator_;
-      // engine_ = std::move(res->engine_);
       execution_context_.reset(res->engine_->createExecutionContext());
     } else {
       res->calibrator_->setBatch(binding_params);

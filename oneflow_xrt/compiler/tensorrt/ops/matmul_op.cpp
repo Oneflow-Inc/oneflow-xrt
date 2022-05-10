@@ -60,7 +60,7 @@ class MatMulOp : public TrtOpKernel {
   }
 };
 
-REGISTER_TRT_OP_KERNEL(MatMul, MatMulOp).EnableTrainPhase().Finalize();
+REGISTER_TRT_OP_KERNEL(matmul, MatMulOp).EnableTrainPhase().Finalize();
 
 }  // namespace tensorrt
 }  // namespace xrt

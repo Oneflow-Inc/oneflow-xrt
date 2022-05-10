@@ -71,10 +71,10 @@ class PoolingOp : public TrtOpKernel {
   }
 };
 
-REGISTER_TRT_OP_KERNEL(MaxPooling2D, PoolingOp<nvinfer1::PoolingType::kMAX>)
+REGISTER_TRT_OP_KERNEL(tf_max_pool_2d, PoolingOp<nvinfer1::PoolingType::kMAX>)
     .EnableTrainPhase()
     .Finalize();
-REGISTER_TRT_OP_KERNEL(AveragePooling2D,
+REGISTER_TRT_OP_KERNEL(tf_avg_pool_2d,
                        PoolingOp<nvinfer1::PoolingType::kAVERAGE>)
     .EnableTrainPhase()
     .Finalize();

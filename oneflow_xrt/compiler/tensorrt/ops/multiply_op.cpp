@@ -36,7 +36,7 @@ class MultiplyOp : public TrtOpKernel {
   }
 };
 
-REGISTER_TRT_OP_KERNEL(Multiply, MultiplyOp).EnableTrainPhase().Finalize();
+REGISTER_TRT_OP_KERNEL(multiply, MultiplyOp).EnableTrainPhase().Finalize();
 
 }  // namespace tensorrt
 }  // namespace xrt

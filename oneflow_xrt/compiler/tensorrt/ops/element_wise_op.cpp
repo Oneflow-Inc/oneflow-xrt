@@ -42,7 +42,8 @@ class ElementWiseOp : public TrtOpKernel {
   }
 };
 
-REGISTER_TRT_OP_KERNEL(Add, ElementWiseOp<nvinfer1::ElementWiseOperation::kSUM>)
+REGISTER_TRT_OP_KERNEL(add_n,
+                       ElementWiseOp<nvinfer1::ElementWiseOperation::kSUM>)
     .EnableTrainPhase()
     .Finalize();
 

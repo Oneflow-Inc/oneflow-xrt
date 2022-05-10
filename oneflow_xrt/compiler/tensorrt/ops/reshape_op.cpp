@@ -33,7 +33,7 @@ class ReshapeOp : public TrtOpKernel {
   }
 };
 
-REGISTER_TRT_OP_KERNEL(Reshape, ReshapeOp).EnableTrainPhase().Finalize();
+REGISTER_TRT_OP_KERNEL(reshape, ReshapeOp).EnableTrainPhase().Finalize();
 
 class ReshapeLikeOp : public TrtOpKernel {
  public:
@@ -47,7 +47,7 @@ class ReshapeLikeOp : public TrtOpKernel {
   }
 };
 
-REGISTER_TRT_OP_KERNEL(ReshapeLike, ReshapeLikeOp)
+REGISTER_TRT_OP_KERNEL(reshape_like, ReshapeLikeOp)
     .EnableTrainPhase()
     .Finalize();
 

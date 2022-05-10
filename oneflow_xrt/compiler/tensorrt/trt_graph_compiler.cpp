@@ -28,6 +28,7 @@ void TrtGraphCompiler::PopulateEntryParams(
     Argument arg = ArgFromParameter(param);
     TrtValue value = TrtValue::Parameter(builder_.get(), param);
     operands_[arg] = std::move(value);
+    arguments_.emplace(param.name(), arg);
   }
 }
 
@@ -69,7 +70,7 @@ void TrtGraphCompiler::SetupKernelContextParam(
     }
   }
   size_t num_outputs = input_output_args.size() - input_ops.size();
-  CHECK_GE(num_outputs, 0) << "Outputs number should >= 0.";
+  CHECK_GE(num_outputs, 0) << "Outputs number should >= 0";
   context_param->op_name = node->name();
   context_param->builder = builder_.get();
   context_param->attrs = node->attrs();
@@ -83,28 +84,36 @@ std::shared_ptr<Executable> TrtGraphCompiler::Compile(
     const XrtGraph* graph, const std::vector<Parameter>& entry_params,
     const std::vector<Parameter>& return_params,
     const std::vector<InputOutputAlias>& aliases) {
-  // Build entry trt values.
+  // build entry trt values
   PopulateEntryParams(entry_params);
+  std::vector<Argument> return_args(return_params.size());
+  for (int i = 0; i < return_params.size(); ++i) {
+    return_args[i] = ArgFromParameter(return_params[i]);
+    arguments_.emplace(return_params[i].name(), return_args[i]);
+  }
 
   algorithm::TopologyVisit(*graph, [&](const XrtNode* node) {
     TrtOpContext::Param param;
     SetupKernelContextParam(node, &param);
     TrtOpContext op_context(param);
-    // Do compile
+    // do compile
     auto op_kernel = BuildOpKernel(node->type());
     op_kernel->Compile(&op_context);
 
-    // Always insert the new output into `operands_`.
+    // always insert the new output into `operands_`
     const auto& outputs = op_context.outputs();
     for (auto it = outputs.begin(); it != outputs.end(); ++it) {
       operands_[it->first] = it->second;
     }
   });
 
-  for (int i = 0; i < return_params.size(); ++i) {
-    Argument arg = ArgFromParameter(return_params[i]);
+  for (const auto& arg : return_args) {
     const TrtValue& value = operands_.at(arg);
     builder_->MarkOutput(value.handle());
+  }
+  for (const auto& arg : arguments_) {
+    TrtValue& value = operands_.at(arg.second);
+    value.AsTensor(builder_.get())->setName(arg.first.data());
   }
   return std::make_shared<TrtExecutable>(
       builder_->name(), builder_->ReleaseBuilder(), builder_->ReleaseNetwork(),

@@ -32,13 +32,13 @@ class ActivationOp : public TrtOpKernel {
   }
 };
 
-REGISTER_TRT_OP_KERNEL(Tanh, ActivationOp<nvinfer1::ActivationType::kTANH>)
+REGISTER_TRT_OP_KERNEL(tanh, ActivationOp<nvinfer1::ActivationType::kTANH>)
     .EnableTrainPhase()
     .Finalize();
-REGISTER_TRT_OP_KERNEL(Relu, ActivationOp<nvinfer1::ActivationType::kRELU>)
+REGISTER_TRT_OP_KERNEL(relu, ActivationOp<nvinfer1::ActivationType::kRELU>)
     .EnableTrainPhase()
     .Finalize();
-REGISTER_TRT_OP_KERNEL(Sigmoid,
+REGISTER_TRT_OP_KERNEL(sigmoid,
                        ActivationOp<nvinfer1::ActivationType::kSIGMOID>)
     .EnableTrainPhase()
     .Finalize();
@@ -56,7 +56,7 @@ class ActivationOp<nvinfer1::ActivationType::kLEAKY_RELU> : public TrtOpKernel {
   }
 };
 
-REGISTER_TRT_OP_KERNEL(LeakyRelu,
+REGISTER_TRT_OP_KERNEL(leaky_relu,
                        ActivationOp<nvinfer1::ActivationType::kLEAKY_RELU>)
     .EnableTrainPhase()
     .Finalize();

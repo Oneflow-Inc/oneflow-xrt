@@ -48,7 +48,7 @@ class TransposeOp : public TrtOpKernel {
   }
 };
 
-REGISTER_TRT_OP_KERNEL(Transpose, TransposeOp).EnableTrainPhase().Finalize();
+REGISTER_TRT_OP_KERNEL(transpose, TransposeOp).EnableTrainPhase().Finalize();
 
 }  // namespace tensorrt
 }  // namespace xrt

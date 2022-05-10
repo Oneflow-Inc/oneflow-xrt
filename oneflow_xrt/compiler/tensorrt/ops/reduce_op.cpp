@@ -46,10 +46,10 @@ class ReduceOp : public TrtOpKernel {
   }
 };
 
-REGISTER_TRT_OP_KERNEL(ReduceSum, ReduceOp<nvinfer1::ReduceOperation::kSUM>)
+REGISTER_TRT_OP_KERNEL(reduce_sum, ReduceOp<nvinfer1::ReduceOperation::kSUM>)
     .EnableTrainPhase()
     .Finalize();
-REGISTER_TRT_OP_KERNEL(ReduceMean, ReduceOp<nvinfer1::ReduceOperation::kAVG>)
+REGISTER_TRT_OP_KERNEL(reduce_mean, ReduceOp<nvinfer1::ReduceOperation::kAVG>)
     .EnableTrainPhase()
     .Finalize();
 
