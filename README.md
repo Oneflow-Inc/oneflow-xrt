@@ -7,8 +7,8 @@ OneFlow-XRT has support multiple third-party computing engines, such as XLA. Dif
 | engine       | device         | inference | training                    |
 | ------------ | -------------- | --------- | --------------------------- |
 | XRT-XLA      | X86 CPU + CUDA | &#10004;  | &#10004;                    |
-| XRT-TensorRT | CUDA           | &#10004;  | &#10004; only no weights op |
-| XRT-OpenVINO | X86 CPU        | &#10004;  | &#10004; only no weights op |
+| XRT-TensorRT | CUDA           | &#10004;  | &#10004; only no weights op |
+| XRT-OpenVINO | X86 CPU        | &#10004;  | &#10004; only no weights op |
 | XRT-TVM      | -              | -         | -                           |
 
 
@@ -21,22 +21,75 @@ To install OneFlow-XRT via pip, use the following command:
 
 ```shell
 # TODO
-# pip3 install oneflow-xrt
+# pip3 install oneflow-xrt-xla
+# pip3 install oneflow-xrt-tensorrt
+# pip3 install oneflow-xrt-openvino
 ```
 
-## Building From Source
+### Building From Source
 
 #### Prerequisites
 
 - install cmake
 - install oneflow
-- install CUDA if building with TensorRT or oneflow is CUDA support
+- install CUDA if oneflow supports CUDA device or building with TensorRT
+- install bazel if building with XLA
+- download and unzip TensorRT if building with TensorRT
+- download and unzip OpenVINO runtime if building with OpenVINO
 
-### building
-
-Create an build directory and inside it, then run the following command:
+#### Get the OneFlow-XRT Source
 
 ```shell
-export ONEFLOW_XRT_ROOT=/home/oneflow-xrt
-cmake -S ${ONEFLOW_XRT_ROOT} && make -j10
+git clone https://github.com/Oneflow-Inc/oneflow-xrt
 ```
+
+#### building
+
+Inside OneFlow-XRT source directory, then run the following command:
+
+- XLA
+
+```shell
+WITH_XLA=ON python3 setup.py install
+```
+
+- TensorRT
+
+```shell
+WITH_TENSORRT=ON TENSORRT_ROOT=/home/TensorRT-8.4.0.6 python3 setup.py install
+```
+
+- OpenVINO
+
+```shell
+WITH_OPENVINO=ON OPENVINO_ROOT=/home/intel/openvino_2022.1.0.643 python3 setup.py install
+```
+
+## Run A Toy Program
+
+```python
+# python3
+
+>>> import oneflow as flow
+>>> import oneflow_xrt as ofrt
+>>> m = flow.nn.Linear(3, 4).to("cuda")
+>>> m = ofrt.XRTModule(m, engine=["TENSORRT"])
+>>> x = flow.randn(4, 3, device="cuda")
+>>> y = m(x)
+>>> print(y)
+tensor([[ 0.2404,  0.7121,  0.4473,  0.4782],
+        [-0.8697,  1.5353,  0.2829,  0.4772],
+        [-0.3865, -1.2719,  1.0911,  0.1179],
+        [ 0.3779,  0.7363,  0.5319,  0.3167]], device='cuda:0', dtype=oneflow.float32, grad_fn=<broadcast_add_backward>)
+```
+
+
+
+## Documentation
+
+TODO
+
+
+## Roadmap
+
+TODO
