@@ -1,13 +1,31 @@
+"""
+Copyright 2020 The OneFlow Authors. All rights reserved.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+"""
 from oneflow_xrt._oneflow_xrt_internal import cluster_subgraph
 from oneflow_xrt._oneflow_xrt_internal import ClusteringOptions, ReBuildJobOptions
 from .graph import *
+from .module import *
 
 import oneflow.core.job.job_pb2 as job_pb
 
+
 def rebuild_job(graph, origin_job, options):
     serialized_origin_job = origin_job.SerializeToString()
-    serialized_job = oneflow_xrt._oneflow_xrt_internal.rebuild_job(graph, serialized_origin_job, options)
+    serialized_job = oneflow_xrt._oneflow_xrt_internal.rebuild_job(
+        graph, serialized_origin_job, options
+    )
     new_job = job_pb.Job()
     new_job.ParseFromString(serialized_job)
     return new_job
-

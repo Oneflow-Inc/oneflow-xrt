@@ -118,6 +118,13 @@ void InitReBuildJobOptionsApis(py::module_& m) {
             opt.int8_calibration = int8_calibration;
           })
       .def_property(
+          "max_batch_size", /*getter*/
+          [](const ReBuildJobOptions& opt) { return opt.max_batch_size; },
+          /*setter*/
+          [](ReBuildJobOptions& opt, const int64_t& max_batch_size) {
+            opt.max_batch_size = max_batch_size;
+          })
+      .def_property(
           "max_workspace_size", /*getter*/
           [](const ReBuildJobOptions& opt) { return opt.max_workspace_size; },
           /*setter*/

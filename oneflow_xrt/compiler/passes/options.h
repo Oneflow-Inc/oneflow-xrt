@@ -52,6 +52,7 @@ struct ReBuildJobOptions {
 
   bool force_compile = false;
 
+  int64_t max_batch_size = 1;
   int64_t max_workspace_size = -1;
 };
 
