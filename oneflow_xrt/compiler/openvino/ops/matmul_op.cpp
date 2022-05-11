@@ -15,8 +15,8 @@ limitations under the License.
 */
 #include <ngraph/op/matmul.hpp>
 
-#include "oneflow/xrt/openvino/ops/op_context.h"
-#include "oneflow/xrt/openvino/ops/op_kernel.h"
+#include "oneflow_xrt/compiler/openvino/ops/op_context.h"
+#include "oneflow_xrt/compiler/openvino/ops/op_kernel.h"
 
 namespace oneflow {
 namespace xrt {
@@ -43,7 +43,7 @@ class MatMulOp : public OpenvinoOpKernel {
   }
 };
 
-REGISTER_OPENVINO_OP_KERNEL(MatMul, MatMulOp).EnableTrainPhase().Finalize();
+REGISTER_OPENVINO_OP_KERNEL(matmul, MatMulOp).EnableTrainPhase().Finalize();
 
 }  // namespace openvino
 }  // namespace xrt

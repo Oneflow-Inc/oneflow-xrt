@@ -16,8 +16,8 @@ limitations under the License.
 #include <ngraph/op/add.hpp>
 
 #include "absl/strings/str_cat.h"
-#include "oneflow/xrt/openvino/ops/op_context.h"
-#include "oneflow/xrt/openvino/ops/op_kernel.h"
+#include "oneflow_xrt/compiler/openvino/ops/op_context.h"
+#include "oneflow_xrt/compiler/openvino/ops/op_kernel.h"
 
 namespace oneflow {
 namespace xrt {
@@ -40,7 +40,7 @@ class AddOp : public OpenvinoOpKernel {
   }
 };
 
-REGISTER_OPENVINO_OP_KERNEL(Add, AddOp).EnableTrainPhase().Finalize();
+REGISTER_OPENVINO_OP_KERNEL(add_n, AddOp).EnableTrainPhase().Finalize();
 
 }  // namespace openvino
 }  // namespace xrt

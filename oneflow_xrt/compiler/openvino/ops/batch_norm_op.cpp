@@ -16,8 +16,8 @@ limitations under the License.
 #include <ngraph/op/batch_norm.hpp>
 
 #include "absl/strings/str_cat.h"
-#include "oneflow/xrt/openvino/ops/op_context.h"
-#include "oneflow/xrt/openvino/ops/op_kernel.h"
+#include "oneflow_xrt/compiler/openvino/ops/op_context.h"
+#include "oneflow_xrt/compiler/openvino/ops/op_kernel.h"
 
 namespace oneflow {
 namespace xrt {
@@ -41,7 +41,7 @@ class NormalizationOp : public OpenvinoOpKernel {
   }
 };
 
-REGISTER_OPENVINO_OP_KERNEL(Normalization, NormalizationOp).Finalize();
+REGISTER_OPENVINO_OP_KERNEL(normalization, NormalizationOp).Finalize();
 
 }  // namespace openvino
 }  // namespace xrt

@@ -16,8 +16,8 @@ limitations under the License.
 #include <ngraph/op/constant.hpp>
 #include <ngraph/op/prelu.hpp>
 
-#include "oneflow/xrt/openvino/ops/op_context.h"
-#include "oneflow/xrt/openvino/ops/op_kernel.h"
+#include "oneflow_xrt/compiler/openvino/ops/op_context.h"
+#include "oneflow_xrt/compiler/openvino/ops/op_kernel.h"
 
 namespace oneflow {
 namespace xrt {
@@ -38,7 +38,7 @@ class LeakyReluOp : public OpenvinoOpKernel {
   }
 };
 
-REGISTER_OPENVINO_OP_KERNEL(LeakyRelu, LeakyReluOp)
+REGISTER_OPENVINO_OP_KERNEL(leaky_relu, LeakyReluOp)
     .EnableTrainPhase()
     .Finalize();
 

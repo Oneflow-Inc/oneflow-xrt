@@ -16,8 +16,8 @@ limitations under the License.
 #include <ngraph/op/constant.hpp>
 #include <ngraph/op/reshape.hpp>
 
-#include "oneflow/xrt/openvino/ops/op_context.h"
-#include "oneflow/xrt/openvino/ops/op_kernel.h"
+#include "oneflow_xrt/compiler/openvino/ops/op_context.h"
+#include "oneflow_xrt/compiler/openvino/ops/op_kernel.h"
 
 namespace oneflow {
 namespace xrt {
@@ -45,7 +45,7 @@ class ReshapeOp : public OpenvinoOpKernel {
   }
 };
 
-REGISTER_OPENVINO_OP_KERNEL(Reshape, ReshapeOp).EnableTrainPhase().Finalize();
+REGISTER_OPENVINO_OP_KERNEL(reshape, ReshapeOp).EnableTrainPhase().Finalize();
 
 }  // namespace openvino
 }  // namespace xrt

@@ -13,19 +13,29 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-#include "oneflow/xrt/openvino/ops/op_context.h"
-#include "oneflow/xrt/openvino/ops/op_kernel.h"
+#include "oneflow_xrt/compiler/openvino/ops/op_context.h"
+#include "oneflow_xrt/compiler/openvino/ops/op_kernel.h"
 
 namespace oneflow {
 namespace xrt {
 namespace openvino {
 
-class ArgumentOp : public OpenvinoOpKernel {
+class XrtEntryOp : public OpenvinoOpKernel {
  public:
-  void Compile(OpenvinoOpContext* ctx) override {}
+  void Compile(OpenvinoOpContext* ctx) override {
+    ctx->SetOutput("value", ctx->Variable());
+  }
 };
 
-REGISTER_OPENVINO_OP_KERNEL(Argument, ArgumentOp).Finalize();
+class XrtReturnOp : public OpenvinoOpKernel {
+ public:
+  void Compile(OpenvinoOpContext* ctx) override {
+    ctx->SetVariable(ctx->Input("value"));
+  }
+};
+
+REGISTER_OPENVINO_OP_KERNEL(XrtEntry, XrtEntryOp).Finalize();
+REGISTER_OPENVINO_OP_KERNEL(XrtReturn, XrtReturnOp).Finalize();
 
 }  // namespace openvino
 }  // namespace xrt

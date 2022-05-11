@@ -13,14 +13,14 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-#ifndef ONEFLOW_XRT_OPENVINO_OPENVINO_EXECUTABLE_H_
-#define ONEFLOW_XRT_OPENVINO_OPENVINO_EXECUTABLE_H_
+#ifndef ONEFLOW_XRT_COMPILER_OPENVINO_OPENVINO_EXECUTABLE_H_
+#define ONEFLOW_XRT_COMPILER_OPENVINO_OPENVINO_EXECUTABLE_H_
 
 #include <inference_engine.hpp>
 
-#include "oneflow/xrt/executable.h"
-#include "oneflow/xrt/openvino/inference_engine_data_desc.h"
-#include "oneflow/xrt/parameter.h"
+#include "oneflow_xrt/compiler/executable.h"
+#include "oneflow_xrt/compiler/openvino/inference_engine_data_desc.h"
+#include "oneflow_xrt/compiler/parameter.h"
 
 namespace oneflow {
 namespace xrt {
@@ -30,7 +30,7 @@ class OpenvinoExecutable : public Executable {
  public:
   OpenvinoExecutable(
       std::unique_ptr<InferenceEngine::ExecutableNetwork> network,
-      const std::map<std::string, int>& in_out_to_param_idx)
+      const std::unordered_map<std::string, int>& in_out_to_param_idx)
       : Executable("", XrtEngine::OPENVINO),
         executable_network_(std::move(network)),
         in_out_to_param_idx_(in_out_to_param_idx) {}
@@ -45,11 +45,11 @@ class OpenvinoExecutable : public Executable {
 
  private:
   std::unique_ptr<InferenceEngine::ExecutableNetwork> executable_network_;
-  std::map<std::string, int> in_out_to_param_idx_;
+  std::unordered_map<std::string, int> in_out_to_param_idx_;
 };
 
 }  // namespace openvino
 }  // namespace xrt
 }  // namespace oneflow
 
-#endif  // ONEFLOW_XRT_OPENVINO_OPENVINO_EXECUTABLE_H_
+#endif  // ONEFLOW_XRT_COMPILER_OPENVINO_OPENVINO_EXECUTABLE_H_

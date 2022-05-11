@@ -16,8 +16,8 @@ limitations under the License.
 #include <ngraph/op/concat.hpp>
 
 #include "absl/strings/str_cat.h"
-#include "oneflow/xrt/openvino/ops/op_context.h"
-#include "oneflow/xrt/openvino/ops/op_kernel.h"
+#include "oneflow_xrt/compiler/openvino/ops/op_context.h"
+#include "oneflow_xrt/compiler/openvino/ops/op_kernel.h"
 
 namespace oneflow {
 namespace xrt {
@@ -47,7 +47,7 @@ class ConcatOp : public OpenvinoOpKernel {
   }
 };
 
-REGISTER_OPENVINO_OP_KERNEL(Concat, ConcatOp).EnableTrainPhase().Finalize();
+REGISTER_OPENVINO_OP_KERNEL(concat, ConcatOp).EnableTrainPhase().Finalize();
 
 }  // namespace openvino
 }  // namespace xrt

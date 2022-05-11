@@ -13,11 +13,11 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-#include "oneflow/xrt/openvino/ops/op_context.h"
+#include "oneflow_xrt/compiler/openvino/ops/op_context.h"
 
 #include <ngraph/op/constant.hpp>
 
-#include "oneflow/xrt/openvino/ngraph_shape.h"
+#include "oneflow_xrt/compiler/openvino/ngraph_shape.h"
 
 namespace oneflow {
 namespace xrt {
@@ -71,10 +71,19 @@ std::shared_ptr<ngraph::Node> OpenvinoOpContext::Weight(const Argument& arg) {
   return input_node;
 }
 
+std::shared_ptr<ngraph::Node> OpenvinoOpContext::Variable() {
+  return Input("variable");
+}
+
 void OpenvinoOpContext::SetOutput(
     const std::string& name, const std::shared_ptr<ngraph::Node>& ngraph_node) {
   Argument arg = ArgumentFromKey(name);
   outputs_[arg] = ngraph_node;
+}
+
+void OpenvinoOpContext::SetVariable(
+    const std::shared_ptr<ngraph::Node>& ngraph_node) {
+  SetOutput("variable", ngraph_node);
 }
 
 DataType OpenvinoOpContext::InputType(const std::string& name) const {

@@ -13,10 +13,11 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-#ifndef ONEFLOW_XRT_OPENVINO_NGRAPH_SHAPE_H_
-#define ONEFLOW_XRT_OPENVINO_NGRAPH_SHAPE_H_
+#ifndef ONEFLOW_XRT_COMPILER_OPENVINO_NGRAPH_SHAPE_H_
+#define ONEFLOW_XRT_COMPILER_OPENVINO_NGRAPH_SHAPE_H_
 
 #include "glog/logging.h"
+#include "ngraph/ngraph.hpp"
 #include "oneflow/core/common/data_type.pb.h"
 #include "oneflow/core/common/shape.h"
 
@@ -40,7 +41,7 @@ inline ngraph::element::Type DataTypeToNgraphDataType(
     case oneflow::kInt64:
       return ngraph::element::i64;
     default: {
-      LOG(FATAL) << "Unsupported data type " << data_type << " for Ngraph.";
+      LOG(FATAL) << "Unsupported data type " << data_type << " for Ngraph";
       return ngraph::element::f32;
     }
   }
@@ -48,7 +49,7 @@ inline ngraph::element::Type DataTypeToNgraphDataType(
 
 inline ngraph::Shape ShapeToNgraphShape(const Shape& shape) {
   CHECK_LE(shape.NumAxes(), 8)
-      << "The maximum dimensions is 8 supported by Ngraph.";
+      << "The maximum dimensions is 8 supported by Ngraph";
   std::vector<size_t> dim_vec;
   for (int i = 0; i < shape.NumAxes(); ++i) {
     dim_vec.push_back(shape.At(i));
@@ -77,4 +78,4 @@ class NgraphShape {
 }  // namespace xrt
 }  // namespace oneflow
 
-#endif  // ONEFLOW_XRT_OPENVINO_NGRAPH_SHAPE_H_
+#endif  // ONEFLOW_XRT_COMPILER_OPENVINO_NGRAPH_SHAPE_H_

@@ -15,8 +15,8 @@ limitations under the License.
 */
 #include <ngraph/op/relu.hpp>
 
-#include "oneflow/xrt/openvino/ops/op_context.h"
-#include "oneflow/xrt/openvino/ops/op_kernel.h"
+#include "oneflow_xrt/compiler/openvino/ops/op_context.h"
+#include "oneflow_xrt/compiler/openvino/ops/op_kernel.h"
 
 namespace oneflow {
 namespace xrt {
@@ -32,7 +32,7 @@ class ReluOp : public OpenvinoOpKernel {
   }
 };
 
-REGISTER_OPENVINO_OP_KERNEL(Relu, ReluOp).EnableTrainPhase().Finalize();
+REGISTER_OPENVINO_OP_KERNEL(relu, ReluOp).EnableTrainPhase().Finalize();
 
 }  // namespace openvino
 }  // namespace xrt

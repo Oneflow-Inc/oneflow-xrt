@@ -13,10 +13,9 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-#include "oneflow/xrt/openvino/openvino_graph_compiler.h"
+#include "oneflow_xrt/compiler/openvino/openvino_graph_compiler.h"
 
-#include "oneflow/xrt/node_util.h"
-#include "oneflow/xrt/openvino/ops/op_kernel.h"
+#include "oneflow_xrt/compiler/openvino/ops/op_kernel.h"
 
 namespace oneflow {
 namespace xrt {
@@ -24,12 +23,13 @@ namespace openvino {
 
 void OpenvinoGraphCompiler::PopulateEntryParams(
     const std::vector<Parameter>& entry_params,
-    std::map<Argument, Parameter>& entry_params_map,
-    std::map<Argument, int>& entry_params_index_map) {
+    std::unordered_map<Argument, Parameter>& entry_params_map,
+    std::unordered_map<Argument, int>& entry_params_index_map) {
   for (int i = 0; i < entry_params.size(); ++i) {
     Argument arg = ArgFromParameter(entry_params[i]);
     entry_params_map[arg] = entry_params[i];
     entry_params_index_map[arg] = i;
+    arguments_.emplace(entry_params[i].name(), arg);
   }
 }
 
@@ -39,21 +39,32 @@ Argument OpenvinoGraphCompiler::ArgFromParameter(const Parameter& param) {
 
 void OpenvinoGraphCompiler::SetupKernelContextParam(
     const XrtNode* node, OpenvinoOpContext::Param* context_param) {
-  std::map<Argument, std::shared_ptr<ngraph::Node>> input_ops;
-  std::map<std::string /* produce/consume key */, Argument> input_output_args;
+  std::unordered_map<Argument, std::shared_ptr<ngraph::Node>> input_ops;
+  std::unordered_map<std::string /* produce/consume key */, Argument>
+      input_output_args;
   int input_size = 0;
+  if (node->IsEntryNode()) {
+    const Argument& arg = arguments_.at(node->name());
+    input_output_args.emplace("variable", arg);
+    input_size++;
+    if (operands_.count(arg) > 0) {
+      input_ops.emplace(arg, operands_.at(arg));
+    }
+  } else if (node->IsReturnNode()) {
+    const Argument& arg = arguments_.at(node->name());
+    input_output_args.emplace("variable", arg);
+  }
   for (const XrtEdge* edge : node->in_edges()) {
     if (!edge->IsControlEdge()) {
       const Argument& arg = edge->argument();
       const std::string& k = arg.meta_data().consume_key;
       input_size++;
       input_output_args.emplace(k, arg);
-      // When arg is graph input, operands_ not hold it.
+      // when arg is graph input, operands_ maybe not hold it
       if (operands_.count(arg) <= 0) {
         continue;
       }
-      const auto& ngraph_node = operands_.at(arg);
-      input_ops.emplace(arg, ngraph_node);
+      input_ops.emplace(arg, operands_.at(arg));
     }
   }
   for (const XrtEdge* edge : node->out_edges()) {
@@ -64,7 +75,7 @@ void OpenvinoGraphCompiler::SetupKernelContextParam(
     }
   }
   context_param->op_name = node->name();
-  context_param->message = OpMessage(node);
+  context_param->attrs = node->attrs();
   context_param->arguments = std::move(input_output_args);
   context_param->inputs = std::move(input_ops);
   context_param->input_size = input_size;
@@ -74,18 +85,24 @@ std::shared_ptr<Executable> OpenvinoGraphCompiler::Compile(
     const XrtGraph* graph, const std::vector<Parameter>& entry_params,
     const std::vector<Parameter>& return_params,
     const std::vector<InputOutputAlias>& aliases) {
-  // openvino input output name to entry and return param index.
-  std::map<std::string, int> in_out_to_param_idx;
+  // openvino input output name to entry and return param index
+  std::unordered_map<std::string, int> in_out_to_param_idx;
   ngraph::ParameterVector parameter_nodes;
-  std::map<Argument, Parameter> entry_params_map;
-  std::map<Argument, int> entry_params_index_map;
+  std::unordered_map<Argument, Parameter> entry_params_map;
+  std::unordered_map<Argument, int> entry_params_index_map;
   PopulateEntryParams(entry_params, entry_params_map, entry_params_index_map);
+
+  std::vector<Argument> return_args(return_params.size());
+  for (int i = 0; i < return_params.size(); ++i) {
+    return_args[i] = ArgFromParameter(return_params[i]);
+    arguments_.emplace(return_params[i].name(), return_args[i]);
+  }
 
   algorithm::TopologyVisit(*graph, [&](const XrtNode* node) {
     OpenvinoOpContext::Param param;
     SetupKernelContextParam(node, &param);
     OpenvinoOpContext op_context(param, entry_params_map);
-    // Do compile
+    // do compile
     auto op_kernel = BuildOpKernel(node->type());
     op_kernel->Compile(&op_context);
 
@@ -101,7 +118,7 @@ std::shared_ptr<Executable> OpenvinoGraphCompiler::Compile(
     for (auto it = graph_weight.begin(); it != graph_weight.end(); ++it) {
       operands_[it->first] = it->second;
     }
-    // Always insert the new output into `operands_`.
+    // always insert the new output into `operands_`
     const auto& outputs = op_context.outputs();
     for (auto it = outputs.begin(); it != outputs.end(); ++it) {
       operands_[it->first] = it->second;
@@ -109,9 +126,8 @@ std::shared_ptr<Executable> OpenvinoGraphCompiler::Compile(
   });
 
   ngraph::ResultVector result_nodes;
-  for (int i = 0; i < return_params.size(); ++i) {
-    Argument arg = ArgFromParameter(return_params[i]);
-    std::shared_ptr<ngraph::Node> ngraph_node = operands_.at(arg);
+  for (int i = 0; i < return_args.size(); ++i) {
+    std::shared_ptr<ngraph::Node> ngraph_node = operands_.at(return_args[i]);
     in_out_to_param_idx[ngraph_node->get_friendly_name()] = i;
     auto result = std::make_shared<ngraph::op::Result>(ngraph_node);
     result_nodes.push_back(result);

@@ -13,9 +13,9 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-#include "oneflow/xrt/openvino/openvino_executable.h"
+#include "oneflow_xrt/compiler/openvino/openvino_executable.h"
 
-#include "oneflow/xrt/platform.h"
+#include "oneflow_xrt/common/device.h"
 
 namespace oneflow {
 namespace xrt {
@@ -48,7 +48,7 @@ bool OpenvinoExecutable::Run(const std::vector<Parameter>& inputs,
     infer_request->SetBlob(input_info_iter->first, in_blob);
   }
 
-  // All return params are the results of the executable.
+  // all return params are the results of the executable
   this->results_ = run_options.return_params;
 
   for (auto output_info_iter = output_info.begin();
