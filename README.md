@@ -62,7 +62,7 @@ WITH_TENSORRT=ON TENSORRT_ROOT=/home/TensorRT-8.4.0.6 python3 setup.py install
 - OpenVINO
 
 ```shell
-WITH_OPENVINO=ON OPENVINO_ROOT=/home/intel/openvino_2022.1.0.643 python3 setup.py install
+WITH_OPENVINO=ON OPENVINO_ROOT=/home/intel/openvino_2022.1.0.643/runtime python3 setup.py install
 ```
 
 ## Run A Toy Program
