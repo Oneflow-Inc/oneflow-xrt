@@ -1,3 +1,4 @@
 *.so
 /dist
 /build
+/oneflow_xrt_*

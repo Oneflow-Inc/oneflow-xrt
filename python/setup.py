@@ -60,11 +60,6 @@ else:
     cmake_build_type = "Release"
 
 
-class CMakeExtension(Extension):
-    def __init__(self, name):
-        Extension.__init__(self, name, sources=[])
-
-
 class BuildExt(build_ext):
     def build_extension(self, ext):
         os.makedirs(self.build_temp, exist_ok=True)
@@ -88,7 +83,7 @@ class BuildExt(build_ext):
             pass
 
         source_dir = os.path.join(cwd, "..")
-        self.spawn(["cmake", f"{source_dir}"] + cmake_args)
+        self.spawn(["cmake", source_dir] + cmake_args)
 
         build_args = ["--config", cmake_build_type, "--", "-j"]
         if not self.dry_run:
@@ -104,7 +99,7 @@ def setup_stub(package_name, description):
             "an OneFlow extension that provides an easy to use, "
             "flexible and unified way to integrate third-party computing engines"
         ),
-        ext_modules=[CMakeExtension(package_name)],
+        ext_modules=[Extension(package_name, sources=[])],
         cmdclass={"build_ext": BuildExt},
         zip_safe=False,
         packages=find_packages(),

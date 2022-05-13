@@ -50,6 +50,15 @@ function(ONEFLOW_XRT_ADD_STUB target_name)
   if(WIN32)
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /WHOLEARCHIVE:${target_name}")
   endif()
+
+  add_custom_target(
+      ${target_name}_create_python_module
+      COMMAND ${Python_EXECUTABLE}
+              ${PROJECT_SOURCE_DIR}/cmake/tools/create_python_module.py
+              ${ONEFLOW_XRT_PYTHON_DIR} ${target_name}
+      DEPENDS ${Python_EXECUTABLE}
+  )
+  add_dependencies(${target_name}_internal ${target_name}_create_python_module)
 endfunction()
 
 if(WITH_XLA)
