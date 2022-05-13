@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 3.18.0)
 option(WITH_XLA "Option to build with XLA" OFF)
 option(WITH_TENSORRT "Option to build with TensorRT" OFF)
 option(WITH_OPENVINO "Option to build with OpenVINO" OFF)
+option(BUILD_PYTHON "Option to build python module" ON)
 
 project(oneflow-xrt CXX)
 

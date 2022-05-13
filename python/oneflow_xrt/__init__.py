@@ -13,12 +13,11 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 """
+import oneflow_xrt._oneflow_xrt_internal
 from oneflow_xrt._oneflow_xrt_internal import cluster_subgraph
 from oneflow_xrt._oneflow_xrt_internal import ClusteringOptions, ReBuildJobOptions
-from .graph import *
-from .module import *
-
-import oneflow.core.job.job_pb2 as job_pb
+from .graph import Graph
+from .module import XRTModule
 
 
 def rebuild_job(graph, origin_job, options):
@@ -26,6 +25,9 @@ def rebuild_job(graph, origin_job, options):
     serialized_job = oneflow_xrt._oneflow_xrt_internal.rebuild_job(
         graph, serialized_origin_job, options
     )
+
+    import oneflow.core.job.job_pb2 as job_pb
+
     new_job = job_pb.Job()
     new_job.ParseFromString(serialized_job)
     return new_job

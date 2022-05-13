@@ -3,3 +3,5 @@
 *.pyc
 *.ipynb
 core.*
+*.egg-info
+/dist

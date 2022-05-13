@@ -19,24 +19,49 @@ file(GLOB_RECURSE XRT_SRCS
   xrt_launch_kernel.cpp
   xrt_launch_op.cpp
 )
+add_library(oneflow_xrt ${XRT_SRCS})
+add_dependencies(oneflow_xrt ${XRT_THIRD_PARTY_DEPENDICES})
+target_link_libraries(oneflow_xrt oneflow_xrt_proto ${XRT_THIRD_PARTY_LIBRARIES})
 
 if(WITH_XLA)
   file(GLOB_RECURSE XRT_XLA_SRCS compiler/xla/*.cpp)
-  list(APPEND XRT_SRCS ${XRT_XLA_SRCS})
+  add_library(oneflow_xrt_xla ${XRT_XLA_SRCS})
+  add_dependencies(
+      oneflow_xrt_xla
+      ${XRT_THIRD_PARTY_DEPENDICES}
+      ${XRT_XLA_THIRD_PARTY_DEPENDICES})
+  target_link_libraries(
+      oneflow_xrt_xla
+      oneflow_xrt
+      ${XRT_XLA_THIRD_PARTY_LIBRARIES})
 endif()
 
 if(WITH_TENSORRT)
   file(GLOB_RECURSE XRT_TENSORRT_SRCS compiler/tensorrt/*.cpp)
-  list(APPEND XRT_SRCS ${XRT_TENSORRT_SRCS})
+  add_library(oneflow_xrt_tensorrt ${XRT_TENSORRT_SRCS})
+  add_dependencies(
+      oneflow_xrt_tensorrt
+      ${XRT_THIRD_PARTY_DEPENDICES}
+      ${XRT_TENSORRT_THIRD_PARTY_DEPENDICES})
+  target_link_libraries(
+      oneflow_xrt_tensorrt
+      oneflow_xrt
+      ${XRT_TENSORRT_THIRD_PARTY_LIBRARIES})
 endif()
 
 if(WITH_OPENVINO)
   file(GLOB_RECURSE XRT_OPENVINO_SRCS compiler/openvino/*.cpp)
-  list(APPEND XRT_SRCS ${XRT_OPENVINO_SRCS})
+  add_library(oneflow_xrt_openvino ${XRT_OPENVINO_SRCS})
+  add_dependencies(
+      oneflow_xrt_openvino
+      ${XRT_THIRD_PARTY_DEPENDICES}
+      ${XRT_OPENVINO_THIRD_PARTY_DEPENDICES})
+  target_link_libraries(
+      oneflow_xrt_openvino
+      oneflow_xrt
+      ${XRT_OPENVINO_THIRD_PARTY_LIBRARIES})
 endif()
 
-add_library(oneflow_xrt STATIC ${XRT_SRCS})
-add_dependencies(oneflow_xrt ${XRT_THIRD_PARTY_DEPENDICES})
-target_link_libraries(oneflow_xrt oneflow_xrt_proto ${XRT_THIRD_PARTY_LIBRARIES})
-
-add_subdirectory(python)
+if(BUILD_PYTHON)
+  add_subdirectory(python)
+endif()

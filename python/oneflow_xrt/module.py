@@ -57,7 +57,7 @@ class XRTModule(flow.nn.Module):
         >>> import oneflow_xrt as ofrt
 
         >>> m = flow.nn.Linear(3, 4).to("cuda")
-        >>> m = ofrt.XRTModule(m, engine=["TENSORRT"])
+        >>> m = ofrt.XRTModule(m, engine=["tensorrt"])
         >>> x = flow.randn(4, 3, device="cuda")
         >>> y = m(x)
 

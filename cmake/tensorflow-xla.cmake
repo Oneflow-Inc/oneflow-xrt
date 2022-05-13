@@ -135,5 +135,5 @@ add_custom_command(
           ${TENSORFLOW_INSTALL_DIR}/include/tensorflow_inc/tensorflow/core/platform/google)
 
 include_directories(${TENSORFLOW_XLA_INCLUDE_INSTALL_DIR})
-list(APPEND XRT_THIRD_PARTY_LIBRARIES ${TENSORFLOW_XLA_LIBRARIES})
-list(APPEND XRT_THIRD_PARTY_DEPENDICES tensorflow_copy_libs_to_destination tensorflow_symlink_headers)
+list(APPEND XRT_XLA_THIRD_PARTY_LIBRARIES ${TENSORFLOW_XLA_LIBRARIES})
+list(APPEND XRT_XLA_THIRD_PARTY_DEPENDICES tensorflow_copy_libs_to_destination tensorflow_symlink_headers)
