@@ -48,24 +48,33 @@ git clone https://github.com/Oneflow-Inc/oneflow-xrt
 
 #### building
 
-Inside OneFlow-XRT source directory, then run the following command:
+Inside OneFlow-XRT source directory, then run the following command to install `oneflow_xrt`:
+
+```shell
+python3 python/setup.py install
+```
+
+The following components are optional, run the command to install it according to your needs,
 
 - XLA
 
+build and install `oneflow_xrt_xla`
 ```shell
-WITH_XLA=ON python3 setup.py install
+BUILD_XLA=ON python3 python/setup.py install
 ```
 
 - TensorRT
 
+build and install `oneflow_xrt_tensorrt`
 ```shell
-WITH_TENSORRT=ON TENSORRT_ROOT=/home/TensorRT-8.4.0.6 python3 setup.py install
+BUILD_TENSORRT=ON TENSORRT_ROOT=/home/TensorRT-8.4.0.6 python3 setup.py install
 ```
 
 - OpenVINO
 
+build and install `oneflow_xrt_openvino`
 ```shell
-WITH_OPENVINO=ON OPENVINO_ROOT=/home/intel/openvino_2022.1.0.643/runtime python3 setup.py install
+BUILD_OPENVINO=ON OPENVINO_ROOT=/home/intel/openvino_2022.1.0.643/runtime python3 setup.py install
 ```
 
 ## Run A Toy Program
