@@ -21,9 +21,12 @@ To install OneFlow-XRT via pip, use the following command:
 
 ```shell
 # TODO
-# pip3 install oneflow-xrt-xla
-# pip3 install oneflow-xrt-tensorrt
-# pip3 install oneflow-xrt-openvino
+# pip3 install oneflow_xrt
+
+# run the following commands according to your needs
+# pip3 install oneflow_xrt_xla
+# pip3 install oneflow_xrt_tensorrt
+# pip3 install oneflow_xrt_openvino
 ```
 
 ### Building From Source
@@ -73,14 +76,14 @@ WITH_OPENVINO=ON OPENVINO_ROOT=/home/intel/openvino_2022.1.0.643/runtime python3
 >>> import oneflow as flow
 >>> import oneflow_xrt as ofrt
 >>> m = flow.nn.Linear(3, 4).to("cuda")
->>> m = ofrt.XRTModule(m, engine=["TENSORRT"])
+>>> m = ofrt.XRTModule(m, engine=["tensorrt"])
 >>> x = flow.randn(4, 3, device="cuda")
 >>> y = m(x)
 >>> print(y)
 tensor([[ 0.2404,  0.7121,  0.4473,  0.4782],
         [-0.8697,  1.5353,  0.2829,  0.4772],
         [-0.3865, -1.2719,  1.0911,  0.1179],
-        [ 0.3779,  0.7363,  0.5319,  0.3167]], device='cuda:0', dtype=oneflow.float32, grad_fn=<broadcast_add_backward>)
+        [ 0.3779,  0.7363,  0.5319,  0.3167]], device='cuda:0', dtype=oneflow.float32)
 ```
 
 
