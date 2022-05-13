@@ -56,23 +56,20 @@ python3 python/setup.py install
 
 The following components are optional, run the command to install it according to your needs,
 
-- XLA
+- `oneflow_xrt_xla`
 
-build and install `oneflow_xrt_xla`
 ```shell
 BUILD_XLA=ON python3 python/setup.py install
 ```
 
-- TensorRT
+- `oneflow_xrt_tensorrt`
 
-build and install `oneflow_xrt_tensorrt`
 ```shell
 BUILD_TENSORRT=ON TENSORRT_ROOT=/home/TensorRT-8.4.0.6 python3 setup.py install
 ```
 
-- OpenVINO
+- `oneflow_xrt_openvino`
 
-build and install `oneflow_xrt_openvino`
 ```shell
 BUILD_OPENVINO=ON OPENVINO_ROOT=/home/intel/openvino_2022.1.0.643/runtime python3 setup.py install
 ```
