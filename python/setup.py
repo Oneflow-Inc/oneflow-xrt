@@ -25,23 +25,11 @@ from setuptools import Extension
 from setuptools.command.build_ext import build_ext
 from setuptools.command.install import install
 
-base_package_name = "oneflow_xrt"
-
 cwd = os.path.dirname(os.path.abspath(__file__))
 
 
 def get_env(name, default=""):
     return os.getenv(name, default)
-
-
-def get_so_path(package_name):
-    import imp
-
-    fp, pathname, description = imp.find_module(
-        f"_{package_name}_internal", [package_name]
-    )
-    assert os.path.isfile(pathname)
-    return os.path.relpath(pathname, package_name)
 
 
 with_xla = False
@@ -88,11 +76,13 @@ class BuildExt(build_ext):
             cmake_args += ["-DWITH_XLA=ON"]
         elif ext.name == "oneflow_xrt_tensorrt":
             cmake_args += [
-                f"-DWITH_TENSORRT=ON -DTENSORRT_ROOT={get_env('TENSORRT_ROOT')}"
+                "-DWITH_TENSORRT=ON",
+                f"-DTENSORRT_ROOT={get_env('TENSORRT_ROOT')}",
             ]
         elif ext.name == "oneflow_xrt_openvino":
             cmake_args += [
-                f"-DWITH_OPENVINO=ON -DOPENVINO_ROOT={get_env('OPENVINO_ROOT')}"
+                "-DWITH_OPENVINO=ON",
+                f"-DOPENVINO_ROOT={get_env('OPENVINO_ROOT')}",
             ]
         else:
             pass
@@ -118,7 +108,14 @@ def setup_stub(package_name, description):
         cmdclass={"build_ext": BuildExt},
         zip_safe=False,
         packages=find_packages(),
-        package_data={package_name: [get_so_path(package_name)]},
+        package_data={
+            package_name: [
+                f"{package_name}/*.so*",
+                f"{package_name}/*.dylib*",
+                f"{package_name}/*.dll",
+                f"{package_name}/*.lib",
+            ]
+        },
     )
 
 

@@ -15,6 +15,7 @@ limitations under the License.
 """
 import oneflow as flow
 import oneflow_xrt as ofrt
+from .import_engine import try_import_engine
 
 
 class XRTModule(flow.nn.Module):
@@ -135,6 +136,7 @@ class XRTModule(flow.nn.Module):
                 % (item, ", ".join(supported_engine))
             )
             result.append(item_up)
+            try_import_engine(item_up)
         return result
 
     def make_clustering_options(
