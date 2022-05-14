@@ -18,7 +18,84 @@
 #  OPENVINO_ROOT
 #    specify where OpenVINO runtime is installed
 
-from tools.utils import setup_extension, env
+from setuptools import find_packages, setup
+from setuptools import Extension
+import setuptools.command.build_ext
+import setuptools.command.build_py
+import os
+
+from tools.utils import env
+
+
+cwd = os.path.dirname(os.path.abspath(__file__))
+
+
+class build_ext(setuptools.command.build_ext.build_ext):
+    def build_extension(self, ext):
+        os.makedirs(self.build_temp, exist_ok=True)
+        os.chdir(self.build_temp)
+
+        cmake_args = ["-DCMAKE_BUILD_TYPE=" + env.cmake_build_type]
+
+        if ext.name == "oneflow_xrt_xla":
+            cmake_args += ["-DWITH_XLA=ON"]
+        elif ext.name == "oneflow_xrt_tensorrt":
+            cmake_args += [
+                "-DWITH_TENSORRT=ON",
+                f"-DTENSORRT_ROOT={env.tensorrt_root}",
+            ]
+        elif ext.name == "oneflow_xrt_openvino":
+            cmake_args += [
+                "-DWITH_OPENVINO=ON",
+                f"-DOPENVINO_ROOT={env.openvino_root}",
+            ]
+        else:
+            pass
+
+        source_dir = os.path.join(cwd, "..")
+        self.spawn(["cmake", source_dir] + cmake_args)
+
+        build_args = ["--config", env.cmake_build_type, "--", "-j"]
+        if not self.dry_run:
+            self.spawn(["cmake", "--build", "."] + build_args)
+        os.chdir(cwd)
+
+
+class build_py(setuptools.command.build_py.build_py):
+    def run(self):
+        # clear build lib dir
+        import glob
+        import shutil
+
+        for filename in glob.glob(f"{self.build_lib}/*"):
+            try:
+                os.remove(filename)
+            except OSError:
+                shutil.rmtree(filename, ignore_errors=True)
+        super().run()
+
+
+def setup_extension(package_name, description):
+    if not os.path.exists(package_name):
+        os.makedirs(package_name)
+    setup(
+        name=package_name,
+        version="0.0.1",
+        description=description,
+        ext_modules=[Extension(package_name, sources=[])],
+        cmdclass={"build_ext": build_ext, "build_py": build_py},
+        zip_safe=False,
+        packages=[package_name],
+        package_data={
+            package_name: [
+                f"{package_name}/*.so*",
+                f"{package_name}/*.dylib*",
+                f"{package_name}/*.dll",
+                f"{package_name}/*.lib",
+            ]
+        },
+    )
+
 
 if env.build_xla:
     setup_extension(
