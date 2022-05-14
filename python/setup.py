@@ -22,6 +22,7 @@ from setuptools import find_packages, setup
 from setuptools import Extension
 import setuptools.command.build_ext
 import setuptools.command.build_py
+import setuptools.command.install
 import os
 
 from tools.utils import env
@@ -75,6 +76,17 @@ class build_py(setuptools.command.build_py.build_py):
         super().run()
 
 
+class install(setuptools.command.install.install):
+    def finalize_options(self):
+        super().finalize_options()
+        if self.distribution.has_ext_modules():
+            self.install_lib = self.install_platlib
+
+    def run(self):
+        self.run_command("build_ext")
+        super().run()
+
+
 def setup_extension(package_name, description):
     if not os.path.exists(package_name):
         os.makedirs(package_name)
@@ -83,17 +95,10 @@ def setup_extension(package_name, description):
         version="0.0.1",
         description=description,
         ext_modules=[Extension(package_name, sources=[])],
-        cmdclass={"build_ext": build_ext, "build_py": build_py},
+        cmdclass={"build_ext": build_ext, "build_py": build_py, "install": install},
         zip_safe=False,
         packages=[package_name],
-        package_data={
-            package_name: [
-                f"{package_name}/*.so*",
-                f"{package_name}/*.dylib*",
-                f"{package_name}/*.dll",
-                f"{package_name}/*.lib",
-            ]
-        },
+        package_data={package_name: ["*.so*", "*.dylib*", "*.dll", "*.lib",]},
     )
 
 
