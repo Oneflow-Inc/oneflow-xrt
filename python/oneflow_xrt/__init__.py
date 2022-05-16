@@ -18,6 +18,7 @@ from oneflow_xrt._oneflow_xrt_internal import cluster_subgraph
 from oneflow_xrt._oneflow_xrt_internal import ClusteringOptions, ReBuildJobOptions
 from .graph import Graph
 from .module import XRTModule
+from .calibration_mode import ptq_calibration_mode
 
 
 def rebuild_job(graph, origin_job, options):

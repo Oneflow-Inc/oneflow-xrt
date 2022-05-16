@@ -34,6 +34,11 @@ message ExecuteOptionsProto {
   optional int64 random_seed = 9 [default = -1];
 
   optional bool force_compile = 10 [default = false];
+
+  // It does not guarantee to use low precision if just set use_int8 or
+  // use_fp16, but you can set strict_types to enforce the engine to use
+  // low precision
+  optional bool strict_types = 11 [default = false];
 }
 
 message FunctionArgumentProto {

@@ -22,6 +22,7 @@ limitations under the License.
 #include "oneflow_xrt/compiler/passes/options.h"
 #include "oneflow_xrt/compiler/passes/shape_inference_context.h"
 #include "oneflow_xrt/graph/graph.h"
+#include "oneflow_xrt/int8_calibration/calibration_mode.h"
 #include "oneflow_xrt/xrt.pb.h"
 
 namespace oneflow {
@@ -42,11 +43,6 @@ extern std::shared_ptr<Job> RunRebuildJobPass(const XrtGraph* graph,
 
 extern void RunShapeInferencePass(const XrtGraph* graph,
                                   ShapeInferenceContext& context);
-
-#ifdef WITH_TENSORRT
-void CacheInt8Calibration();
-void WriteInt8Calibration(const std::string& path);
-#endif  // WITH_TENSORRT
 
 }  // namespace xrt
 }  // namespace oneflow

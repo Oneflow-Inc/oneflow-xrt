@@ -64,6 +64,7 @@ class build_ext(setuptools.command.build_ext.build_ext):
 
 class build_py(setuptools.command.build_py.build_py):
     def run(self):
+        self.run_command("build_ext")
         # clear build lib dir
         import glob
         import shutil
@@ -83,7 +84,6 @@ class install(setuptools.command.install.install):
             self.install_lib = self.install_platlib
 
     def run(self):
-        self.run_command("build_ext")
         super().run()
 
 

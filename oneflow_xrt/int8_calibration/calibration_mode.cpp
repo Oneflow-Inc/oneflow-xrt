@@ -13,26 +13,33 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-#include "oneflow_xrt/api/api.h"
+#include "oneflow_xrt/int8_calibration/calibration_mode.h"
 
-#include "oneflow_xrt/compiler/passes/build_subgraph_pass.h"
-#include "oneflow_xrt/compiler/passes/mark_cluster_id_pass.h"
+#include "glog/logging.h"
+#include "oneflow_xrt/int8_calibration/calibration.h"
 
 namespace oneflow {
 namespace xrt {
 
-std::shared_ptr<XrtGraph> RunClusterSubGraphPass(
-    const XrtGraph* graph, const ClusteringOptions& options) {
-  auto new_graph = RunMarkClusterIdPass(graph, options);
-  return RunBuildSubGraphPass(new_graph.get(), options);
+// not thread safe
+static bool calibration_mode_enabled = false;
+
+PTQCalibrationMode::PTQCalibrationMode(const std::string& cache_path)
+    : cache_path_(cache_path) {
+  CHECK(!calibration_mode_enabled) << "calibration mode cannot be nested";
+  calibration_mode_enabled = true;
 }
 
-Parameter BuildParameter(const std::string& name,
-                         const user_op::Tensor* tensor) {
-  Shape shape;
-  tensor->shape().ToShape(&shape);
-  return Parameter(name, const_cast<void*>(tensor->dptr()), shape,
-                   tensor->data_type());
+PTQCalibrationMode::~PTQCalibrationMode() {
+  if (cache_path_.empty()) {
+    CacheInt8Calibration();
+  } else {
+    CacheAndWriteInt8Calibration(cache_path_);
+  }
+}
+
+/*static*/ bool PTQCalibrationMode::Enabled() {
+  return calibration_mode_enabled;
 }
 
 }  // namespace xrt

@@ -18,9 +18,10 @@ function(ONEFLOW_XRT_ADD_MODULE target_name)
 endfunction()
 
 set(XRT_PYTHON_SRCS
+  stub.cpp
   graph.cpp
   options.cpp
-  stub.cpp
+  int8_calibration.cpp
 )
 oneflow_xrt_add_module(oneflow_xrt_internal ${XRT_PYTHON_SRCS})
 set_target_properties(oneflow_xrt_internal
@@ -45,8 +46,7 @@ function(ONEFLOW_XRT_ADD_STUB target_name)
        ${START_WHOLE_ARCHIVE}
        ${target_name}
        ${END_WHOLE_ARCHIVE}
-       oneflow_xrt_internal
-       ${XRT_THIRD_PARTY_LIBRARIES})
+       oneflow_xrt_internal)
   if(WIN32)
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /WHOLEARCHIVE:${target_name}")
   endif()
@@ -61,14 +61,14 @@ function(ONEFLOW_XRT_ADD_STUB target_name)
   add_dependencies(${target_name}_internal ${target_name}_create_python_module)
 endfunction()
 
-if(WITH_XLA)
+if(BUILD_XLA)
   oneflow_xrt_add_stub(oneflow_xrt_xla xla_stub.cpp)
 endif()
 
-if(WITH_TENSORRT)
+if(BUILD_TENSORRT)
   oneflow_xrt_add_stub(oneflow_xrt_tensorrt tensorrt_stub.cpp)
 endif()
 
-if(WITH_OPENVINO)
+if(BUILD_OPENVINO)
   oneflow_xrt_add_stub(oneflow_xrt_openvino openvino_stub.cpp)
 endif()
