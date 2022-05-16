@@ -84,7 +84,6 @@ class install(setuptools.command.install.install):
             self.install_lib = self.install_platlib
 
     def run(self):
-        # self.run_command("build_ext")
         super().run()
 
 
