@@ -111,6 +111,13 @@ void InitReBuildJobOptionsApis(py::module_& m) {
             opt.force_compile = force_compile;
           })
       .def_property(
+          "strict_types", /*getter*/
+          [](const ReBuildJobOptions& opt) { return opt.strict_types; },
+          /*setter*/
+          [](ReBuildJobOptions& opt, const bool& strict_types) {
+            opt.strict_types = strict_types;
+          })
+      .def_property(
           "int8_calibration", /*getter*/
           [](const ReBuildJobOptions& opt) { return opt.int8_calibration; },
           /*setter*/

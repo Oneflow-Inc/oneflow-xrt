@@ -13,27 +13,26 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-#include "oneflow_xrt/api/api.h"
+#ifndef ONEFLOW_XRT_INT8_CALIBRATION_CALIBRATION_MODE_H_
+#define ONEFLOW_XRT_INT8_CALIBRATION_CALIBRATION_MODE_H_
 
-#include "oneflow_xrt/compiler/passes/build_subgraph_pass.h"
-#include "oneflow_xrt/compiler/passes/mark_cluster_id_pass.h"
+#include <string>
 
 namespace oneflow {
 namespace xrt {
 
-std::shared_ptr<XrtGraph> RunClusterSubGraphPass(
-    const XrtGraph* graph, const ClusteringOptions& options) {
-  auto new_graph = RunMarkClusterIdPass(graph, options);
-  return RunBuildSubGraphPass(new_graph.get(), options);
-}
+class PTQCalibrationMode {
+ public:
+  explicit PTQCalibrationMode(const std::string& cache_path);
+  virtual ~PTQCalibrationMode();
 
-Parameter BuildParameter(const std::string& name,
-                         const user_op::Tensor* tensor) {
-  Shape shape;
-  tensor->shape().ToShape(&shape);
-  return Parameter(name, const_cast<void*>(tensor->dptr()), shape,
-                   tensor->data_type());
-}
+  static bool Enabled();
+
+ protected:
+  std::string cache_path_;
+};
 
 }  // namespace xrt
 }  // namespace oneflow
+
+#endif  // ONEFLOW_XRT_INT8_CALIBRATION_CALIBRATION_MODE_H_

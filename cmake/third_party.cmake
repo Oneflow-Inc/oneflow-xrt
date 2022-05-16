@@ -2,7 +2,7 @@ include(protobuf)
 include(glog)
 include(absl)
 
-set(XRT_THIRD_PARTY_LIBRARIES
+set(XRT_COMMON_THIRD_PARTY_LIBRARIES
   glog::glog
   absl::algorithm
   absl::base
@@ -20,7 +20,8 @@ set(XRT_THIRD_PARTY_LIBRARIES
 )
 set(XRT_THIRD_PARTY_DEPENDICES protobuf)
 
+set(XRT_THIRD_PARTY_LIBRARIES ${XRT_COMMON_THIRD_PARTY_LIBRARIES})
 if(WITH_CUDA)
   find_package(CUDAToolkit REQUIRED)
-  set(XRT_THIRD_PARTY_LIBRARIES CUDA::cudart_static ${XRT_THIRD_PARTY_LIBRARIES})
+  list(APPEND XRT_THIRD_PARTY_LIBRARIES CUDA::cudart_static)
 endif()

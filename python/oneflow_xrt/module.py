@@ -36,6 +36,8 @@ class XRTModule(flow.nn.Module):
               The maximum batch size for training or inference. Default: 1
         - max_workspace_size:
               The maximum available workspace for XRT. Default: -1
+        - strict_types:
+              It does not guarantee to use low precision if just set use_int8 or use_fp16, but you can set strict_types to enforce the engine to use low precision. Default: False
         - force_compile:
               Force compile on every execution without using the cached results. Default: False
         - cluster_minimum_nodes:
@@ -73,6 +75,7 @@ class XRTModule(flow.nn.Module):
         int8_calibration=None,
         max_batch_size=1,
         max_workspace_size=-1,
+        strict_types=False,
         force_compile=False,
         cluster_minimum_nodes=1,
         cluster_ignore_pipeline=True,
@@ -90,6 +93,7 @@ class XRTModule(flow.nn.Module):
                 module, flow.nn.Graph
             ), "the module should be flow.nn.Module or flow.nn.Graph"
             self.module = module
+        self.is_compiled = False
         self.engine = self.make_engine(engine)
         self.clustering_options = self.make_clustering_options(
             cluster_minimum_nodes,
@@ -103,6 +107,7 @@ class XRTModule(flow.nn.Module):
             int8_calibration,
             max_batch_size,
             max_workspace_size,
+            strict_types,
             force_compile,
         )
         self.verbose = verbose
@@ -161,6 +166,7 @@ class XRTModule(flow.nn.Module):
         int8_calibration=None,
         max_batch_size=1,
         max_workspace_size=-1,
+        strict_types=False,
         force_compile=False,
     ):
         options = ofrt.ReBuildJobOptions()
@@ -170,10 +176,14 @@ class XRTModule(flow.nn.Module):
             options.int8_calibration = int8_calibration
         options.max_batch_size = max_batch_size
         options.max_workspace_size = max_workspace_size
+        options.strict_types = strict_types
         options.force_compile = force_compile
         return options
 
     def forward(self, *args, **kwargs):
+        if self.is_compiled:
+            return self.module(*args, **kwargs)
+
         origin_job, _ = self.module.build_graph(*args, **kwargs)
         graph = ofrt.Graph(origin_job)
 
@@ -188,4 +198,5 @@ class XRTModule(flow.nn.Module):
 
         self.module.restore_full_job(compiled_job)
         self.module.finish_complie_and_init_runtime()
+        self.is_compiled = True
         return self.module(*args, **kwargs)

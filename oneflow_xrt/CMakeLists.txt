@@ -1,5 +1,6 @@
 include_directories(${PROJECT_SOURCE_DIR})
 include_directories(${PROJECT_BINARY_DIR})
+include_directories(${ONEFLOW_INCLUDE_DIR})
 
 file(GLOB XRT_PROTO_FILES *.proto)
 set(PROTOBUF_IMPORT_DIRS ${ONEFLOW_INCLUDE_DIR})
@@ -16,49 +17,56 @@ file(GLOB_RECURSE XRT_SRCS
   compiler/compilation_cache.cpp
   compiler/kernel/*.cpp
   compiler/passes/*.cpp
+  int8_calibration/*.cpp
   xrt_launch_kernel.cpp
   xrt_launch_op.cpp
 )
 add_library(oneflow_xrt ${XRT_SRCS})
 add_dependencies(oneflow_xrt ${XRT_THIRD_PARTY_DEPENDICES})
-target_link_libraries(oneflow_xrt oneflow_xrt_proto ${XRT_THIRD_PARTY_LIBRARIES})
+target_link_libraries(oneflow_xrt PRIVATE oneflow_xrt_proto ${XRT_THIRD_PARTY_LIBRARIES})
 
-if(WITH_XLA)
+if(BUILD_XLA)
   file(GLOB_RECURSE XRT_XLA_SRCS compiler/xla/*.cpp)
   add_library(oneflow_xrt_xla ${XRT_XLA_SRCS})
   add_dependencies(
       oneflow_xrt_xla
-      ${XRT_THIRD_PARTY_DEPENDICES}
+      ${XRT_COMMON_THIRD_PARTY_LIBRARIES}
       ${XRT_XLA_THIRD_PARTY_DEPENDICES})
   target_link_libraries(
       oneflow_xrt_xla
       oneflow_xrt
+      oneflow_xrt_proto
+      ${XRT_COMMON_THIRD_PARTY_LIBRARIES}
       ${XRT_XLA_THIRD_PARTY_LIBRARIES})
 endif()
 
-if(WITH_TENSORRT)
+if(BUILD_TENSORRT)
   file(GLOB_RECURSE XRT_TENSORRT_SRCS compiler/tensorrt/*.cpp)
   add_library(oneflow_xrt_tensorrt ${XRT_TENSORRT_SRCS})
   add_dependencies(
       oneflow_xrt_tensorrt
-      ${XRT_THIRD_PARTY_DEPENDICES}
+      ${XRT_COMMON_THIRD_PARTY_LIBRARIES}
       ${XRT_TENSORRT_THIRD_PARTY_DEPENDICES})
   target_link_libraries(
       oneflow_xrt_tensorrt
       oneflow_xrt
+      oneflow_xrt_proto
+      ${XRT_COMMON_THIRD_PARTY_LIBRARIES}
       ${XRT_TENSORRT_THIRD_PARTY_LIBRARIES})
 endif()
 
-if(WITH_OPENVINO)
+if(BUILD_OPENVINO)
   file(GLOB_RECURSE XRT_OPENVINO_SRCS compiler/openvino/*.cpp)
   add_library(oneflow_xrt_openvino ${XRT_OPENVINO_SRCS})
   add_dependencies(
       oneflow_xrt_openvino
-      ${XRT_THIRD_PARTY_DEPENDICES}
+      ${XRT_COMMON_THIRD_PARTY_LIBRARIES}
       ${XRT_OPENVINO_THIRD_PARTY_DEPENDICES})
   target_link_libraries(
       oneflow_xrt_openvino
       oneflow_xrt
+      oneflow_xrt_proto
+      ${XRT_COMMON_THIRD_PARTY_LIBRARIES}
       ${XRT_OPENVINO_THIRD_PARTY_LIBRARIES})
 endif()
 

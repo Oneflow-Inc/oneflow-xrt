@@ -51,6 +51,7 @@ struct ReBuildJobOptions {
   std::string int8_calibration = "";
 
   bool force_compile = false;
+  bool strict_types = false;
 
   int64_t max_batch_size = 1;
   int64_t max_workspace_size = -1;

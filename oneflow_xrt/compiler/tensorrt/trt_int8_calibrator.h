@@ -25,6 +25,7 @@ limitations under the License.
 #include "oneflow_xrt/compiler/parameter.h"
 #include "oneflow_xrt/compiler/tensorrt/common.h"
 #include "oneflow_xrt/compiler/tensorrt/trt_unique_ptr.h"
+#include "oneflow_xrt/int8_calibration/calibration.h"
 
 namespace oneflow {
 namespace xrt {
@@ -98,12 +99,16 @@ class TRTInt8Calibrator : public nvinfer1::IInt8EntropyCalibrator2 {
   std::string calibration_table_;
 };
 
-struct TRTInt8CalibratorResource {
+struct TRTInt8CalibratorResource : public Int8CalibratorResource {
  public:
   static TRTInt8CalibratorResource* LookupOrCreate(const std::string& name);
 
   static const std::unordered_map<std::string, TRTInt8CalibratorResource*>&
   All();
+
+  void WaitAndSetDone() override;
+  bool IsDone() const override;
+  std::string GetCalibrationTableAsString() const override;
 
   // Individual mutex
   mutable std::mutex mutex_;

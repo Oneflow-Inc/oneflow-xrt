@@ -26,6 +26,7 @@ using namespace oneflow::xrt;
 extern void InitXrtGraphApis(py::module_& m);
 extern void InitClusteringOptionsApis(py::module_& m);
 extern void InitReBuildJobOptionsApis(py::module_& m);
+extern void InitInt8CalibrationApis(py::module_& m);
 
 PYBIND11_MODULE(_oneflow_xrt_internal, m) {
   m.def("rebuild_job",
@@ -44,4 +45,5 @@ PYBIND11_MODULE(_oneflow_xrt_internal, m) {
   InitXrtGraphApis(m);
   InitClusteringOptionsApis(m);
   InitReBuildJobOptionsApis(m);
+  InitInt8CalibrationApis(m);
 }

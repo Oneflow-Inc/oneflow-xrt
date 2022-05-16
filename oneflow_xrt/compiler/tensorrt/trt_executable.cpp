@@ -22,6 +22,7 @@ limitations under the License.
 #include "cuda_runtime.h"
 #include "oneflow_xrt/common/device.h"
 #include "oneflow_xrt/compiler/tensorrt/trt_int8_calibrator.h"
+#include "oneflow_xrt/int8_calibration/calibration_mode.h"
 
 namespace oneflow {
 namespace xrt {
@@ -65,9 +66,10 @@ nvinfer1::ICudaEngine* TrtExecutable::CreateExecutableEngine(
     }
   }
   // It does not guarantee to use low precision if just set kFP16 or kint8 flag,
-  // but you can set kSTRICT_TYPES to enforce using half or int8 precision.
-  // flags |= (1U << int(nvinfer1::BuilderFlag::kSTRICT_TYPES));
-
+  // but you can set kSTRICT_TYPES to enforce using half or int8 precision
+  if (run_options.common.strict_types()) {
+    flags |= (1U << int(nvinfer1::BuilderFlag::kSTRICT_TYPES));
+  }
   // flags |= (1U << int(nvinfer1::BuilderFlag::kREFIT));
   build_config->setFlags(flags);
 
@@ -153,7 +155,7 @@ bool TrtExecutable::Run(const std::vector<Parameter>& inputs,
     execution_context_.reset(engine_->createExecutionContext());
   }
 
-  if (run_options.common.use_int8() && !calibrator_) {
+  if (run_options.common.use_int8() && PTQCalibrationMode::Enabled()) {
     auto* res = TRTInt8CalibratorResource::LookupOrCreate(this->name());
     {
       std::lock_guard<std::mutex> lock(res->mutex_);

@@ -172,6 +172,7 @@ TRTInt8CalibratorResource::LookupOrCreate(const std::string& name) {
   auto it = resources.find(name);
   if (it == resources.end()) {
     it = resources.emplace(name, new TRTInt8CalibratorResource).first;
+    Int8CalibratorResource::Record(name, it->second);
   }
   return it->second;
 }
@@ -179,6 +180,24 @@ TRTInt8CalibratorResource::LookupOrCreate(const std::string& name) {
 /* static */ const std::unordered_map<std::string, TRTInt8CalibratorResource*>&
 TRTInt8CalibratorResource::All() {
   return resources;
+}
+
+void TRTInt8CalibratorResource::WaitAndSetDone() {
+  std::lock_guard<std::mutex> lock(mutex_);
+  if (!calibrator_->isDone()) {
+    calibrator_->waitAndSetDone();
+    thread_->join();
+  }
+  calibrator_->ReleaseDevBuffers();
+}
+
+bool TRTInt8CalibratorResource::IsDone() const { return calibrator_->isDone(); }
+
+std::string TRTInt8CalibratorResource::GetCalibrationTableAsString() const {
+  CHECK(calibrator_->isDone())
+      << "Calibration table maybe has not been generated "
+      << "since the calibrator has not been done";
+  return calibrator_->getCalibrationTableAsString();
 }
 
 }  // namespace tensorrt
