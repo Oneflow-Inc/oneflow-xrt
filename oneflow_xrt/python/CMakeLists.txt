@@ -27,6 +27,7 @@ oneflow_xrt_add_module(oneflow_xrt_internal ${XRT_PYTHON_SRCS})
 set_target_properties(oneflow_xrt_internal
   PROPERTIES LIBRARY_OUTPUT_DIRECTORY "${ONEFLOW_XRT_PYTHON_DIR}/oneflow_xrt")
 
+target_include_directories(oneflow_xrt_internal PRIVATE ${ONEFLOW_INCLUDE_DIR})
 target_link_libraries(oneflow_xrt_internal PRIVATE
      ${START_WHOLE_ARCHIVE}
      oneflow_xrt

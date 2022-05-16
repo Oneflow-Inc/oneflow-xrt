@@ -50,7 +50,7 @@ list(
   TENSORFLOW_XLA_INCLUDE_DIR
   ${TENSORFLOW_INC_DIR}
   ${TENSORFLOW_GEN_DIR}
-  #${THIRD_ABSL_DIR}
+  ${THIRD_ABSL_DIR}
   ${THIRD_PROTOBUF_DIR}
   ${THIRD_BORINGSSL_DIR}
   ${THIRD_SNAPPY_DIR}
@@ -134,6 +134,6 @@ add_custom_command(
   COMMAND ${CMAKE_COMMAND} -E create_symlink ${GLOG_INCLUDE_DIR}/glog
           ${TENSORFLOW_INSTALL_DIR}/include/tensorflow_inc/tensorflow/core/platform/google)
 
-include_directories(${TENSORFLOW_XLA_INCLUDE_INSTALL_DIR})
 list(APPEND XRT_XLA_THIRD_PARTY_LIBRARIES ${TENSORFLOW_XLA_LIBRARIES})
+list(APPEND XRT_XLA_THIRD_PARTY_INCLUDE_DIRS ${TENSORFLOW_XLA_INCLUDE_INSTALL_DIR})
 list(APPEND XRT_XLA_THIRD_PARTY_DEPENDICES tensorflow_copy_libs_to_destination tensorflow_symlink_headers)
