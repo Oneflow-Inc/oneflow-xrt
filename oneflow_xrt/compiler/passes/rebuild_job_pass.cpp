@@ -397,13 +397,16 @@ void FoldSubgraphBuilder::FixupInOutBlobNames() {
         const std::string& consume_key = arg.meta_data().consume_key;
         FixupOpInputBlobName(op_conf, consume_key, arg.name(), fixed_blob_name);
       }
+      // update output edge argument
       edge->argument().meta_data().produce_key = it->second;
+      edge->argument().set_name(fixed_blob_name);
     }
 
     // fix subgraph entry and return nodes name
     for (XrtNode* sub_node : node->sub_graph()->Nodes()) {
       if (sub_node->IsEntryNode()) {
-        const auto& it = consume_names.find(sub_node->name());
+        std::string fixed_name = FixedName(sub_node->name());
+        const auto& it = consume_names.find(fixed_name);
         CHECK(it != consume_names.end());
         sub_node->set_name(it->second);
       } else if (sub_node->IsReturnNode()) {

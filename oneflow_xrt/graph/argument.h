@@ -78,6 +78,7 @@ class Argument {
         initialized_(true) {}
 
   const std::string& name() const { return arg_name_; }
+  void set_name(const std::string& name) { arg_name_ = name; }
 
   const Shape& shape() const { return shape_; }
   const DataType& data_type() const { return data_type_; }
