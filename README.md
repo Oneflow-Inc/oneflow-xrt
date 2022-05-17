@@ -12,6 +12,9 @@ OneFlow-XRT has support multiple third-party computing engines, such as XLA. Dif
 | XRT-TVM      | -              | -         | -                           |
 
 
+## Architecture
+
+<img width="1046" alt="截屏2022-05-17 下午3 54 32" src="https://user-images.githubusercontent.com/13991173/168759503-a3ebda4b-af4c-4415-883a-8eb1c7814359.png">
 
 ## Installation
 
@@ -96,7 +99,8 @@ tensor([[ 0.2404,  0.7121,  0.4473,  0.4782],
 
 ## Documentation
 
-TODO
+- [OneFlow XRT overall architecture and introduction](https://github.com/Oneflow-Inc/oneflow-xrt/wiki/OneFlow-XRT整体架构及简介)
+- [How to use low precision in OneFlow XRT](https://github.com/Oneflow-Inc/oneflow-xrt/wiki/OneFlow-XRT如何使用低精度计算)
 
 
 ## Roadmap
