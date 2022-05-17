@@ -113,7 +113,9 @@ std::shared_ptr<Executable> TrtGraphCompiler::Compile(
   }
   for (const auto& arg : arguments_) {
     TrtValue& value = operands_.at(arg.second);
-    value.AsTensor(builder_.get())->setName(arg.first.data());
+    if (IsTensorKind(value.ValueKind(builder_.get()))) {
+      value.AsTensor(builder_.get())->setName(arg.first.data());
+    }
   }
   return std::make_shared<TrtExecutable>(
       builder_->name(), builder_->ReleaseBuilder(), builder_->ReleaseNetwork(),

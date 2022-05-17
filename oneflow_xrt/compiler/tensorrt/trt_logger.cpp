@@ -33,7 +33,7 @@ void Logger::log(ILogger::Severity severity, const char* msg) TRT_NOEXCEPT {
       break;
     }
     case ILogger::Severity::kWARNING: {
-      LOG(WARNING) << name_ << ": " << msg;
+      VLOG(2) << name_ << ": " << msg;
       break;
     }
     case ILogger::Severity::kERROR: {

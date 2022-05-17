@@ -31,12 +31,12 @@ class ReduceOp : public TrtOpKernel {
       reduce_axis = reduce_axis | (1U << axis[i]);
     }
     bool keepDimensions = ctx->Attr<bool>("keepdims");
-    // TensorRT does not support full reduce without keepDimensions.
-    Shape in_shape = ctx->SoleInputShape();
-    if (!keepDimensions) {
-      CHECK_NE(reduce_axis, (1U << in_shape.NumAxes()) - 1)
-          << "TensorRT does not support full reduce without keepDimensions.";
-    }
+    // // TensorRT does not support full reduce without keepDimensions.
+    // Shape in_shape = ctx->SoleInputShape();
+    // if (!keepDimensions) {
+    //   CHECK_NE(reduce_axis, (1U << in_shape.NumAxes()) - 1)
+    //       << "TensorRT does not support full reduce without keepDimensions.";
+    // }
 
     nvinfer1::ITensor* in = ctx->SoleInput();
     auto* layer =

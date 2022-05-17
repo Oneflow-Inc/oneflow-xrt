@@ -112,6 +112,19 @@ class XRTModule(flow.nn.Module):
         )
         self.verbose = verbose
 
+    def __getattr__(self, name):
+        if name in self.__dict__:
+            return self.__dict__[name]
+        else:
+            try:
+                return self.module.__getattr__(name)
+            except:
+                raise AttributeError(
+                    "'{}' object has no attribute '{}'".format(
+                        type(self).__name__, name
+                    )
+                )
+
     def make_naive_graph(self, module):
         """Transform a normal nn.Module to nn.Graph
         """

@@ -65,6 +65,8 @@ class TrtExecutable : public Executable {
 
   std::string LoadCalibrationTable(const std::string& calibration_path);
 
+  int32_t GetBindingIndex(const std::string& name) const;
+
  private:
   nv::unique_ptr<nvinfer1::ICudaEngine> engine_;
   nv::unique_ptr<nvinfer1::IBuilder> builder_;
@@ -74,6 +76,7 @@ class TrtExecutable : public Executable {
   std::shared_ptr<TRTInt8Calibrator> calibrator_;
 
   std::map<std::string, std::shared_ptr<std::vector<uint8_t>>> host_weights_;
+  std::map<std::string, int32_t> bindings_;
 };
 
 }  // namespace tensorrt

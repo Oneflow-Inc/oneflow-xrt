@@ -71,7 +71,7 @@ class TrtOpContext : public OpContext {
   nvinfer1::Weights& Weight(const std::string& name);
   nvinfer1::Weights& Weight(const Argument& arg);
 
-  nvinfer1::ITensor* Variable();
+  TrtValue Variable(const std::string& name);
 
   int num_inputs() const { return param_.inputs.size(); }
   int num_outputs() const { return param_.num_outputs; }
@@ -90,7 +90,7 @@ class TrtOpContext : public OpContext {
   void SetOutput(const std::string& name, const TrtValue& value);
   void SetSoleOutput(nvinfer1::ITensor* tensor);
 
-  void SetVariable(nvinfer1::ITensor* tensor);
+  void SetVariable(const std::string& name, const TrtValue& value);
 
   // Return input `name` shape as Shape
   Shape InputShape(const std::string& name) const;

@@ -23,16 +23,14 @@ namespace tensorrt {
 class XrtEntryOp : public TrtOpKernel {
  public:
   void Compile(TrtOpContext* ctx) override {
-    nvinfer1::ITensor* value = ctx->Variable();
-    ctx->SetOutput("value", value);
+    ctx->SetVariable("value", ctx->Variable("variable"));
   }
 };
 
 class XrtReturnOp : public TrtOpKernel {
  public:
   void Compile(TrtOpContext* ctx) override {
-    nvinfer1::ITensor* value = ctx->Input("value");
-    ctx->SetVariable(value);
+    ctx->SetVariable("variable", ctx->Variable("value"));
   }
 };
 

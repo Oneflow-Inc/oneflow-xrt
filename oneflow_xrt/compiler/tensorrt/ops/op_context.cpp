@@ -65,7 +65,11 @@ nvinfer1::Weights& TrtOpContext::Weight(const Argument& arg) {
   return param_.inputs.at(arg).AsWeight(builder());
 }
 
-nvinfer1::ITensor* TrtOpContext::Variable() { return Input("variable"); }
+TrtValue TrtOpContext::Variable(const std::string& name) {
+  Argument arg = ArgumentFromKey(name);
+  CHECK_GT(param_.inputs.count(arg), 0);
+  return param_.inputs.at(arg);
+}
 
 void TrtOpContext::SetOutput(const std::string& name,
                              nvinfer1::ITensor* tensor) {
@@ -84,8 +88,9 @@ void TrtOpContext::SetSoleOutput(nvinfer1::ITensor* tensor) {
   SetOutput(SoleOutputName(), tensor);
 }
 
-void TrtOpContext::SetVariable(nvinfer1::ITensor* tensor) {
-  SetOutput("variable", tensor);
+void TrtOpContext::SetVariable(const std::string& name, const TrtValue& value) {
+  Argument arg = ArgumentFromKey(name);
+  outputs_[arg] = value;
 }
 
 DataType TrtOpContext::InputType(const std::string& name) const {
