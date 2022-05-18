@@ -85,6 +85,8 @@ class XrtNode {
   const XrtDevice& device() const { return device_; }
   void set_device(const XrtDevice& device) { device_ = device; }
 
+  bool trainable() const { return trainable_; }
+  void set_trainable(bool trainable) { trainable_ = trainable; }
   int64_t cluster_id() const { return cluster_id_; }
   void set_cluster_id(int64_t cluster_id) { cluster_id_ = cluster_id; }
 
@@ -108,7 +110,8 @@ class XrtNode {
         type_(_XrtUnsupportedOpType),
         unique_id_(-1),
         sub_graph_(nullptr),
-        device_(XrtDevice::CPU_X86) {}
+        device_(XrtDevice::CPU_X86),
+        trainable_(false) {}
   explicit XrtNode(const OperatorConf& conf);
 
  protected:
@@ -132,6 +135,7 @@ class XrtNode {
   XrtGraph* sub_graph_ = nullptr;
 
   XrtDevice device_;
+  bool trainable_ = false;
   // the folded node will has a cluster id after clustering subgraph
   int64_t cluster_id_ = -1;
 };

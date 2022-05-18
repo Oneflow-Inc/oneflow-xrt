@@ -26,8 +26,16 @@ namespace xrt {
 
 bool IsCanbeCompiledNode(const XrtNode* node, const XrtEngine& engine,
                          const XrtDevice& device) {
-  return XRT_REGISTER_HAS(OpKernelRegId,
-                          (OpKernelRegKey{node->type(), engine, device}));
+  if (XRT_REGISTER_HAS(OpKernelRegId,
+                       (OpKernelRegKey{node->type(), engine, device}))) {
+    if (!node->trainable()) {
+      return true;
+    }
+    const auto& kernel_attrs = XRT_REGISTER_LOOKUP(
+        OpKernelAttrRegId, (OpKernelAttrRegKey{node->type(), engine}));
+    return kernel_attrs.train_phase_enabled;
+  }
+  return false;
 }
 
 bool IsModelUpdateNode(const XrtNode* node) {

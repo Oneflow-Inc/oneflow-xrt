@@ -17,13 +17,16 @@ limitations under the License.
 
 #include "oneflow_xrt/compiler/passes/build_subgraph_pass.h"
 #include "oneflow_xrt/compiler/passes/mark_cluster_id_pass.h"
+#include "oneflow_xrt/compiler/passes/trainable_propagation_pass.h"
 
 namespace oneflow {
 namespace xrt {
 
 std::shared_ptr<XrtGraph> RunClusterSubGraphPass(
     const XrtGraph* graph, const ClusteringOptions& options) {
-  auto new_graph = RunMarkClusterIdPass(graph, options);
+  std::shared_ptr<XrtGraph> new_graph;
+  new_graph = TrainablePropagationPass(graph);
+  new_graph = RunMarkClusterIdPass(new_graph.get(), options);
   return RunBuildSubGraphPass(new_graph.get(), options);
 }
 

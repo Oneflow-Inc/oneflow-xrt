@@ -21,7 +21,11 @@ namespace oneflow {
 namespace xrt {
 
 XrtNode::XrtNode(const OperatorConf& conf)
-    : name_(conf.name()), conf_(conf), unique_id_(-1), sub_graph_(nullptr) {
+    : name_(conf.name()),
+      conf_(conf),
+      unique_id_(-1),
+      sub_graph_(nullptr),
+      trainable_(false) {
   if (conf.has_user_conf()) {
     const auto& user_conf = conf.user_conf();
     type_ = user_conf.op_type_name();
@@ -30,6 +34,9 @@ XrtNode::XrtNode(const OperatorConf& conf)
     type_ = _XrtUnsupportedOpType;
   }
   device_ = OfDeviceToXrtDevice(conf.device_tag());
+  if (conf.has_variable_conf() && conf.variable_conf().has_trainable()) {
+    trainable_ = conf.variable_conf().trainable();
+  }
 }
 
 void XrtNode::AddInEdge(const XrtEdge* edge) {
