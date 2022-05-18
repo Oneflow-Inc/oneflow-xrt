@@ -65,7 +65,9 @@ class OpKernelRegistrar {
   }
 
   OpKernelRegistrar& Finalize() {
-    XRT_REGISTER(ModelUpdateRegId, op_name_, attrs_.is_model_update_op);
+    if (attrs_.is_model_update_op) {
+      XRT_REGISTER(ModelUpdateRegId, op_name_, attrs_.is_model_update_op);
+    }
     XRT_REGISTER(OpKernelAttrRegId, (OpKernelAttrRegKey{op_name_, engine_}),
                  attrs_);
     for (const auto& device : device_) {

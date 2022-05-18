@@ -59,6 +59,7 @@ inline bool IsWeightKind(const TrtValueKind& kind) {
   __macro(ElementWise);                 \
   __macro(Unary);                       \
   __macro(Padding);                     \
+  __macro(PaddingNd);                   \
   __macro(Shuffle);                     \
   __macro(Reduce);                      \
   __macro(TopK);                        \

@@ -72,7 +72,7 @@ class ClusterMergeNode : public ClusterNode {
   };
 
   ClusterMergeNode(ClusterNode* lhs, ClusterNode* rhs)
-      : ClusterNode(-100), lhs_(lhs), rhs_(rhs) {
+      : ClusterNode(lhs->xrt_node(), -100), lhs_(lhs), rhs_(rhs) {
     BuildInputEdges();
     BuildOutputEdges();
   }

@@ -30,6 +30,10 @@ class OpContext {
     return CHECK_JUST(attrs_.GetAttr<T>(name));
   }
 
+  bool HasAttr(const std::string& name) const {
+    return attrs_.find(name) != attrs_.end();
+  }
+
  private:
   AttrMap attrs_;
 };

@@ -16,6 +16,7 @@ limitations under the License.
 #ifndef ONEFLOW_XRT_COMPILER_TENSORRT_TRT_HELPERS_H_
 #define ONEFLOW_XRT_COMPILER_TENSORRT_TRT_HELPERS_H_
 
+#include "oneflow/core/common/scalar.h"
 #include "oneflow_xrt/compiler/tensorrt/ops/op_context.h"
 #include "oneflow_xrt/compiler/tensorrt/trt_shape.h"
 
@@ -26,6 +27,10 @@ namespace tensorrt {
 namespace helpers {
 
 bool DimsEqual(const nvinfer1::Dims& dim1, const nvinfer1::Dims& dim2);
+
+nvinfer1::Weights Constant(TrtOpContext* ctx, const Scalar& value,
+                           const Shape& shape, DataType data_type,
+                           const std::string& name);
 
 nvinfer1::ITensor* Reshape(TrtOpContext* ctx, nvinfer1::ITensor* in,
                            const Shape& shape);

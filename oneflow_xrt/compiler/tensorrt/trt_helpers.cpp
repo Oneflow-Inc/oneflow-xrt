@@ -33,6 +33,28 @@ bool DimsEqual(const nvinfer1::Dims& dim1, const nvinfer1::Dims& dim2) {
   return true;
 }
 
+nvinfer1::Weights Constant(TrtOpContext* ctx, const Scalar& value,
+                           const Shape& shape, DataType data_type,
+                           const std::string& name) {
+  switch (data_type) {
+#define TRT_HELPERS_CONSTANT_SWITCH_ENTRY(T, type)                 \
+  case type: {                                                     \
+    std::vector<T> v(shape.elem_cnt(), CHECK_JUST(value.As<T>())); \
+    Parameter param(name, v.data(), shape, type);                  \
+    int64_t handle = ctx->builder()->AddParameter(param);          \
+    return ctx->builder()->GetWeight(handle);                      \
+  }
+    OF_PP_FOR_EACH_TUPLE(TRT_HELPERS_CONSTANT_SWITCH_ENTRY,
+                         ARITHMETIC_DATA_TYPE_SEQ)
+#undef TRT_HELPERS_CONSTANT_SWITCH_ENTRY
+    default: {
+      UNIMPLEMENTED() << "Constant does not support data type "
+                      << DataType_Name(data_type);
+      return nvinfer1::Weights();
+    }
+  }
+}  // namespace helpers
+
 nvinfer1::ITensor* Reshape(TrtOpContext* ctx, nvinfer1::ITensor* in,
                            const Shape& shape) {
   nvinfer1::Dims dims = ShapeToXrtDims(shape);

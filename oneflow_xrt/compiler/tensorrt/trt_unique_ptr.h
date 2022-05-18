@@ -16,7 +16,7 @@ limitations under the License.
 #ifndef ONEFLOW_XRT_COMPILER_TENSORRT_TRT_UNIQUE_PTR_H_
 #define ONEFLOW_XRT_COMPILER_TENSORRT_TRT_UNIQUE_PTR_H_
 
-//#include <memory>
+#include "NvInferVersion.h"
 
 namespace oneflow {
 namespace xrt {
@@ -28,7 +28,11 @@ struct PtrDeleter {
   template <typename T>
   inline void operator()(T* obj) {
     if (obj) {
+#if NV_TENSORRT_MAJOR >= 8
+      delete obj;
+#else
       obj->destroy();
+#endif
     }
   }
 };

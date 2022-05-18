@@ -159,7 +159,8 @@ bool TrtExecutable::Run(const std::vector<Parameter>& inputs,
   // TODO(hjchen2): check batch size is same for all binding parameters
   int batch_size = 1;
   for (int i = 0; i < num_bindings; ++i) {
-    if (binding_params[i]->shape().NumAxes() > 0) {
+    if (binding_params[i]->shape().NumAxes() > 0 &&
+        binding_params[i]->shape().At(0) > batch_size) {
       batch_size = binding_params[i]->shape().At(0);
     }
   }
