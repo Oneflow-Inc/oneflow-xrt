@@ -49,6 +49,7 @@ REGISTER_XLA_OP_KERNEL(sigmoid, ApplyUnaryOp<op::Logistic>).Finalize();
 REGISTER_XLA_OP_KERNEL(tanh, ApplyUnaryOp<op::Tanh>).Finalize();
 REGISTER_XLA_OP_KERNEL(gelu, ApplyUnaryOp<Gelu>).Finalize();
 REGISTER_XLA_OP_KERNEL(rsqrt, ApplyUnaryOp<op::Rsqrt>).Finalize();
+REGISTER_XLA_OP_KERNEL(sqrt, ApplyUnaryOp<op::Sqrt>).Finalize();
 
 struct Identity {
   xla::XlaOp operator()(const xla::XlaOp& x) { return x; }

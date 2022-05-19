@@ -41,6 +41,7 @@ class BcastBinaryOp : public XlaOpKernel {
 };
 
 REGISTER_XLA_OP_KERNEL(broadcast_add, BcastBinaryOp<op::Add>).Finalize();
+REGISTER_XLA_OP_KERNEL(broadcast_sub, BcastBinaryOp<op::Sub>).Finalize();
 REGISTER_XLA_OP_KERNEL(broadcast_mul, BcastBinaryOp<op::Mul>).Finalize();
 REGISTER_XLA_OP_KERNEL(broadcast_div, BcastBinaryOp<op::Div>).Finalize();
 REGISTER_XLA_OP_KERNEL(broadcast_min, BcastBinaryOp<op::Min>).Finalize();

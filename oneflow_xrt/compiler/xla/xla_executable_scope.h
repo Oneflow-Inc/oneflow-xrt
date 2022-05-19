@@ -25,12 +25,9 @@ namespace mola {
 
 inline bool SupportMultiStream(const XrtDevice& device) {
   switch (device) {
-    case XrtDevice::CPU_X86:
-      return false;
     case XrtDevice::GPU_CUDA:
       return true;
     default: {
-      LOG(FATAL) << "Unknow device " << device;
       return false;
     }
   }
