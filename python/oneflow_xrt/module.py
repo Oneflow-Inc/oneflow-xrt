@@ -35,14 +35,17 @@ class XRTModule(flow.nn.Module):
         - max_batch_size:
               The maximum batch size for training or inference. Default: 1
         - max_workspace_size:
-              The maximum available workspace for XRT. Default: -1
+              The maximum available workspace for XRT. Default: None
         - strict_types:
               It does not guarantee to use low precision if just set use_int8 or use_fp16, but you can set strict_types to enforce the engine to use low precision. Default: False
         - force_compile:
               Force compile on every execution without using the cached results. Default: False
         - cluster_minimum_nodes:
-              The Minimum subgraph size.
+              The minimum subgraph size.
               XRT ensure that the size of the clustered subgraph will not be less than it. Default: 1
+        - cluster_maximum_nodes:
+              The maximum subgraph size.
+              XRT ensure that the size of the clustered subgraph will not be larger than it. Usually used in debugging. Default: None
         - cluster_ignore_pipeline:
               XRT will not strictly take execution dependencies into consideration when cluster subgraph. Default: True
         - cluster_max_iteration:
@@ -74,10 +77,11 @@ class XRTModule(flow.nn.Module):
         use_int8=False,
         int8_calibration=None,
         max_batch_size=1,
-        max_workspace_size=-1,
+        max_workspace_size=None,
         strict_types=False,
         force_compile=False,
         cluster_minimum_nodes=1,
+        cluster_maximum_nodes=None,
         cluster_ignore_pipeline=True,
         cluster_max_iteration=20,
         dump_subgraph_dir=None,
@@ -97,6 +101,7 @@ class XRTModule(flow.nn.Module):
         self.engine = self.make_engine(engine)
         self.clustering_options = self.make_clustering_options(
             cluster_minimum_nodes,
+            cluster_maximum_nodes,
             cluster_ignore_pipeline,
             cluster_max_iteration,
             dump_subgraph_dir,
@@ -160,12 +165,15 @@ class XRTModule(flow.nn.Module):
     def make_clustering_options(
         self,
         minimum_nodes=1,
+        maximum_nodes=None,
         ignore_pipeline=True,
         max_iteration=20,
         dump_subgraph_dir=None,
     ):
         options = ofrt.ClusteringOptions()
         options.minimum_nodes = minimum_nodes
+        if maximum_nodes is not None:
+            options.maximum_nodes = maximum_nodes
         options.ignore_pipeline = ignore_pipeline
         options.max_iteration = max_iteration
         if dump_subgraph_dir is not None:
@@ -178,7 +186,7 @@ class XRTModule(flow.nn.Module):
         use_int8=False,
         int8_calibration=None,
         max_batch_size=1,
-        max_workspace_size=-1,
+        max_workspace_size=None,
         strict_types=False,
         force_compile=False,
     ):
@@ -188,7 +196,8 @@ class XRTModule(flow.nn.Module):
         if int8_calibration is not None:
             options.int8_calibration = int8_calibration
         options.max_batch_size = max_batch_size
-        options.max_workspace_size = max_workspace_size
+        if max_workspace_size is not None:
+            options.max_workspace_size = max_workspace_size
         options.strict_types = strict_types
         options.force_compile = force_compile
         return options

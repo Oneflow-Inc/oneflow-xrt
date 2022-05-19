@@ -36,6 +36,7 @@ PTQCalibrationMode::~PTQCalibrationMode() {
   } else {
     CacheAndWriteInt8Calibration(cache_path_);
   }
+  calibration_mode_enabled = false;
 }
 
 /*static*/ bool PTQCalibrationMode::Enabled() {

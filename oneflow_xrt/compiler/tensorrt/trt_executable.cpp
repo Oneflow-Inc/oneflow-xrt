@@ -70,6 +70,7 @@ nvinfer1::ICudaEngine* TrtExecutable::CreateExecutableEngine(
   if (run_options.common.strict_types()) {
     flags |= (1U << int(nvinfer1::BuilderFlag::kSTRICT_TYPES));
   }
+  flags |= (1U << int(nvinfer1::BuilderFlag::kOBEY_PRECISION_CONSTRAINTS));
   // flags |= (1U << int(nvinfer1::BuilderFlag::kREFIT));
   build_config->setFlags(flags);
 
@@ -159,6 +160,7 @@ bool TrtExecutable::Run(const std::vector<Parameter>& inputs,
   // TODO(hjchen2): check batch size is same for all binding parameters
   int batch_size = 1;
   for (int i = 0; i < num_bindings; ++i) {
+    CHECK(binding_params[i]) << "missing binding param which index is " << i;
     if (binding_params[i]->shape().NumAxes() > 0 &&
         binding_params[i]->shape().At(0) > batch_size) {
       batch_size = binding_params[i]->shape().At(0);
@@ -174,34 +176,33 @@ bool TrtExecutable::Run(const std::vector<Parameter>& inputs,
     execution_context_.reset(engine_->createExecutionContext());
   }
 
-  if (run_options.common.use_int8() && PTQCalibrationMode::Enabled()) {
+  if (run_options.common.use_int8() && !calibrator_) {
+    CHECK(PTQCalibrationMode::Enabled())
+        << "A offline calibration table should be provided or enable "
+           "calibration mode to generate one online";
     auto* res = TRTInt8CalibratorResource::LookupOrCreate(this->name());
     {
       std::lock_guard<std::mutex> lock(res->mutex_);
       if (!res->calibrator_) {
         res->calibrator_.reset(new TRTInt8Calibrator());
+        // TODO(hjchen2): TensorRT maybe crash if calibrator batch size > 1
+        res->calibrator_->setBatchSize(1 /*batch_size*/);
         int ordinal = GetDeviceId(XrtDevice::GPU_CUDA);
         res->thread_.reset(
             new std::thread([this, ordinal, batch_size, res, run_options]() {
               SetDeviceId(XrtDevice::GPU_CUDA, ordinal);
-              // TODO(hjchen2): TensorRT maybe crash if calibrator batch size >
-              // 1
-              res->calibrator_->setBatchSize(1 /*batch_size*/);
               res->engine_.reset(this->CreateExecutableEngine(
                   run_options, batch_size, res->calibrator_.get()));
+              CHECK_EQ(cudaSuccess,
+                       cudaStreamSynchronize(
+                           reinterpret_cast<cudaStream_t>(run_options.stream)));
+              this->calibrator_ = res->calibrator_;
+              this->execution_context_.reset(
+                  res->engine_->createExecutionContext());
             }));
       }
     }
-
-    if (res->calibrator_->isDone()) {
-      CHECK_EQ(cudaSuccess,
-               cudaStreamSynchronize(
-                   reinterpret_cast<cudaStream_t>(run_options.stream)));
-      calibrator_ = res->calibrator_;
-      execution_context_.reset(res->engine_->createExecutionContext());
-    } else {
-      res->calibrator_->setBatch(binding_params);
-    }
+    res->calibrator_->setBatch(binding_params);
   }
 
   return ExecuteEngine(batch_size, buffers.data(), run_options.stream,

@@ -29,6 +29,14 @@ class ActivationOp : public TrtOpKernel {
     nvinfer1::ITensor* in = ctx->SoleInput();
     auto* layer = ctx->builder()->addActivation(*in, activation_type);
     layer->setName(ctx->op_name().c_str());
+
+    // force float32 to reduce precision loss, it is useful for accuracy
+    // sensitive models such as super resolution
+    if (activation_type == nvinfer1::ActivationType::kTANH ||
+        activation_type == nvinfer1::ActivationType::kSIGMOID ||
+        activation_type == nvinfer1::ActivationType::kSIGMOID) {
+      layer->setPrecision(nvinfer1::DataType::kFLOAT);
+    }
     ctx->SetSoleOutput(layer->getOutput(0));
   }
 };
@@ -40,6 +48,10 @@ REGISTER_TRT_OP_KERNEL(relu, ActivationOp<nvinfer1::ActivationType::kRELU>)
     .EnableTrainPhase()
     .Finalize();
 REGISTER_TRT_OP_KERNEL(sigmoid,
+                       ActivationOp<nvinfer1::ActivationType::kSIGMOID>)
+    .EnableTrainPhase()
+    .Finalize();
+REGISTER_TRT_OP_KERNEL(sigmoid_v2,
                        ActivationOp<nvinfer1::ActivationType::kSIGMOID>)
     .EnableTrainPhase()
     .Finalize();
