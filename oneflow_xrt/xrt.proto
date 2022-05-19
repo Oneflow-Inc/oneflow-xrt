@@ -39,6 +39,12 @@ message ExecuteOptionsProto {
   // use_fp16, but you can set strict_types to enforce the engine to use
   // low precision
   optional bool strict_types = 11 [default = false];
+
+  // In order to reduce the computation precision loss, some ops specify
+  // a precision constraint, but this constraint is not mandatory, and the
+  // engine may still choose an appropriate precision based on it's tuning
+  // result. This option will make the constraint to be mandatory
+  optional bool force_precision_constraints = 12 [default = true];
 }
 
 message FunctionArgumentProto {

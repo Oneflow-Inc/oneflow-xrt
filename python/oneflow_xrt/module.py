@@ -23,37 +23,39 @@ class XRTModule(flow.nn.Module):
 
     Args:
         - module:
-              Initial oneflow module (nn.Module) or graph (nn.Graph).
+            Initial oneflow module (nn.Module) or graph (nn.Graph).
         - engine:
-              The desired engine used to accelerate the module. Can be a str or a list of str.
+            The desired engine used to accelerate the module. Can be a str or a list of str.
         - use_fp16:
-              If use fp16 precision. Default: False
+            If use fp16 precision. Default: False
         - use_int8:
-              If use int8 precision. Default: False
+            If use int8 precision. Default: False
         - int8_calibration:
-              The directory of TensorRT style int8 calibration table. Default: None
+            The directory of TensorRT style int8 calibration table. Default: None
         - max_batch_size:
-              The maximum batch size for training or inference. Default: 1
+            The maximum batch size for training or inference. Default: 1
         - max_workspace_size:
-              The maximum available workspace for XRT. Default: None
+            The maximum available workspace for XRT. Default: None
         - strict_types:
-              It does not guarantee to use low precision if just set use_int8 or use_fp16, but you can set strict_types to enforce the engine to use low precision. Default: False
+            It does not guarantee to use low precision if just set use_int8 or use_fp16, but you can set strict_types to enforce the engine to use low precision. Default: False
+        - force_precision_constraints:
+            In order to reduce the computation precision loss, some ops specify a precision constraint, but this constraint is not mandatory, and the engine may still choose an appropriate precision based on it's tuning result. This option will make the constraint to be mandatory. Default: True
         - force_compile:
-              Force compile on every execution without using the cached results. Default: False
+            Force compile on every execution without using the cached results. Default: False
         - cluster_minimum_nodes:
-              The minimum subgraph size.
-              XRT ensure that the size of the clustered subgraph will not be less than it. Default: 1
+            The minimum subgraph size.
+            XRT ensure that the size of the clustered subgraph will not be less than it. Default: 1
         - cluster_maximum_nodes:
-              The maximum subgraph size.
-              XRT ensure that the size of the clustered subgraph will not be larger than it. Usually used in debugging. Default: None
+            The maximum subgraph size.
+            XRT ensure that the size of the clustered subgraph will not be larger than it. Usually used in debugging. Default: None
         - cluster_ignore_pipeline:
-              XRT will not strictly take execution dependencies into consideration when cluster subgraph. Default: True
+            XRT will not strictly take execution dependencies into consideration when cluster subgraph. Default: True
         - cluster_max_iteration:
-              The maximum iteration when cluster subgraph. Default: 20
+            The maximum iteration when cluster subgraph. Default: 20
         - dump_subgraph_dir:
-              The subgraph clustered will be dumped in this directory. Default: None
+            The subgraph clustered will be dumped in this directory. Default: None
         - verbose:
-              If output some details. Default: False
+            If output some details. Default: False
 
     For example:
 
@@ -79,6 +81,7 @@ class XRTModule(flow.nn.Module):
         max_batch_size=1,
         max_workspace_size=None,
         strict_types=False,
+        force_precision_constraints=True,
         force_compile=False,
         cluster_minimum_nodes=1,
         cluster_maximum_nodes=None,
@@ -113,6 +116,7 @@ class XRTModule(flow.nn.Module):
             max_batch_size,
             max_workspace_size,
             strict_types,
+            force_precision_constraints,
             force_compile,
         )
         self.verbose = verbose
@@ -188,6 +192,7 @@ class XRTModule(flow.nn.Module):
         max_batch_size=1,
         max_workspace_size=None,
         strict_types=False,
+        force_precision_constraints=True,
         force_compile=False,
     ):
         options = ofrt.ReBuildJobOptions()
@@ -199,6 +204,7 @@ class XRTModule(flow.nn.Module):
         if max_workspace_size is not None:
             options.max_workspace_size = max_workspace_size
         options.strict_types = strict_types
+        options.force_precision_constraints = force_precision_constraints
         options.force_compile = force_compile
         return options
 

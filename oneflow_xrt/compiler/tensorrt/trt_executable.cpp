@@ -70,7 +70,9 @@ nvinfer1::ICudaEngine* TrtExecutable::CreateExecutableEngine(
   if (run_options.common.strict_types()) {
     flags |= (1U << int(nvinfer1::BuilderFlag::kSTRICT_TYPES));
   }
-  flags |= (1U << int(nvinfer1::BuilderFlag::kOBEY_PRECISION_CONSTRAINTS));
+  if (run_options.common.force_precision_constraints()) {
+    flags |= (1U << int(nvinfer1::BuilderFlag::kOBEY_PRECISION_CONSTRAINTS));
+  }
   // flags |= (1U << int(nvinfer1::BuilderFlag::kREFIT));
   build_config->setFlags(flags);
 

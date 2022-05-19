@@ -253,6 +253,8 @@ void FoldSubgraphBuilder::BuildXrtLaunchOps() {
     options->set_int8_calibration(options_.int8_calibration);
     options->set_force_compile(options_.force_compile);
     options->set_strict_types(options_.strict_types);
+    options->set_force_precision_constraints(
+        options_.force_precision_constraints);
     options->set_max_batch_size(options_.max_batch_size);
     options->set_max_workspace_size(options_.max_workspace_size);
 

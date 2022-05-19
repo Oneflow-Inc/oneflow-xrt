@@ -118,6 +118,15 @@ void InitReBuildJobOptionsApis(py::module_& m) {
             opt.strict_types = strict_types;
           })
       .def_property(
+          "force_precision_constraints", /*getter*/
+          [](const ReBuildJobOptions& opt) {
+            return opt.force_precision_constraints;
+          },
+          /*setter*/
+          [](ReBuildJobOptions& opt, const bool& force_precision_constraints) {
+            opt.force_precision_constraints = force_precision_constraints;
+          })
+      .def_property(
           "int8_calibration", /*getter*/
           [](const ReBuildJobOptions& opt) { return opt.int8_calibration; },
           /*setter*/
