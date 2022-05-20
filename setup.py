@@ -87,8 +87,9 @@ class install(setuptools.command.install.install):
 
 
 def setup_extension(package_name, description):
-    if not os.path.exists(package_name):
-        os.makedirs(package_name)
+    package_dir = f"python/{package_name}"
+    if not os.path.exists(package_dir):
+        os.makedirs(package_dir)
     setup(
         name=package_name,
         version="0.0.1",
@@ -96,7 +97,7 @@ def setup_extension(package_name, description):
         ext_modules=[Extension(package_name, sources=[])],
         cmdclass={"build_ext": build_ext, "build_py": build_py, "install": install},
         zip_safe=False,
-        package_dir={package_name: f"python/{package_name}"},
+        package_dir={package_name: package_dir},
         packages=[package_name],
         package_data={package_name: ["*.so*", "*.dylib*", "*.dll", "*.lib",]},
     )
