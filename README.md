@@ -54,7 +54,7 @@ git clone https://github.com/Oneflow-Inc/oneflow-xrt
 Inside OneFlow-XRT source directory, then run the following command to install `oneflow_xrt`:
 
 ```shell
-python3 python/setup.py install
+python3 setup.py install
 ```
 
 The following components are optional, run the command to install it according to your needs,
@@ -62,7 +62,7 @@ The following components are optional, run the command to install it according t
 - `oneflow_xrt_xla`
 
 ```shell
-BUILD_XLA=ON python3 python/setup.py install
+BUILD_XLA=ON python3 setup.py install
 ```
 
 - `oneflow_xrt_tensorrt`

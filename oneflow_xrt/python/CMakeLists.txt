@@ -55,7 +55,7 @@ function(ONEFLOW_XRT_ADD_STUB target_name)
   add_custom_target(
       ${target_name}_create_python_module
       COMMAND ${Python_EXECUTABLE}
-              ${ONEFLOW_XRT_PYTHON_DIR}/tools/create_python_module.py
+              ${PROJECT_SOURCE_DIR}/tools/create_python_module.py
               ${ONEFLOW_XRT_PYTHON_DIR} ${target_name}
       DEPENDS ${Python_EXECUTABLE}
   )

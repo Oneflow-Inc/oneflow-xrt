@@ -25,7 +25,7 @@ import setuptools.command.build_py
 import setuptools.command.install
 import os
 
-from tools.utils import env
+from tools.env import env
 
 
 cwd = os.path.dirname(os.path.abspath(__file__))
@@ -39,22 +39,21 @@ class build_ext(setuptools.command.build_ext.build_ext):
         cmake_args = ["-DCMAKE_BUILD_TYPE=" + env.cmake_build_type]
 
         if ext.name == "oneflow_xrt_xla":
-            cmake_args += ["-DWITH_XLA=ON"]
+            cmake_args += ["-DBUILD_XLA=ON"]
         elif ext.name == "oneflow_xrt_tensorrt":
             cmake_args += [
-                "-DWITH_TENSORRT=ON",
+                "-DBUILD_TENSORRT=ON",
                 f"-DTENSORRT_ROOT={env.tensorrt_root}",
             ]
         elif ext.name == "oneflow_xrt_openvino":
             cmake_args += [
-                "-DWITH_OPENVINO=ON",
+                "-DBUILD_OPENVINO=ON",
                 f"-DOPENVINO_ROOT={env.openvino_root}",
             ]
         else:
             pass
 
-        source_dir = os.path.join(cwd, "..")
-        self.spawn(["cmake", source_dir] + cmake_args)
+        self.spawn(["cmake", cwd] + cmake_args)
 
         build_args = ["--config", env.cmake_build_type, "--", "-j"]
         if not self.dry_run:
@@ -97,6 +96,7 @@ def setup_extension(package_name, description):
         ext_modules=[Extension(package_name, sources=[])],
         cmdclass={"build_ext": build_ext, "build_py": build_py, "install": install},
         zip_safe=False,
+        package_dir={package_name: f"python/{package_name}"},
         packages=[package_name],
         package_data={package_name: ["*.so*", "*.dylib*", "*.dll", "*.lib",]},
     )
