@@ -53,6 +53,14 @@ class XrtLaunchKernelState : public user_op::OpKernelState {
   std::shared_ptr<xrt::CompilationCache> compilation_cache_;
 };
 
+static xrt::Parameter BuildParameter(const std::string& name,
+                                     const user_op::Tensor* tensor) {
+  Shape shape;
+  tensor->shape().ToShape(&shape);
+  return xrt::Parameter(name, const_cast<void*>(tensor->dptr()), shape,
+                        tensor->data_type());
+}
+
 class XrtLaunchKernel : public user_op::OpKernel {
  public:
   XrtLaunchKernel() = default;
@@ -150,13 +158,13 @@ void XrtLaunchKernel::Compute(user_op::KernelComputeContext* ctx,
     std::string name = absl::StrCat(input.first, "_", input.second);
     const user_op::Tensor* input_tensor = ctx->Tensor4ArgNameAndIndex(
         /*name*/ input.first, /*index*/ input.second);
-    entry_params.emplace_back(xrt::BuildParameter(name, input_tensor));
+    entry_params.emplace_back(BuildParameter(name, input_tensor));
   }
   for (const auto& output : ctx->outputs()) {
     std::string name = absl::StrCat(output.first, "_", output.second);
     const user_op::Tensor* output_tensor = ctx->Tensor4ArgNameAndIndex(
         /*name*/ output.first, /*index*/ output.second);
-    return_params.emplace_back(xrt::BuildParameter(name, output_tensor));
+    return_params.emplace_back(BuildParameter(name, output_tensor));
   }
 
   std::vector<xrt::InputOutputAlias> aliases;

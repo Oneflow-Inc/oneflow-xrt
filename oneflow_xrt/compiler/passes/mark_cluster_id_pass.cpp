@@ -164,10 +164,19 @@ void MarkClusterIdPass::RemoveInvalidClusterNodes(
     const ClusteringOptions& options) {
   const int min_nodes = options.minimum_nodes;
   const int max_nodes = options.maximum_nodes;
+  // remove cluster if it has only NoOp node
+  auto IsAllNoOp = [](const ClusterNode* node) {
+    for (const ClusterNode* folded_node : node->folded_nodes()) {
+      if (!folded_node->xrt_node()->IsNoOpNode()) {
+        return false;
+      }
+    }
+    return true;
+  };
   std::vector<ClusterNode*> removing_clusters;
   for (ClusterNode* node : root_nodes_) {
     if (!node->IsCompiled(options.engine) || node->size() < min_nodes ||
-        node->size() > max_nodes) {
+        node->size() > max_nodes || IsAllNoOp(node)) {
       removing_clusters.emplace_back(node);
     }
   }

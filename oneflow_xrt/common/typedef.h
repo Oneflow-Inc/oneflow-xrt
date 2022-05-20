@@ -22,6 +22,7 @@ namespace xrt {
 constexpr char const _XrtLaunchOpType[] = "XrtLaunch";
 constexpr char const _XrtEntryOpType[] = "XrtEntry";
 constexpr char const _XrtReturnOpType[] = "XrtReturn";
+constexpr char const _XrtNoOpType[] = "XrtNoOp";
 constexpr char const _XrtUnsupportedOpType[] = "XrtUnsupported";
 
 constexpr char const _XrtLaunchPrefix[] = "_xrt_launch_";

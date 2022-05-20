@@ -35,7 +35,7 @@ bool IsCanbeCompiledNode(const XrtNode* node, const XrtEngine& engine,
         OpKernelAttrRegId, (OpKernelAttrRegKey{node->type(), engine}));
     return kernel_attrs.train_phase_enabled;
   }
-  return false;
+  return node->IsNoOpNode();
 }
 
 bool IsModelUpdateNode(const XrtNode* node) {

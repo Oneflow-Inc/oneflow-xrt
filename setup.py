@@ -18,12 +18,12 @@
 #  OPENVINO_ROOT
 #    specify where OpenVINO runtime is installed
 
+import os
 from setuptools import find_packages, setup
 from setuptools import Extension
 import setuptools.command.build_ext
 import setuptools.command.build_py
 import setuptools.command.install
-import os
 
 from tools.env import env
 
@@ -110,14 +110,14 @@ if env.build_xla:
 elif env.build_tensorrt:
     assert (
         env.tensorrt_root != ""
-    ), "should specify TENSORRT_ROOT where TensorRT runtime is installed when build with TensorRT"
+    ), "should specify TENSORRT_ROOT where TensorRT is installed when building TensorRT"
     setup_extension(
         "oneflow_xrt_tensorrt", description=("oneflow_xrt's tensorrt extension"),
     )
 elif env.build_openvino:
     assert (
         env.openvino_root != ""
-    ), "should specify OPENVINO_ROOT where OpenVINO runtime is installed when build with OpenVINO"
+    ), "should specify OPENVINO_ROOT where OpenVINO runtime is installed when building OpenVINO"
     setup_extension(
         "oneflow_xrt_openvino", description=("oneflow_xrt's openvino extension"),
     )

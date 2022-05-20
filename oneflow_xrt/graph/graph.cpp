@@ -86,6 +86,18 @@ XrtNode* XrtGraph::AddReturnNode(const std::string& name) {
   return node;
 }
 
+XrtNode* XrtGraph::AddNoOpNode(const std::string& name,
+                               const XrtDevice device) {
+  OperatorConf conf;
+  conf.set_name(name);
+  conf.set_device_tag(
+      *CHECK_JUST(DeviceTag4DeviceType(XrtDeviceToOfDevice(device))));
+  auto* user_conf = conf.mutable_user_conf();
+  user_conf->set_op_type_name(_XrtNoOpType);
+  (*user_conf->mutable_input())["value"].add_s(name);
+  return AddNode(conf);
+}
+
 XrtEdge* XrtGraph::AddEdge() {
   std::unique_ptr<XrtEdge> edge(new XrtEdge);
   edge->unique_id_ = edges_.size();

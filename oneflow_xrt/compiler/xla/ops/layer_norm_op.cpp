@@ -92,15 +92,14 @@ void LayerNormOp::Compile(XlaOpContext* ctx) {
         xla::ConvertElementType(output, DataTypeToPrimitiveType(output_type));
   }
 
-  Shape gamma_shape = Shape({norm_dims});
-  // output = Reshape(output, Shape({batch_dims, norm_dims}));
+  Shape param_shape = Shape({norm_dims});
   if (ctx->Attr<bool>("scale")) {
-    CHECK_EQ(gamma_shape, ctx->InputShape("gamma_0"));
-    output = xla::Mul(output, ctx->Input("gamma_0"), {3} /*broadcast dim*/);
+    output = xla::Mul(output, Reshape(ctx->Input("gamma_0"), param_shape),
+                      {3} /*broadcast dim*/);
   }
   if (ctx->Attr<bool>("center")) {
-    CHECK_EQ(gamma_shape, ctx->InputShape("beta_0"));
-    output = xla::Add(output, ctx->Input("beta_0"), {3} /*broadcast dim*/);
+    output = xla::Add(output, Reshape(ctx->Input("beta_0"), param_shape),
+                      {3} /*broadcast dim*/);
   }
 
   ctx->SetOutput("y_0", Reshape(output, input_shape));

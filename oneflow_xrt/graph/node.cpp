@@ -67,6 +67,8 @@ bool XrtNode::IsEntryNode() const { return type_ == _XrtEntryOpType; }
 
 bool XrtNode::IsReturnNode() const { return type_ == _XrtReturnOpType; }
 
+bool XrtNode::IsNoOpNode() const { return type_ == _XrtNoOpType; }
+
 bool XrtNode::IsReachable(const XrtNode& dst_node) const {
   return algorithm::IsReachable(this, &dst_node);
 }

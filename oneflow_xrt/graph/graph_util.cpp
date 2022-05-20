@@ -84,12 +84,12 @@ GraphBuilder::GraphBuilder(const FunctionProto& function)
   for (const auto& input : function.input()) {
     XrtNode* node = graph_->AddEntryNode(input.name());
     producers_[input.value()] = node;
-    node_info_[node].input_output_keys.emplace(input.value(), "value");
+    node_info_[node].input_output_keys[input.value()] = "value";
   }
   for (const auto& output : function.output()) {
     XrtNode* node = graph_->AddReturnNode(output.name());
-    node_info_[node].inputs.insert(output.value());
-    node_info_[node].input_output_keys.emplace(output.value(), "value");
+    node_info_[node].inputs = {output.value()};
+    node_info_[node].input_output_keys[output.value()] = "value";
   }
 
   for (const auto& node_conf : function.node()) {
@@ -121,6 +121,7 @@ ArgumentMetaData GraphBuilder::MakeMetaData(const XrtNode* start,
 }
 
 void GraphBuilder::BuildGraphEdges() {
+  std::set<std::string> consumed_args;
   for (const auto& p : node_info_) {
     const XrtNode* node = p.first;
     const std::set<std::string>& inputs = p.second.inputs;
@@ -129,8 +130,29 @@ void GraphBuilder::BuildGraphEdges() {
       if (it != producers_.end() && it->second != node) {
         Argument argument(input, MakeMetaData(it->second, node, input));
         graph_->Connect(it->second, node, argument);
+        consumed_args.insert(input);
       }
     }
+  }
+  // add NoOp to consume arguments that is produced but never unused
+  for (const auto& it : producers_) {
+    const auto& arg_name = it.first;
+    if (consumed_args.count(arg_name)) {
+      continue;
+    }
+    const XrtNode* node = graph_->AddNoOpNode(arg_name, it.second->device());
+    // update node info
+    auto& node_info = node_info_[node];
+    node_info.inputs = {arg_name};
+    node_info.input_output_keys[arg_name] = "value";
+    const auto& start_node_info = node_info_.at(it.second);
+    node_info.time_shape = start_node_info.time_shape;
+    if (!start_node_info.nd_sbp.empty()) {
+      node_info.nd_sbp[arg_name] = start_node_info.nd_sbp.at(arg_name);
+    }
+    // connect NoOp
+    Argument argument(arg_name, MakeMetaData(it.second, node, arg_name));
+    graph_->Connect(it.second, node, argument);
   }
 }
 
