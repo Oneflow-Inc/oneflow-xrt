@@ -116,7 +116,7 @@ GraphBuilder::GraphBuilder(const FunctionProto& function)
     if (consumed_args.count(arg_name)) {
       continue;
     }
-    const XrtNode* node = graph_->AddNoOpNode(arg_name, it.second->device());
+    const XrtNode* node = graph_->AddNoOpNode(arg_name);
     // update node info
     auto& node_info = node_info_[node];
     node_info.inputs = {arg_name};

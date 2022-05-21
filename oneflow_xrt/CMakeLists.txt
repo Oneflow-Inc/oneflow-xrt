@@ -18,7 +18,6 @@ file(GLOB_RECURSE XRT_SRCS
   compiler/kernel/*.cpp
   compiler/passes/*.cpp
   int8_calibration/*.cpp
-  xrt_no_op.cpp
   xrt_launch_kernel.cpp
   xrt_launch_op.cpp
 )

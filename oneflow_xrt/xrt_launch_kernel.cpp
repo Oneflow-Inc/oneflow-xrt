@@ -170,6 +170,9 @@ void XrtLaunchKernel::Compute(user_op::KernelComputeContext* ctx,
   std::vector<xrt::InputOutputAlias> aliases;
   MakeInputOutputAlias(launch_state->liveout_entries(), entry_params,
                        &return_params, &aliases);
+  if (return_params.empty()) {
+    return;
+  }
 
   const auto& options = launch_state->proto().options();
   xrt::XrtDevice device = options.device();
