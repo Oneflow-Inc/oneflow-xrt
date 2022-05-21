@@ -30,13 +30,5 @@ std::shared_ptr<XrtGraph> RunClusterSubGraphPass(
   return RunBuildSubGraphPass(new_graph.get(), options);
 }
 
-Parameter BuildParameter(const std::string& name,
-                         const user_op::Tensor* tensor) {
-  Shape shape;
-  tensor->shape().ToShape(&shape);
-  return Parameter(name, const_cast<void*>(tensor->dptr()), shape,
-                   tensor->data_type());
-}
-
 }  // namespace xrt
 }  // namespace oneflow

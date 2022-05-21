@@ -224,7 +224,7 @@ class XRTModule(flow.nn.Module):
         if self.verbose:
             print("job after XRT compilation: ", compiled_job)
 
-        self.module.restore_full_job(compiled_job)
+        self.module._full_graph_proto = compiled_job
         self.module.finish_complie_and_init_runtime()
         self.is_compiled = True
         return self.module(*args, **kwargs)

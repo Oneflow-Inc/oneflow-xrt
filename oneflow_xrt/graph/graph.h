@@ -40,6 +40,8 @@ class XrtGraph : public std::enable_shared_from_this<XrtGraph> {
   XrtNode* AddEntryNode(const std::string& name);
   XrtNode* AddReturnNode(const std::string& name);
 
+  XrtNode* AddNoOpNode(const std::string& name);
+
   XrtEdge* AddEdge();
   XrtEdge* AddEdge(const XrtNode* start, const XrtNode* end);
 

@@ -98,6 +98,7 @@ class XrtNode {
   bool IsFinishNode() const;
   bool IsEntryNode() const;
   bool IsReturnNode() const;
+  bool IsNoOpNode() const;
 
   bool IsReachable(const XrtNode& dst_node) const;
 

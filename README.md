@@ -38,10 +38,10 @@ To install OneFlow-XRT via pip, use the following command:
 
 - install cmake
 - install oneflow
-- install CUDA if oneflow supports CUDA device or building with TensorRT
-- install bazel if building with XLA
-- download and unzip TensorRT if building with TensorRT
-- download and unzip OpenVINO runtime if building with OpenVINO
+- install CUDA if oneflow supports CUDA device or building TensorRT
+- install bazel if building XLA
+- download and unzip TensorRT if building TensorRT
+- download and unzip OpenVINO runtime if building OpenVINO
 
 #### Get the OneFlow-XRT Source
 

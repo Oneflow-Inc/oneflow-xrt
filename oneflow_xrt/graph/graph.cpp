@@ -86,6 +86,12 @@ XrtNode* XrtGraph::AddReturnNode(const std::string& name) {
   return node;
 }
 
+XrtNode* XrtGraph::AddNoOpNode(const std::string& name) {
+  XrtNode* node = AddNode(name);
+  node->type_ = _XrtNoOpType;
+  return node;
+}
+
 XrtEdge* XrtGraph::AddEdge() {
   std::unique_ptr<XrtEdge> edge(new XrtEdge);
   edge->unique_id_ = edges_.size();

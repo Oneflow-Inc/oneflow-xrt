@@ -18,7 +18,6 @@ limitations under the License.
 
 #include "oneflow/core/framework/framework.h"
 #include "oneflow/core/job/job.pb.h"
-#include "oneflow_xrt/compiler/parameter.h"
 #include "oneflow_xrt/compiler/passes/options.h"
 #include "oneflow_xrt/compiler/passes/shape_inference_context.h"
 #include "oneflow_xrt/graph/graph.h"
@@ -27,9 +26,6 @@ limitations under the License.
 
 namespace oneflow {
 namespace xrt {
-
-Parameter BuildParameter(const std::string& name,
-                         const user_op::Tensor* tensor);
 
 extern std::shared_ptr<XrtGraph> BuildGraph(const FunctionProto& function);
 extern std::shared_ptr<XrtGraph> BuildGraph(const Job& job);

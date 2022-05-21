@@ -30,6 +30,9 @@ namespace shape_inference {
 void InferPhysicalShape(const XrtGraph* graph, ShapeInferenceContext& context) {
   auto* infered_physical_blob_descs = context.infered_physical_blob_descs();
   algorithm::TopologyVisit(*graph, [&](const XrtNode* node) {
+    if (node->IsNoOpNode()) {
+      return;
+    }
     if (node->IsEntryNode()) {
       // entry node must have output edge
       CHECK_GT(node->out_edges().size(), 0);

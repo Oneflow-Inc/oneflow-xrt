@@ -95,6 +95,9 @@ void XlaGraphCompiler::BuildComputation(
     xla::Shape* output_shape, xla::XlaComputation* computation) {
   // Compile each node as topology order.
   algorithm::TopologyVisit(*graph, [&](const XrtNode* node) {
+    if (node->IsNoOpNode()) {
+      return;
+    }
     SetOpMetadata(node->type(), node->name());
     // Setup param to build an XlaOpContext.
     XlaOpContext::Param param;
