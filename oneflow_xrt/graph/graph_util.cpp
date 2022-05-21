@@ -81,6 +81,7 @@ GraphBuilder::GraphBuilder(const Job& job)
 
 GraphBuilder::GraphBuilder(const FunctionProto& function)
     : graph_(std::make_shared<XrtGraph>()) {
+  std::set<std::string> consumed_args;
   for (const auto& input : function.input()) {
     XrtNode* node = graph_->AddEntryNode(input.name());
     producers_[input.value()] = node;
@@ -90,6 +91,7 @@ GraphBuilder::GraphBuilder(const FunctionProto& function)
     XrtNode* node = graph_->AddReturnNode(output.name());
     node_info_[node].inputs = {output.value()};
     node_info_[node].input_output_keys[output.value()] = "value";
+    consumed_args.insert(output.value());
   }
 
   for (const auto& node_conf : function.node()) {
@@ -105,33 +107,7 @@ GraphBuilder::GraphBuilder(const FunctionProto& function)
       std::string input = GenLogicalBlobName(op->BnInOp2Lbi(bn));
       input_output_keys[input] = bn;
       node_info_[node].inputs.insert(input);
-    }
-  }
-}
-
-ArgumentMetaData GraphBuilder::MakeMetaData(const XrtNode* start,
-                                            const XrtNode* end,
-                                            const std::string& arg_name) {
-  ArgumentMetaData meta_data;
-  const auto& produce_keys = node_info_.at(start).input_output_keys;
-  const auto& consume_keys = node_info_.at(end).input_output_keys;
-  meta_data.produce_key = produce_keys.at(arg_name);
-  meta_data.consume_key = consume_keys.at(arg_name);
-  return meta_data;
-}
-
-void GraphBuilder::BuildGraphEdges() {
-  std::set<std::string> consumed_args;
-  for (const auto& p : node_info_) {
-    const XrtNode* node = p.first;
-    const std::set<std::string>& inputs = p.second.inputs;
-    for (const std::string& input : inputs) {
-      const auto& it = producers_.find(input);
-      if (it != producers_.end() && it->second != node) {
-        Argument argument(input, MakeMetaData(it->second, node, input));
-        graph_->Connect(it->second, node, argument);
-        consumed_args.insert(input);
-      }
+      consumed_args.insert(input);
     }
   }
   // add NoOp to consume arguments that is produced but never unused
@@ -150,9 +126,31 @@ void GraphBuilder::BuildGraphEdges() {
     if (!start_node_info.nd_sbp.empty()) {
       node_info.nd_sbp[arg_name] = start_node_info.nd_sbp.at(arg_name);
     }
-    // connect NoOp
-    Argument argument(arg_name, MakeMetaData(it.second, node, arg_name));
-    graph_->Connect(it.second, node, argument);
+  }
+}
+
+ArgumentMetaData GraphBuilder::MakeMetaData(const XrtNode* start,
+                                            const XrtNode* end,
+                                            const std::string& arg_name) {
+  ArgumentMetaData meta_data;
+  const auto& produce_keys = node_info_.at(start).input_output_keys;
+  const auto& consume_keys = node_info_.at(end).input_output_keys;
+  meta_data.produce_key = produce_keys.at(arg_name);
+  meta_data.consume_key = consume_keys.at(arg_name);
+  return meta_data;
+}
+
+void GraphBuilder::BuildGraphEdges() {
+  for (const auto& p : node_info_) {
+    const XrtNode* node = p.first;
+    const std::set<std::string>& inputs = p.second.inputs;
+    for (const std::string& input : inputs) {
+      const auto& it = producers_.find(input);
+      if (it != producers_.end() && it->second != node) {
+        Argument argument(input, MakeMetaData(it->second, node, input));
+        graph_->Connect(it->second, node, argument);
+      }
+    }
   }
 }
 

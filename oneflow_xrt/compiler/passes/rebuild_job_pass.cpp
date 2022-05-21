@@ -128,8 +128,7 @@ FoldSubgraphBuilder::FoldSubgraphBuilder(XrtGraph* graph, Job* job,
     XrtGraph* sub_graph = launch_nodes_[i]->sub_graph();
     CHECK_NOTNULL(sub_graph);
     for (const XrtNode* sub_node : sub_graph->Nodes()) {
-      if (!sub_node->IsEntryNode() && !sub_node->IsReturnNode() &&
-          !sub_node->IsNoOpNode()) {
+      if (!sub_node->IsEntryNode() && !sub_node->IsReturnNode()) {
         folded_nodes_[i].emplace_back(sub_node);
       }
     }
@@ -270,19 +269,29 @@ void FoldSubgraphBuilder::BuildXrtLaunchOps() {
     // save function logical blob descs
     const auto& lbn2logical_blob_desc =
         builder_->job().helper().lbn2logical_blob_desc();
+    const auto& op_name2arg_signature =
+        builder_->job().helper().op_name2arg_signature();
     auto* logical_blob_descs = proto.mutable_logical_blob_descs();
 
+    auto CopyLogicalBlobDesc = [&](const std::string& arg_name) {
+      const auto src_it = lbn2logical_blob_desc.find(arg_name);
+      CHECK(src_it != lbn2logical_blob_desc.end());
+      auto dst_it = logical_blob_descs->find(arg_name);
+      if (dst_it != logical_blob_descs->end()) {
+        CHECK(dst_it->second == src_it->second);
+      } else {
+        (*logical_blob_descs)[arg_name] = src_it->second;
+      }
+    };
     for (const XrtNode* sub_node : node->sub_graph()->Nodes()) {
-      for (const XrtEdge* edge : sub_node->in_edges()) {
-        const auto& arg_name = edge->argument().name();
-        const auto it = lbn2logical_blob_desc.find(arg_name);
-        CHECK(it != lbn2logical_blob_desc.end());
-        auto dst_it = logical_blob_descs->find(arg_name);
-        if (dst_it != logical_blob_descs->end()) {
-          CHECK(dst_it->second == it->second);
-        } else {
-          (*logical_blob_descs)[arg_name] = it->second;
-        }
+      if (sub_node->IsEntryNode() || sub_node->IsReturnNode()) {
+        continue;
+      }
+      const auto& it = op_name2arg_signature.find(sub_node->name());
+      CHECK(it != op_name2arg_signature.end());
+      for (const auto& p : it->second.bn_in_op2lbi()) {
+        std::string arg_name = GenLogicalBlobName(p.second);
+        CopyLogicalBlobDesc(arg_name);
       }
     }
     // save the launch op outputs logical blob descs
@@ -295,11 +304,6 @@ void FoldSubgraphBuilder::BuildXrtLaunchOps() {
     // save sbp signatures for the folded nodes
     auto* nd_sbp_signatures = proto.mutable_nd_sbp_signatures();
     for (const auto& node_conf : proto.function().node()) {
-      // skip NoOp node
-      if (node_conf.has_user_conf() &&
-          node_conf.user_conf().op_type_name() == _XrtNoOpType) {
-        continue;
-      }
       const std::string& node_name = node_conf.name();
       (*nd_sbp_signatures)[node_name] =
           builder_->NdSbpSignature4OpName(node_name);
@@ -339,9 +343,6 @@ void FoldSubgraphBuilder::FixupControlInOpNames() {
   };
 
   for (const XrtNode* node : graph_->Nodes()) {
-    if (node->IsNoOpNode()) {
-      continue;
-    }
     auto* op_conf = CHECK_JUST(builder_->MutableOpConf4OpName(node->name()));
     if (!node->sub_graph()) {
       auto ctrl_in_op_names = op_conf->ctrl_in_op_name();
@@ -351,8 +352,7 @@ void FoldSubgraphBuilder::FixupControlInOpNames() {
       }
     } else {
       for (const XrtNode* sub_node : node->sub_graph()->Nodes()) {
-        if (sub_node->IsEntryNode() || sub_node->IsReturnNode() ||
-            sub_node->IsNoOpNode()) {
+        if (sub_node->IsEntryNode() || sub_node->IsReturnNode()) {
           continue;
         }
         const auto& folded_op_conf =
