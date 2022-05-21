@@ -99,6 +99,9 @@ std::shared_ptr<Executable> OpenvinoGraphCompiler::Compile(
   }
 
   algorithm::TopologyVisit(*graph, [&](const XrtNode* node) {
+    if (node->IsNoOpNode()) {
+      return;
+    }
     OpenvinoOpContext::Param param;
     SetupKernelContextParam(node, &param);
     OpenvinoOpContext op_context(param, entry_params_map);

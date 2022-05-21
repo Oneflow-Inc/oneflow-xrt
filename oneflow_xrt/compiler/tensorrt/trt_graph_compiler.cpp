@@ -93,6 +93,9 @@ std::shared_ptr<Executable> TrtGraphCompiler::Compile(
   }
 
   algorithm::TopologyVisit(*graph, [&](const XrtNode* node) {
+    if (node->IsNoOpNode()) {
+      return;
+    }
     TrtOpContext::Param param;
     SetupKernelContextParam(node, &param);
     TrtOpContext op_context(param);
