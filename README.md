@@ -102,6 +102,7 @@ tensor([[ 0.2404,  0.7121,  0.4473,  0.4782],
 - [OneFlow XRT overall architecture and introduction](https://github.com/Oneflow-Inc/oneflow-xrt/wiki/OneFlow-XRT整体架构及简介)
 - [Summary of operators in OneFlow XRT](https://github.com/Oneflow-Inc/oneflow-xrt/wiki/Summary-of-operators-in-OneFlow-XRT)
 - [How to use low precision in OneFlow XRT](https://github.com/Oneflow-Inc/oneflow-xrt/wiki/OneFlow-XRT如何使用低精度计算)
+- [How to extend custom engine components](https://github.com/Oneflow-Inc/oneflow-xrt/wiki/如何在XRT框架下添加自定义的后端引擎)
 
 
 ## Roadmap
