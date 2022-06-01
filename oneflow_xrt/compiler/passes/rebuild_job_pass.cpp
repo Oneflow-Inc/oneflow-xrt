@@ -260,6 +260,7 @@ void FoldSubgraphBuilder::BuildXrtLaunchOps() {
     proto.options->max_batch_size = options_.max_batch_size;
     proto.options->max_workspace_size = options_.max_workspace_size;
 
+    proto.function.reset(new FunctionProtoT);
     // build function
     buildFunction(node, engine, &liveout_entries, proto.function.get());
 

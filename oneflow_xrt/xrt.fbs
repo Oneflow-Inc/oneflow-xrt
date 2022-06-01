@@ -72,3 +72,5 @@ table XrtLaunchProto {
 
   logical_blob_descs: [StringVec];
 }
+
+root_type XrtLaunchProto;

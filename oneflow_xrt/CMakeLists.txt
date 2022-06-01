@@ -15,10 +15,11 @@ file(GLOB_RECURSE XRT_SRCS
   xrt_launch_op.cpp
 )
 add_library(oneflow_xrt SHARED ${XRT_SRCS})
-add_dependencies(oneflow_xrt ${XRT_THIRD_PARTY_DEPENDICES})
+add_dependencies(oneflow_xrt ${XRT_THIRD_PARTY_DEPENDICES} xrt_fbs)
 target_link_libraries(
     oneflow_xrt PUBLIC
-    ${XRT_THIRD_PARTY_LIBRARIES} ${FLATBUFFERS_STATIC_LIBRARIES})
+    ${XRT_THIRD_PARTY_LIBRARIES} ${FLATBUFFERS_STATIC_LIBRARIES}
+    -Wl,--version-script ${PROJECT_SOURCE_DIR}/version_script.lds)
 target_include_directories(
     oneflow_xrt PRIVATE
     ${ONEFLOW_INCLUDE_DIR} ${FLATBUFFERS_INCLUDE_DIR})
