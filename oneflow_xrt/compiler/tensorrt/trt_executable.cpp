@@ -37,13 +37,13 @@ nvinfer1::ICudaEngine* TrtExecutable::CreateExecutableEngine(
   auto build_config =
       nv::unique_ptr<nvinfer1::IBuilderConfig>(builder_->createBuilderConfig());
   int64_t max_workspace_size = 1U << 24;  // 16MiB
-  if (run_options.common.max_workspace_size() > 0) {
-    max_workspace_size = run_options.common.max_workspace_size();
+  if (run_options.common.max_workspace_size > 0) {
+    max_workspace_size = run_options.common.max_workspace_size;
   }
   build_config->setMaxWorkspaceSize(max_workspace_size);
 
   nvinfer1::BuilderFlags flags = 0U;
-  if (run_options.common.use_fp16()) {
+  if (run_options.common.use_fp16) {
     if (builder_->platformHasFastFp16()) {
       flags |= (1U << int(nvinfer1::BuilderFlag::kFP16));
     } else {
@@ -51,7 +51,7 @@ nvinfer1::ICudaEngine* TrtExecutable::CreateExecutableEngine(
                  "hardware does not support.";
     }
   }
-  if (run_options.common.use_int8()) {
+  if (run_options.common.use_int8) {
     if (builder_->platformHasFastInt8()) {
       if (calibrator) {
         flags |= (1U << int(nvinfer1::BuilderFlag::kINT8));
@@ -67,17 +67,17 @@ nvinfer1::ICudaEngine* TrtExecutable::CreateExecutableEngine(
   }
   // It does not guarantee to use low precision if just set kFP16 or kint8 flag,
   // but you can set kSTRICT_TYPES to enforce using half or int8 precision
-  if (run_options.common.strict_types()) {
+  if (run_options.common.strict_types) {
     flags |= (1U << int(nvinfer1::BuilderFlag::kSTRICT_TYPES));
   }
-  if (run_options.common.force_precision_constraints()) {
+  if (run_options.common.force_precision_constraints) {
     flags |= (1U << int(nvinfer1::BuilderFlag::kOBEY_PRECISION_CONSTRAINTS));
   }
   // flags |= (1U << int(nvinfer1::BuilderFlag::kREFIT));
   build_config->setFlags(flags);
 
   int32_t max_batch_size = std::max(
-      static_cast<int32_t>(run_options.common.max_batch_size()), batch_size);
+      static_cast<int32_t>(run_options.common.max_batch_size), batch_size);
   builder_->setMaxBatchSize(max_batch_size);
   // builder_->setGpuAllocator();
   auto* engine = builder_->buildEngineWithConfig(*network_, *build_config);
@@ -124,10 +124,10 @@ int32_t TrtExecutable::GetBindingIndex(const std::string& name) const {
 bool TrtExecutable::Run(const std::vector<Parameter>& inputs,
                         const ExecutableRunOptions& run_options,
                         bool block_until_done) {
-  if (run_options.common.use_int8() && !calibrator_ &&
-      run_options.common.int8_calibration().size()) {
+  if (run_options.common.use_int8 && !calibrator_ &&
+      run_options.common.int8_calibration.size()) {
     std::string calibration_data =
-        LoadCalibrationTable(run_options.common.int8_calibration());
+        LoadCalibrationTable(run_options.common.int8_calibration);
     CHECK(calibration_data.size()) << "Calibration data is empty";
     calibrator_.reset(new TRTInt8Calibrator(calibration_data));
   }
@@ -178,7 +178,7 @@ bool TrtExecutable::Run(const std::vector<Parameter>& inputs,
     execution_context_.reset(engine_->createExecutionContext());
   }
 
-  if (run_options.common.use_int8() && !calibrator_) {
+  if (run_options.common.use_int8 && !calibrator_) {
     CHECK(PTQCalibrationMode::Enabled())
         << "A offline calibration table should be provided or enable "
            "calibration mode to generate one online";
@@ -189,10 +189,10 @@ bool TrtExecutable::Run(const std::vector<Parameter>& inputs,
         res->calibrator_.reset(new TRTInt8Calibrator());
         // TODO(hjchen2): TensorRT maybe crash if calibrator batch size > 1
         res->calibrator_->setBatchSize(1 /*batch_size*/);
-        int ordinal = GetDeviceId(XrtDevice::GPU_CUDA);
+        int ordinal = GetDeviceId(XrtDevice_GPU_CUDA);
         res->thread_.reset(
             new std::thread([this, ordinal, batch_size, res, run_options]() {
-              SetDeviceId(XrtDevice::GPU_CUDA, ordinal);
+              SetDeviceId(XrtDevice_GPU_CUDA, ordinal);
               res->engine_.reset(this->CreateExecutableEngine(
                   run_options, batch_size, res->calibrator_.get()));
               CHECK_EQ(cudaSuccess,

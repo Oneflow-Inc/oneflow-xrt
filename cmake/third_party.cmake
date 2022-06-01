@@ -1,4 +1,6 @@
-include(protobuf)
+include(util)
+include(oneflow)
+include(flatbuffers)
 include(glog)
 include(absl)
 
@@ -18,9 +20,9 @@ set(XRT_COMMON_THIRD_PARTY_LIBRARIES
   absl::utility
   absl::span
 )
-set(XRT_THIRD_PARTY_DEPENDICES protobuf)
+set(XRT_THIRD_PARTY_DEPENDICES flatbuffers)
 
-set(XRT_THIRD_PARTY_LIBRARIES ${XRT_COMMON_THIRD_PARTY_LIBRARIES})
+set(XRT_THIRD_PARTY_LIBRARIES ${XRT_COMMON_THIRD_PARTY_LIBRARIES} oneflow)
 if(WITH_CUDA)
   find_package(CUDAToolkit REQUIRED)
   list(APPEND XRT_THIRD_PARTY_LIBRARIES CUDA::cudart_static)

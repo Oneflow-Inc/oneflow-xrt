@@ -1,0 +1,74 @@
+namespace oneflow.xrt;
+
+enum XrtDevice : int {
+  CPU_X86,
+  GPU_CUDA,
+  GPU_CL,
+  CPU_ARM,
+}
+
+enum XrtEngine : int {
+  DEFAULT,
+  XLA,
+  TENSORRT,
+  TVM,
+  OPENVINO,
+}
+
+table StringVec {
+  data: [string];
+}
+
+table ExecuteOptionsProto {
+  engine: XrtEngine;
+  device: XrtDevice;
+
+  use_fp16: bool = false;
+  use_int8: bool = false;
+
+  int8_calibration: string;
+
+  max_batch_size: long = 1;
+  max_workspace_size: long = 0;
+
+  host_num_threads: long = 1;
+  random_seed: long = -1;
+
+  force_compile: bool = false;
+ 
+  // It does not guarantee to use low precision if just set use_int8 or
+  // use_fp16, but you can set strict_types to enforce the engine to use
+  // low precision
+  strict_types: bool = false;
+
+  // In order to reduce the computation precision loss, some ops specify
+  // a precision constraint, but this constraint is not mandatory, and the
+  // engine may still choose an appropriate precision based on it's tuning
+  // result. This option will make the constraint to be mandatory
+  force_precision_constraints: bool = true;
+}
+
+table FunctionArgumentProto {
+  name: string;
+  value: string; 
+}
+
+table FunctionProto {
+  input: [FunctionArgumentProto];
+  output: [FunctionArgumentProto];
+
+  node: [string];
+}
+
+table XrtLaunchProto {
+  options: ExecuteOptionsProto;
+
+  function: FunctionProto;
+
+  liveout_entries: [string];
+
+  // nd sbp signature for each folded node
+  nd_sbp_signatures: [StringVec];
+
+  logical_blob_descs: [StringVec];
+}

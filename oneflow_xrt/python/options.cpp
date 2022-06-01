@@ -14,6 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 #include "oneflow_xrt/compiler/passes/options.h"
+#include "oneflow_xrt/common/flatbuffers.h"
 
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
@@ -33,9 +34,7 @@ void InitClusteringOptionsApis(py::module_& m) {
           },
           /*setter*/
           [](ClusteringOptions& opt, const std::string& engine) {
-            XrtEngine _engine;
-            XrtEngine_Parse(engine, &_engine);
-            opt.engine = _engine;
+            opt.engine = XrtEngine_Parse(engine);
           })
       .def_property(
           "device", /*getter*/
@@ -44,9 +43,7 @@ void InitClusteringOptionsApis(py::module_& m) {
           },
           /*setter*/
           [](ClusteringOptions& opt, const std::string& device) {
-            XrtDevice _device;
-            XrtDevice_Parse(device, &_device);
-            opt.device = _device;
+            opt.device = XrtDevice_Parse(device);
           })
       .def_property(
           "minimum_nodes", /*getter*/

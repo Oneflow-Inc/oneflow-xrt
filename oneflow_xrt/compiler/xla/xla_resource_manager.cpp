@@ -28,9 +28,9 @@ namespace resource_mgr {
 
 se::Platform::Id GetPlatformId(const XrtDevice& device) {
   se::Platform::Id platform_id = nullptr;
-  if (device == XrtDevice::CPU_X86) {
+  if (device == XrtDevice_CPU_X86) {
     platform_id = se::host::kHostPlatformId;
-  } else if (device == XrtDevice::GPU_CUDA) {
+  } else if (device == XrtDevice_GPU_CUDA) {
     platform_id = se::cuda::kCudaPlatformId;
   } else {
     LOG(FATAL) << "Only CPU_X86 or GPU_CUDA is supported by XLA.";

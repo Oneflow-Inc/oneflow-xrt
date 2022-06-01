@@ -25,7 +25,7 @@ namespace mola {
 
 inline bool SupportMultiStream(const XrtDevice& device) {
   switch (device) {
-    case XrtDevice::GPU_CUDA:
+    case XrtDevice_GPU_CUDA:
       return true;
     default: {
       return false;

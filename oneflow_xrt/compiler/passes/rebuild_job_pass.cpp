@@ -20,11 +20,12 @@ limitations under the License.
 
 #include "absl/strings/str_cat.h"
 #include "glog/logging.h"
-#include "google/protobuf/text_format.h"
+#include "flatbuffers/minireflect.h"
 #include "oneflow/core/job/job_builder.h"
 #include "oneflow/core/operator/op_conf.pb.h"
 #include "oneflow/core/operator/operator.h"
 #include "oneflow_xrt/common/typedef.h"
+#include "oneflow_xrt/common/protobuf.h"
 #include "oneflow_xrt/compiler/passes/options.h"
 #include "oneflow_xrt/graph/argument.h"
 #include "oneflow_xrt/graph/graph.h"
@@ -88,7 +89,7 @@ class FoldSubgraphBuilder {
  private:
   void buildFunction(const XrtNode* launch_node, const XrtEngine& engine,
                      std::set<std::string>* liveout_entries,
-                     FunctionProto* function) const;
+                     FunctionProtoT* function) const;
 
   void FixupControlInOpNames();
 
@@ -112,7 +113,7 @@ class FoldSubgraphBuilder {
   std::vector<std::vector<const XrtNode*>> folded_nodes_;
 
   std::map<std::string, std::string> fixedup_names_;
-  std::map<std::string /*op name*/, XrtLaunchProto> launch_attrs_;
+  std::map<std::string /*op name*/, XrtLaunchProtoT> launch_attrs_;
 };
 
 FoldSubgraphBuilder::FoldSubgraphBuilder(XrtGraph* graph, Job* job,
@@ -147,7 +148,7 @@ std::string FoldSubgraphBuilder::FixedName(const std::string& name) {
 void FoldSubgraphBuilder::buildFunction(const XrtNode* launch_node,
                                         const XrtEngine& engine,
                                         std::set<std::string>* liveout_entries,
-                                        FunctionProto* function) const {
+                                        FunctionProtoT* function) const {
   for (const XrtNode* node : launch_node->sub_graph()->Nodes()) {
     if (node->IsEntryNode()) {
       std::string value;
@@ -161,16 +162,17 @@ void FoldSubgraphBuilder::buildFunction(const XrtNode* launch_node,
       if (is_mutable) {
         liveout_entries->insert(node->name());
       }
-      auto* input = function->add_input();
-      input->set_name(node->name());
-      input->set_value(value);
+      
+      function->input.emplace_back(new FunctionArgumentProtoT);
+      function->input.back()->name = node->name();
+      function->input.back()->value = value;
     } else if (node->IsReturnNode()) {
       const auto* in_edge = node->in_edges().front();
-      auto* output = function->add_output();
-      output->set_name(node->name());
-      output->set_value(in_edge->argument().name());
+      function->output.emplace_back(new FunctionArgumentProtoT);
+      function->output.back()->name = node->name();
+      function->output.back()->value = in_edge->argument().name();
     } else {
-      *(function->add_node()) = node->conf();
+      function->node.emplace_back(protobuf::PrintToTextString(node->conf()));
     }
   }
 }
@@ -241,29 +243,29 @@ void FoldSubgraphBuilder::BuildXrtLaunchOps() {
     }
 
     std::set<std::string> liveout_entries;
-    XrtLaunchProto& proto = launch_attrs_[node->name()];
+    XrtLaunchProtoT& proto = launch_attrs_[node->name()];
 
     const auto& engine = node->sub_graph()->engine();
     // add execute options
-    auto* options = proto.mutable_options();
-    options->set_engine(engine);
-    options->set_device(node->device());
-    options->set_use_fp16(options_.use_fp16);
-    options->set_use_int8(options_.use_int8);
-    options->set_int8_calibration(options_.int8_calibration);
-    options->set_force_compile(options_.force_compile);
-    options->set_strict_types(options_.strict_types);
-    options->set_force_precision_constraints(
-        options_.force_precision_constraints);
-    options->set_max_batch_size(options_.max_batch_size);
-    options->set_max_workspace_size(options_.max_workspace_size);
+    proto.options.reset(new ExecuteOptionsProtoT);
+    proto.options->engine = engine;
+    proto.options->device = node->device();
+    proto.options->use_fp16 = options_.use_fp16;
+    proto.options->use_int8 = options_.use_int8;
+    proto.options->int8_calibration = options_.int8_calibration;
+    proto.options->force_compile = options_.force_compile;
+    proto.options->strict_types = options_.strict_types;
+    proto.options->force_precision_constraints =
+        options_.force_precision_constraints;
+    proto.options->max_batch_size = options_.max_batch_size;
+    proto.options->max_workspace_size = options_.max_workspace_size;
 
     // build function
-    buildFunction(node, engine, &liveout_entries, proto.mutable_function());
+    buildFunction(node, engine, &liveout_entries, proto.function.get());
 
     // add liveout entries
     for (const auto& entry : liveout_entries) {
-      proto.add_liveout_entries(entry);
+      proto.liveout_entries.emplace_back(entry);
     }
 
     // save function logical blob descs
@@ -271,16 +273,17 @@ void FoldSubgraphBuilder::BuildXrtLaunchOps() {
         builder_->job().helper().lbn2logical_blob_desc();
     const auto& op_name2arg_signature =
         builder_->job().helper().op_name2arg_signature();
-    auto* logical_blob_descs = proto.mutable_logical_blob_descs();
 
+    std::map<std::string, BlobDescProto> logical_blob_descs;
+    // auto* logical_blob_descs = proto.mutable_logical_blob_descs();
     auto CopyLogicalBlobDesc = [&](const std::string& arg_name) {
       const auto src_it = lbn2logical_blob_desc.find(arg_name);
       CHECK(src_it != lbn2logical_blob_desc.end());
-      auto dst_it = logical_blob_descs->find(arg_name);
-      if (dst_it != logical_blob_descs->end()) {
+      auto dst_it = logical_blob_descs.find(arg_name);
+      if (dst_it != logical_blob_descs.end()) {
         CHECK(dst_it->second == src_it->second);
       } else {
-        (*logical_blob_descs)[arg_name] = src_it->second;
+        logical_blob_descs[arg_name] = src_it->second;
       }
     };
     for (const XrtNode* sub_node : node->sub_graph()->Nodes()) {
@@ -295,28 +298,44 @@ void FoldSubgraphBuilder::BuildXrtLaunchOps() {
       }
     }
     // save the launch op outputs logical blob descs
-    for (const auto& output : proto.function().output()) {
-      const auto& it = logical_blob_descs->find(output.value());
-      CHECK(it != logical_blob_descs->end());
-      (*logical_blob_descs)[output.name()] = it->second;
+    for (const auto& output : proto.function->output) {
+      const auto& it = logical_blob_descs.find(output->value);
+      CHECK(it != logical_blob_descs.end());
+      logical_blob_descs[output->name] = it->second;
+    }
+    for (const auto& it : logical_blob_descs) {
+      std::unique_ptr<StringVecT> v(new StringVecT);
+      v->data.emplace_back(it.first);
+      v->data.emplace_back(protobuf::PrintToTextString(it.second));
+      proto.logical_blob_descs.emplace_back(std::move(v));
     }
 
     // save sbp signatures for the folded nodes
-    auto* nd_sbp_signatures = proto.mutable_nd_sbp_signatures();
-    for (const auto& node_conf : proto.function().node()) {
-      const std::string& node_name = node_conf.name();
-      (*nd_sbp_signatures)[node_name] =
+    std::map<std::string, NdSbpSignature> nd_sbp_signatures;
+    for (const XrtNode* sub_node : node->sub_graph()->Nodes()) {
+      if (sub_node->IsEntryNode() || sub_node->IsReturnNode()) {
+        continue;
+      }
+      const std::string& node_name = sub_node->name();
+      nd_sbp_signatures[node_name] =
           builder_->NdSbpSignature4OpName(node_name);
     }
-    (*nd_sbp_signatures)[node->name()] =
+    nd_sbp_signatures[node->name()] =
         builder_->NdSbpSignature4OpName(node->name());
+    for (const auto& it : nd_sbp_signatures) {
+      std::unique_ptr<StringVecT> v(new StringVecT);
+      v->data.emplace_back(it.first);
+      v->data.emplace_back(protobuf::PrintToTextString(it.second));
+      proto.logical_blob_descs.emplace_back(std::move(v));
+    }
 
     // update xrt launch op attribute `proto`
     auto* op_conf = CHECK_JUST(builder_->MutableOpConf4OpName(node->name()));
-    std::string xrt_launch_attr;
-    google::protobuf::TextFormat::PrintToString(proto, &xrt_launch_attr);
     auto* attr = op_conf->mutable_user_conf()->mutable_attr();
-    (*attr)["proto"].set_at_string(xrt_launch_attr);
+    flatbuffers::FlatBufferBuilder fbb;
+    fbb.Finish(XrtLaunchProto::Pack(fbb, &proto));
+    auto s = flatbuffers::FlatBufferToString(fbb.GetBufferPointer(), XrtLaunchProtoTypeTable());
+    (*attr)["proto"].set_at_string(s);
   }
 }
 

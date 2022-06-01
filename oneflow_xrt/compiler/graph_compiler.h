@@ -22,7 +22,7 @@ limitations under the License.
 #include "oneflow_xrt/compiler/executable.h"
 #include "oneflow_xrt/compiler/parameter.h"
 #include "oneflow_xrt/graph/graph.h"
-#include "oneflow_xrt/xrt.pb.h"
+#include "oneflow_xrt/xrt_generated.h"
 
 namespace oneflow {
 namespace xrt {

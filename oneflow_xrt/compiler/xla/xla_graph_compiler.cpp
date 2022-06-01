@@ -214,7 +214,7 @@ std::shared_ptr<Executable> XlaGraphCompiler::Compile(
   return BuildExecutable(input_shapes, output_shape, computation);
 }
 
-REGISTER_GRAPH_COMPILER(XrtEngine::XLA, XlaGraphCompiler);
+REGISTER_GRAPH_COMPILER(XrtEngine_XLA, XlaGraphCompiler);
 
 }  // namespace mola
 }  // namespace xrt

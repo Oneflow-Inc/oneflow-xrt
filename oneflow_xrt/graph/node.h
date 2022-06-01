@@ -111,7 +111,7 @@ class XrtNode {
         type_(_XrtUnsupportedOpType),
         unique_id_(-1),
         sub_graph_(nullptr),
-        device_(XrtDevice::CPU_X86),
+        device_(XrtDevice_CPU_X86),
         trainable_(false) {}
   explicit XrtNode(const OperatorConf& conf);
 

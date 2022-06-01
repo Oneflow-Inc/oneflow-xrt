@@ -17,6 +17,9 @@
 #
 #  OPENVINO_ROOT
 #    specify where OpenVINO runtime is installed
+#
+#  USE_MIRROR
+#    use aliyun mirror to speedup downloading thirdparty
 
 import os
 from setuptools import find_packages, setup
@@ -52,6 +55,9 @@ class build_ext(setuptools.command.build_ext.build_ext):
             ]
         else:
             pass
+
+        if env.use_mirror:
+           cmake_args += ["-DUSE_MIRROR=ON"]
 
         self.spawn(["cmake", cwd] + cmake_args)
 

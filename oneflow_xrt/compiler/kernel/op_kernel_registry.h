@@ -82,7 +82,7 @@ class OpKernelRegistrar {
 
   std::string op_name_;
   XrtEngine engine_;
-  std::vector<XrtDevice> device_{CPU_X86, GPU_CUDA};
+  std::vector<XrtDevice> device_{XrtDevice_CPU_X86, XrtDevice_GPU_CUDA};
 
   OpKernelAttributes attrs_;
 };

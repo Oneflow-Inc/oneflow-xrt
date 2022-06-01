@@ -79,7 +79,7 @@ class XrtGraph : public std::enable_shared_from_this<XrtGraph> {
   std::map<int64_t, std::shared_ptr<XrtGraph>> subgraphs_;
 
   // engine_ will be set after clustering subgraph
-  XrtEngine engine_ = XrtEngine::DEFAULT;
+  XrtEngine engine_ = XrtEngine_DEFAULT;
 };
 
 namespace algorithm {

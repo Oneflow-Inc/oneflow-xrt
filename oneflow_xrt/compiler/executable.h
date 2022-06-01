@@ -20,14 +20,14 @@ limitations under the License.
 #include <vector>
 
 #include "oneflow_xrt/compiler/parameter.h"
-#include "oneflow_xrt/xrt.pb.h"
+#include "oneflow_xrt/xrt_generated.h"
 
 namespace oneflow {
 namespace xrt {
 
 struct ExecutableRunOptions {
   // user defined common options
-  ExecuteOptionsProto common;
+  ExecuteOptionsProtoT common;
   // specify the compute stream if the engine supports multiple streams
   // the default compute stream will be used if `stream` is nullptr
   void* stream = nullptr;

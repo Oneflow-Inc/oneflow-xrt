@@ -32,20 +32,20 @@ XrtDevice OfDeviceToXrtDevice(const std::string& device) {
 XrtDevice OfDeviceToXrtDevice(const DeviceType& device) {
   switch (device) {
     case DeviceType::kCUDA:
-      return XrtDevice::GPU_CUDA;
+      return XrtDevice_GPU_CUDA;
     case DeviceType::kCPU:
-      return XrtDevice::CPU_X86;
+      return XrtDevice_CPU_X86;
     default:
       LOG(WARNING) << "unsupported oneflow device type (" << device
                    << ") is encountered, so use the default CPU device instead";
-      return XrtDevice::CPU_X86;
+      return XrtDevice_CPU_X86;
   }
 }
 
 DeviceType XrtDeviceToOfDevice(const XrtDevice& device) {
-  if (device == XrtDevice::GPU_CUDA) {
+  if (device == XrtDevice_GPU_CUDA) {
     return DeviceType::kCUDA;
-  } else if (device == XrtDevice::CPU_X86) {
+  } else if (device == XrtDevice_CPU_X86) {
     return DeviceType::kCPU;
   } else {
     LOG(FATAL) << "unsupported xrt device " << device;
@@ -55,17 +55,17 @@ DeviceType XrtDeviceToOfDevice(const XrtDevice& device) {
 
 int GetDeviceId(const XrtDevice& device) {
   switch (device) {
-    case XrtDevice::CPU_X86:
+    case XrtDevice_CPU_X86:
       return 0;
-    case XrtDevice::GPU_CUDA: {
+    case XrtDevice_GPU_CUDA: {
 #ifdef WITH_CUDA
       int device_id = 0;
       CHECK_EQ(cudaSuccess, cudaGetDevice(&device_id));
       return device_id;
 #endif
     }
-    case XrtDevice::GPU_CL:
-    case XrtDevice::CPU_ARM:
+    case XrtDevice_GPU_CL:
+    case XrtDevice_CPU_ARM:
       return 0;
   }
   return 0;  // let compiler warning free
@@ -73,16 +73,16 @@ int GetDeviceId(const XrtDevice& device) {
 
 void SetDeviceId(const XrtDevice& device, const int device_id) {
   switch (device) {
-    case XrtDevice::CPU_X86:
+    case XrtDevice_CPU_X86:
       return;
-    case XrtDevice::GPU_CUDA: {
+    case XrtDevice_GPU_CUDA: {
 #ifdef WITH_CUDA
       CHECK_EQ(cudaSuccess, cudaSetDevice(device_id));
       return;
 #endif
     }
-    case XrtDevice::GPU_CL:
-    case XrtDevice::CPU_ARM:
+    case XrtDevice_GPU_CL:
+    case XrtDevice_CPU_ARM:
       return;
   }
 }

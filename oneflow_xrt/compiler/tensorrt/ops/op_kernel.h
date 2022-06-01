@@ -37,12 +37,12 @@ class TrtOpKernel : public OpKernel<TrtOpContext> {
   static OpKernelRegistrar _trt_op_kernel_##OpName##_ \
       __attribute__((unused)) =                       \
           OpKernelRegistrar(#OpName)                  \
-              .SetEngine(XrtEngine::TENSORRT)         \
-              .SetDevice({XrtDevice::GPU_CUDA})       \
+              .SetEngine(XrtEngine_TENSORRT)         \
+              .SetDevice({XrtDevice_GPU_CUDA})       \
               .SetFactory([]() -> OpKernelBase* { return new KernelType; })
 
 inline std::shared_ptr<TrtOpKernel> BuildOpKernel(const std::string& op_name) {
-  OpKernelRegKey reg_key{op_name, XrtEngine::TENSORRT, XrtDevice::GPU_CUDA};
+  OpKernelRegKey reg_key{op_name, XrtEngine_TENSORRT, XrtDevice_GPU_CUDA};
   const auto& f = XRT_REGISTER_LOOKUP(OpKernelRegId, reg_key);
   auto* trt_kernel = dynamic_cast<TrtOpKernel*>(f());
   CHECK(trt_kernel) << "failed to build tensorrt op kernel for " << reg_key;

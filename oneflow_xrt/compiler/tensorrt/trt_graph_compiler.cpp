@@ -125,7 +125,7 @@ std::shared_ptr<Executable> TrtGraphCompiler::Compile(
       builder_->host_weights());
 }
 
-REGISTER_GRAPH_COMPILER(XrtEngine::TENSORRT, TrtGraphCompiler);
+REGISTER_GRAPH_COMPILER(XrtEngine_TENSORRT, TrtGraphCompiler);
 
 }  // namespace tensorrt
 }  // namespace xrt

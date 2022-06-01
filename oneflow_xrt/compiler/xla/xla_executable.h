@@ -29,7 +29,7 @@ class XlaExecutable : public Executable {
                 const std::vector<xla::Shape>& input_shapes,
                 const xla::Shape& output_shape,
                 std::unique_ptr<xla::LocalExecutable>&& executable)
-      : Executable(name, XrtEngine::XLA),
+      : Executable(name, XrtEngine_XLA),
         device_(device),
         input_shapes_(input_shapes),
         output_shape_(output_shape),

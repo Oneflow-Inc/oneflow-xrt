@@ -35,7 +35,7 @@ class TrtExecutable : public Executable {
       const std::string& name, nv::unique_ptr<nvinfer1::ICudaEngine>&& engine,
       const std::map<std::string, std::shared_ptr<std::vector<uint8_t>>>&
           host_weights)
-      : Executable(name, XrtEngine::TENSORRT),
+      : Executable(name, XrtEngine_TENSORRT),
         engine_(std::move(engine)),
         host_weights_(host_weights) {}
 
@@ -44,7 +44,7 @@ class TrtExecutable : public Executable {
       nv::unique_ptr<nvinfer1::INetworkDefinition>&& network,
       const std::map<std::string, std::shared_ptr<std::vector<uint8_t>>>&
           host_weights)
-      : Executable(name, XrtEngine::TENSORRT),
+      : Executable(name, XrtEngine_TENSORRT),
         builder_(std::move(builder)),
         network_(std::move(network)),
         host_weights_(host_weights) {}

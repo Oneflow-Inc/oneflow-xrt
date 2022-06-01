@@ -157,7 +157,7 @@ std::shared_ptr<Executable> OpenvinoGraphCompiler::Compile(
                                               in_out_to_param_idx);
 }
 
-REGISTER_GRAPH_COMPILER(XrtEngine::OPENVINO, OpenvinoGraphCompiler);
+REGISTER_GRAPH_COMPILER(XrtEngine_OPENVINO, OpenvinoGraphCompiler);
 
 }  // namespace openvino
 }  // namespace xrt

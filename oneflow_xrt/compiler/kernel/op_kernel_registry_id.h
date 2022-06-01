@@ -20,7 +20,8 @@ limitations under the License.
 #include <iostream>
 #include <string>
 
-#include "oneflow_xrt/xrt.pb.h"
+#include "oneflow_xrt/xrt_generated.h"
+#include "oneflow_xrt/common/flatbuffers.h"
 
 namespace oneflow {
 namespace xrt {

@@ -38,5 +38,9 @@ class Env(object):
     def openvino_root(self):
         return get_env("OPENVINO_ROOT")
 
+    @property
+    def use_mirror(self):
+        return get_env("USE_MIRROR") in ["ON", "1"]
+
 
 env = Env()

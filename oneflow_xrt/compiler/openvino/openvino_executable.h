@@ -31,7 +31,7 @@ class OpenvinoExecutable : public Executable {
   OpenvinoExecutable(
       std::unique_ptr<InferenceEngine::ExecutableNetwork> network,
       const std::unordered_map<std::string, int>& in_out_to_param_idx)
-      : Executable("", XrtEngine::OPENVINO),
+      : Executable("", XrtEngine_OPENVINO),
         executable_network_(std::move(network)),
         in_out_to_param_idx_(in_out_to_param_idx) {}
   virtual ~OpenvinoExecutable() = default;

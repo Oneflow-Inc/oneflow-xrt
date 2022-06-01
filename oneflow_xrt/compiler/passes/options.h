@@ -18,14 +18,14 @@ limitations under the License.
 
 #include <string>
 
-#include "oneflow_xrt/xrt.pb.h"
+#include "oneflow_xrt/xrt_generated.h"
 
 namespace oneflow {
 namespace xrt {
 
 struct ClusteringOptions {
-  XrtEngine engine = XrtEngine::DEFAULT;
-  XrtDevice device = XrtDevice::CPU_X86;
+  XrtEngine engine = XrtEngine_DEFAULT;
+  XrtDevice device = XrtDevice_CPU_X86;
 
   // minimum node number in each cluster after clustering. If the number of
   // nodes contained by a cluster is less than `minimum_nodes` or grater than

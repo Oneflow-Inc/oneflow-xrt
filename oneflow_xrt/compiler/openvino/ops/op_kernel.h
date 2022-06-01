@@ -37,13 +37,13 @@ class OpenvinoOpKernel : public OpKernel<OpenvinoOpContext> {
   static OpKernelRegistrar _openvino_op_kernel_##OpName##_ \
       __attribute__((unused)) =                            \
           OpKernelRegistrar(#OpName)                       \
-              .SetEngine(XrtEngine::OPENVINO)              \
-              .SetDevice({XrtDevice::CPU_X86})             \
+              .SetEngine(XrtEngine_OPENVINO)              \
+              .SetDevice({XrtDevice_CPU_X86})             \
               .SetFactory([]() -> OpKernelBase* { return new KernelType; })
 
 inline std::shared_ptr<OpenvinoOpKernel> BuildOpKernel(
     const std::string& op_name) {
-  OpKernelRegKey reg_key{op_name, XrtEngine::OPENVINO, XrtDevice::CPU_X86};
+  OpKernelRegKey reg_key{op_name, XrtEngine_OPENVINO, XrtDevice_CPU_X86};
   const auto& f = XRT_REGISTER_LOOKUP(OpKernelRegId, reg_key);
   auto* openvino_kernel = dynamic_cast<OpenvinoOpKernel*>(f());
   CHECK(openvino_kernel) << "failed to build openvino op kernel for "

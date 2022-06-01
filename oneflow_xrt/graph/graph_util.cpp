@@ -17,7 +17,7 @@ limitations under the License.
 #include "oneflow/core/graph/op_graph.h"
 #include "oneflow/core/job/job.pb.h"
 #include "oneflow_xrt/graph/graph.h"
-#include "oneflow_xrt/xrt.pb.h"
+#include "oneflow_xrt/xrt_generated.h"
 
 namespace oneflow {
 namespace xrt {
@@ -81,52 +81,52 @@ GraphBuilder::GraphBuilder(const Job& job)
 
 GraphBuilder::GraphBuilder(const FunctionProto& function)
     : graph_(std::make_shared<XrtGraph>()) {
-  std::set<std::string> consumed_args;
-  for (const auto& input : function.input()) {
-    XrtNode* node = graph_->AddEntryNode(input.name());
-    producers_[input.value()] = node;
-    node_info_[node].input_output_keys[input.value()] = "value";
-  }
-  for (const auto& output : function.output()) {
-    XrtNode* node = graph_->AddReturnNode(output.name());
-    node_info_[node].inputs = {output.value()};
-    node_info_[node].input_output_keys[output.value()] = "value";
-    consumed_args.insert(output.value());
-  }
-
-  for (const auto& node_conf : function.node()) {
-    XrtNode* node = graph_->AddNode(node_conf);
-    auto& input_output_keys = node_info_[node].input_output_keys;
-    auto op = CHECK_JUST(ConstructOp(node_conf));
-    for (const std::string& bn : op->output_bns()) {
-      std::string output = GenLogicalBlobName(op->BnInOp2Lbi(bn));
-      producers_[output] = node;
-      input_output_keys[output] = bn;
-    }
-    for (const std::string& bn : op->input_bns()) {
-      std::string input = GenLogicalBlobName(op->BnInOp2Lbi(bn));
-      input_output_keys[input] = bn;
-      node_info_[node].inputs.insert(input);
-      consumed_args.insert(input);
-    }
-  }
-  // add NoOp to consume arguments that is produced but never unused
-  for (const auto& it : producers_) {
-    const auto& arg_name = it.first;
-    if (consumed_args.count(arg_name)) {
-      continue;
-    }
-    const XrtNode* node = graph_->AddNoOpNode(arg_name);
-    // update node info
-    auto& node_info = node_info_[node];
-    node_info.inputs = {arg_name};
-    node_info.input_output_keys[arg_name] = "value";
-    const auto& start_node_info = node_info_.at(it.second);
-    node_info.time_shape = start_node_info.time_shape;
-    if (!start_node_info.nd_sbp.empty()) {
-      node_info.nd_sbp[arg_name] = start_node_info.nd_sbp.at(arg_name);
-    }
-  }
+//  std::set<std::string> consumed_args;
+//  for (const auto& input : function.input()) {
+//    XrtNode* node = graph_->AddEntryNode(input.name());
+//    producers_[input.value()] = node;
+//    node_info_[node].input_output_keys[input.value()] = "value";
+//  }
+//  for (const auto& output : function.output()) {
+//    XrtNode* node = graph_->AddReturnNode(output.name());
+//    node_info_[node].inputs = {output.value()};
+//    node_info_[node].input_output_keys[output.value()] = "value";
+//    consumed_args.insert(output.value());
+//  }
+//
+//  for (const auto& node_conf : function.node()) {
+//    XrtNode* node = graph_->AddNode(node_conf);
+//    auto& input_output_keys = node_info_[node].input_output_keys;
+//    auto op = CHECK_JUST(ConstructOp(node_conf));
+//    for (const std::string& bn : op->output_bns()) {
+//      std::string output = GenLogicalBlobName(op->BnInOp2Lbi(bn));
+//      producers_[output] = node;
+//      input_output_keys[output] = bn;
+//    }
+//    for (const std::string& bn : op->input_bns()) {
+//      std::string input = GenLogicalBlobName(op->BnInOp2Lbi(bn));
+//      input_output_keys[input] = bn;
+//      node_info_[node].inputs.insert(input);
+//      consumed_args.insert(input);
+//    }
+//  }
+//  // add NoOp to consume arguments that is produced but never unused
+//  for (const auto& it : producers_) {
+//    const auto& arg_name = it.first;
+//    if (consumed_args.count(arg_name)) {
+//      continue;
+//    }
+//    const XrtNode* node = graph_->AddNoOpNode(arg_name);
+//    // update node info
+//    auto& node_info = node_info_[node];
+//    node_info.inputs = {arg_name};
+//    node_info.input_output_keys[arg_name] = "value";
+//    const auto& start_node_info = node_info_.at(it.second);
+//    node_info.time_shape = start_node_info.time_shape;
+//    if (!start_node_info.nd_sbp.empty()) {
+//      node_info.nd_sbp[arg_name] = start_node_info.nd_sbp.at(arg_name);
+//    }
+//  }
 }
 
 ArgumentMetaData GraphBuilder::MakeMetaData(const XrtNode* start,

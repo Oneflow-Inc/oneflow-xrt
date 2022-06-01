@@ -13,25 +13,19 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-#ifndef ONEFLOW_XRT_COMMON_DEVICE_H_
-#define ONEFLOW_XRT_COMMON_DEVICE_H_
+#ifndef ONEFLOW_XRT_COMMON_PROTOBUF_H_
+#define ONEFLOW_XRT_COMMON_PROTOBUF_H_
 
-#include "oneflow/core/framework/framework.h"
-#include "oneflow_xrt/xrt_generated.h"
+#include "google/protobuf/text_format.h"
 
 namespace oneflow {
 namespace xrt {
+namespace protobuf {
 
-XrtDevice OfDeviceToXrtDevice(const std::string& device);
-XrtDevice OfDeviceToXrtDevice(const DeviceType& device);
+std::string PrintToTextString(const google::protobuf::Message& m);
 
-DeviceType XrtDeviceToOfDevice(const XrtDevice& device);
-
-int GetDeviceId(const XrtDevice& device);
-
-void SetDeviceId(const XrtDevice& device, const int device_id);
-
+}  // namespace protobuf
 }  // namespace xrt
 }  // namespace oneflow
 
-#endif  // ONEFLOW_XRT_COMMON_DEVICE_H_
+#endif  // ONEFLOW_XRT_COMMON_PROTOBUF_H_

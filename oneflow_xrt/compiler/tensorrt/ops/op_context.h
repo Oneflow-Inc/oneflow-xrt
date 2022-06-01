@@ -23,7 +23,7 @@ limitations under the License.
 #include "oneflow_xrt/compiler/tensorrt/trt_builder.h"
 #include "oneflow_xrt/compiler/tensorrt/trt_value.h"
 #include "oneflow_xrt/graph/argument.h"
-#include "oneflow_xrt/xrt.pb.h"
+#include "oneflow_xrt/xrt_generated.h"
 
 namespace oneflow {
 namespace xrt {

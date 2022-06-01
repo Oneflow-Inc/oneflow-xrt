@@ -25,7 +25,7 @@ limitations under the License.
 #include "oneflow_xrt/compiler/kernel/op_context.h"
 #include "oneflow_xrt/compiler/parameter.h"
 #include "oneflow_xrt/graph/argument.h"
-#include "oneflow_xrt/xrt.pb.h"
+#include "oneflow_xrt/xrt_generated.h"
 
 namespace oneflow {
 namespace xrt {

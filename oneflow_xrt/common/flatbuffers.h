@@ -13,25 +13,21 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-#ifndef ONEFLOW_XRT_COMMON_DEVICE_H_
-#define ONEFLOW_XRT_COMMON_DEVICE_H_
+#ifndef ONEFLOW_XRT_COMMON_FLATBUFFERS_H_
+#define ONEFLOW_XRT_COMMON_FLATBUFFERS_H_
 
-#include "oneflow/core/framework/framework.h"
 #include "oneflow_xrt/xrt_generated.h"
 
 namespace oneflow {
 namespace xrt {
 
-XrtDevice OfDeviceToXrtDevice(const std::string& device);
-XrtDevice OfDeviceToXrtDevice(const DeviceType& device);
+std::string XrtEngine_Name(const XrtEngine& engine);
+std::string XrtDevice_Name(const XrtDevice& engine);
 
-DeviceType XrtDeviceToOfDevice(const XrtDevice& device);
-
-int GetDeviceId(const XrtDevice& device);
-
-void SetDeviceId(const XrtDevice& device, const int device_id);
+XrtEngine XrtEngine_Parse(const std::string& val);
+XrtDevice XrtDevice_Parse(const std::string& val);
 
 }  // namespace xrt
 }  // namespace oneflow
 
-#endif  // ONEFLOW_XRT_COMMON_DEVICE_H_
+#endif  // ONEFLOW_XRT_COMMON_FLATBUFFERS_H_

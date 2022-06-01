@@ -4,6 +4,7 @@ option(BUILD_XLA "Option to build with XLA" OFF)
 option(BUILD_TENSORRT "Option to build with TensorRT" OFF)
 option(BUILD_OPENVINO "Option to build with OpenVINO" OFF)
 option(BUILD_PYTHON "Option to build python module" ON)
+option(USE_MIRROR "" OFF)
 
 project(oneflow-xrt CXX)
 
@@ -15,7 +16,6 @@ set(CMAKE_MODULE_PATH
     ${CMAKE_MODULE_PATH}
     ${PROJECT_SOURCE_DIR}/cmake
 )
-include(oneflow)
 include(third_party)
 
 if(BUILD_XLA)

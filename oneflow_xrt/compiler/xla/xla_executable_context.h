@@ -62,7 +62,7 @@ class XlaExecutableRunContext {
   Eigen::ThreadPoolDevice* host_device() const { return host_device_; }
 
   int64_t rng_seed() const {
-    int64_t random_seed = run_options_.common.random_seed();
+    int64_t random_seed = run_options_.common.random_seed;
     return random_seed == -1 ? tensorflow::GetXLARandomSeed() : random_seed;
   }
 
