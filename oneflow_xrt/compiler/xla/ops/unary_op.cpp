@@ -46,6 +46,7 @@ class ApplyUnaryOp : public XlaOpKernel {
 };
 
 REGISTER_XLA_OP_KERNEL(sigmoid, ApplyUnaryOp<op::Logistic>).Finalize();
+REGISTER_XLA_OP_KERNEL(sigmoid_v2, ApplyUnaryOp<op::Logistic>).Finalize();
 REGISTER_XLA_OP_KERNEL(tanh, ApplyUnaryOp<op::Tanh>).Finalize();
 REGISTER_XLA_OP_KERNEL(gelu, ApplyUnaryOp<Gelu>).Finalize();
 REGISTER_XLA_OP_KERNEL(rsqrt, ApplyUnaryOp<op::Rsqrt>).Finalize();

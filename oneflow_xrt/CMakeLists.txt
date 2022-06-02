@@ -1,5 +1,4 @@
-include_directories(${PROJECT_SOURCE_DIR})
-include_directories(${PROJECT_BINARY_DIR})
+include_directories(${PROJECT_SOURCE_DIR} ${PROJECT_BINARY_DIR})
 
 file(GLOB XRT_PROTO_FILES *.proto)
 set(PROTOBUF_IMPORT_DIRS ${ONEFLOW_INCLUDE_DIR})
