@@ -75,7 +75,7 @@ link_directories(${TENSORFLOW_INSTALL_DIR}/lib)
 
 set(XRT_TF_DOWNLOAD_NO_EXTRACT OFF)
 set(XRT_TF_URL
-    "https://github.com/Oneflow-Inc/tensorflow/archive/7016a22292a607edc4175d07dae263faad31cd04.zip"
+    "https://github.com/Oneflow-Inc/tensorflow/archive/1f_dep_v2.3.0r5.zip"
     CACHE STRING "")
 message(STATUS "XRT_TF_URL: ${XRT_TF_URL}")
 

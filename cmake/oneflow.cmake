@@ -26,14 +26,20 @@ execute_process(COMMAND ${Python_EXECUTABLE} -c
                 OUTPUT_VARIABLE ONEFLOW_ROOT_DIR OUTPUT_STRIP_TRAILING_WHITESPACE)
 
 execute_process(COMMAND ${Python_EXECUTABLE} -c
-                "import oneflow.sysconfig; print(oneflow.sysconfig.get_link_flags()[1].replace('-l:', ''))"
+                "import oneflow.sysconfig; \
+                 print(oneflow.sysconfig.get_liboneflow_link_flags()[0].replace('-L', ''))"
+                OUTPUT_VARIABLE OneFlow_LIBRARIE_DIR OUTPUT_STRIP_TRAILING_WHITESPACE)
+execute_process(COMMAND ${Python_EXECUTABLE} -c
+                "import oneflow.sysconfig; \
+                 print(oneflow.sysconfig.get_liboneflow_link_flags()[1].replace('-l:', ''))"
                 OUTPUT_VARIABLE OneFlow_LIBRARIES OUTPUT_STRIP_TRAILING_WHITESPACE)
+
 find_library(ONEFLOW_LIBRARIES
   NAMES ${OneFlow_LIBRARIES}
-  PATHS ${ONEFLOW_ROOT_DIR})
+  PATHS ${OneFlow_LIBRARIE_DIR})
 
 if (NOT ONEFLOW_LIBRARIES)
-  message(FATAL_ERROR "can not find oneflow libraries in directory: ${ONEFLOW_ROOT_DIR}")
+  message(FATAL_ERROR "can not find oneflow libraries in directory: ${OneFlow_LIBRARIE_DIR}")
 endif()
 
 add_library(oneflow UNKNOWN IMPORTED)
