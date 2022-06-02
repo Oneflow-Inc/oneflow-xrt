@@ -37,21 +37,7 @@ class build_ext(setuptools.command.build_ext.build_ext):
         os.chdir(self.build_temp)
 
         cmake_args = ["-DCMAKE_BUILD_TYPE=" + env.cmake_build_type]
-
-        if ext.name == "oneflow_xrt_xla":
-            cmake_args += ["-DBUILD_XLA=ON"]
-        elif ext.name == "oneflow_xrt_tensorrt":
-            cmake_args += [
-                "-DBUILD_TENSORRT=ON",
-                f"-DTENSORRT_ROOT={env.tensorrt_root}",
-            ]
-        elif ext.name == "oneflow_xrt_openvino":
-            cmake_args += [
-                "-DBUILD_OPENVINO=ON",
-                f"-DOPENVINO_ROOT={env.openvino_root}",
-            ]
-        else:
-            pass
+        cmake_args += ext.extra_compile_args
 
         self.spawn(["cmake", cwd] + cmake_args)
 
@@ -86,7 +72,7 @@ class install(setuptools.command.install.install):
         super().run()
 
 
-def setup_extension(package_name, description):
+def setup_extension(package_name, cmake_args=[], description=""):
     package_dir = f"python/{package_name}"
     if not os.path.exists(package_dir):
         os.makedirs(package_dir)
@@ -94,7 +80,9 @@ def setup_extension(package_name, description):
         name=package_name,
         version="0.0.1",
         description=description,
-        ext_modules=[Extension(package_name, sources=[])],
+        ext_modules=[
+            Extension(package_name, sources=[], extra_compile_args=cmake_args)
+        ],
         cmdclass={"build_ext": build_ext, "build_py": build_py, "install": install},
         zip_safe=False,
         package_dir={package_name: package_dir},
@@ -105,21 +93,27 @@ def setup_extension(package_name, description):
 
 if env.build_xla:
     setup_extension(
-        "oneflow_xrt_xla", description=("oneflow_xrt's xla extension"),
+        "oneflow_xrt_xla",
+        cmake_args=["-DBUILD_XLA=ON"],
+        description=("oneflow_xrt's xla extension"),
     )
 elif env.build_tensorrt:
     assert (
         env.tensorrt_root != ""
     ), "should specify TENSORRT_ROOT where TensorRT is installed when building TensorRT"
     setup_extension(
-        "oneflow_xrt_tensorrt", description=("oneflow_xrt's tensorrt extension"),
+        "oneflow_xrt_tensorrt",
+        cmake_args=["-DBUILD_TENSORRT=ON", f"-DTENSORRT_ROOT={env.tensorrt_root}"],
+        description=("oneflow_xrt's tensorrt extension"),
     )
 elif env.build_openvino:
     assert (
         env.openvino_root != ""
     ), "should specify OPENVINO_ROOT where OpenVINO runtime is installed when building OpenVINO"
     setup_extension(
-        "oneflow_xrt_openvino", description=("oneflow_xrt's openvino extension"),
+        "oneflow_xrt_openvino",
+        cmake_args=["-DBUILD_OPENVINO=ON", f"-DOPENVINO_ROOT={env.openvino_root}"],
+        description=("oneflow_xrt's openvino extension"),
     )
 else:
     setup_extension(

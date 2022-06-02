@@ -3,18 +3,20 @@ if(NOT WITH_CUDA)
 endif()
 
 find_path(TENSORRT_INCLUDE_DIR NvInfer.h
-  PATHS ${TENSORRT_ROOT} ${TENSORRT_ROOT}/include
-        $ENV{TENSORRT_ROOT} $ENV{TENSORRT_ROOT}/include)
+          PATHS ${TENSORRT_ROOT} ${TENSORRT_ROOT}/include $ENV{TENSORRT_ROOT}
+                $ENV{TENSORRT_ROOT}/include)
 
 find_library(
   TENSORRT_LIBRARIES
   NAMES nvinfer
-  PATHS ${TENSORRT_ROOT} ${TENSORRT_ROOT}/lib
-        $ENV{TENSORRT_ROOT} $ENV{TENSORRT_ROOT}/lib)
+  PATHS ${TENSORRT_ROOT} ${TENSORRT_ROOT}/lib $ENV{TENSORRT_ROOT}
+        $ENV{TENSORRT_ROOT}/lib)
 
 if(NOT TENSORRT_INCLUDE_DIR OR NOT TENSORRT_LIBRARIES)
   message(
-    FATAL_ERROR "TensorRT was not found. You can set TENSORRT_ROOT to specify the search path.")
+    FATAL_ERROR
+      "TensorRT was not found. You can set TENSORRT_ROOT to specify the search path."
+  )
 endif()
 
 message(STATUS "TensorRT Include: ${TENSORRT_INCLUDE_DIR}")

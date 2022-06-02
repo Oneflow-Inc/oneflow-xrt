@@ -9,4 +9,5 @@ endif()
 find_package(InferenceEngine REQUIRED)
 find_package(ngraph REQUIRED)
 
-list(APPEND XRT_OPENVINO_THIRD_PARTY_LIBRARIES IE::inference_engine ${NGRAPH_LIBRARIES})
+list(APPEND XRT_OPENVINO_THIRD_PARTY_LIBRARIES IE::inference_engine
+     ${NGRAPH_LIBRARIES})

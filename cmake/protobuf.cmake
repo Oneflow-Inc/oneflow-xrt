@@ -9,13 +9,15 @@ set(PROTOBUF_LIBRARY_DIR ${PROTOBUF_INSTALL_DIR}/${PROTOBUF_INSTALL_LIBDIR})
 set(PROTOBUF_BINARY_DIR ${PROTOBUF_INSTALL_DIR}/${PROTOBUF_INSTALL_BINDIR})
 
 set(PROTOBUF_SRC_DIR ${CMAKE_CURRENT_BINARY_DIR}/protobuf/src/protobuf/src)
-set(PROTOBUF_URL "https://github.com/protocolbuffers/protobuf/archive/v3.9.2.zip")
+set(PROTOBUF_URL
+    "https://github.com/protocolbuffers/protobuf/archive/v3.9.2.zip")
 set(PROTOBUF_MD5 cf02c32870a1f78c860039e0f63a6343)
 
 if(WIN32)
   set(PROTOBUF_LIBRARY_NAMES libprotobufd.lib)
   set(PROTOC_EXECUTABLE_NAME protoc.exe)
-  set(PROTOBUF_ADDITIONAL_CMAKE_OPTIONS -Dprotobuf_MSVC_STATIC_RUNTIME:BOOL=ON -A x64)
+  set(PROTOBUF_ADDITIONAL_CMAKE_OPTIONS -Dprotobuf_MSVC_STATIC_RUNTIME:BOOL=ON
+                                        -A x64)
 else()
   if(BUILD_SHARED_LIBS)
     if("${CMAKE_SHARED_LIBRARY_SUFFIX}" STREQUAL ".dylib")
@@ -23,7 +25,8 @@ else()
     elseif("${CMAKE_SHARED_LIBRARY_SUFFIX}" STREQUAL ".so")
       set(PROTOBUF_LIBRARY_NAMES libprotobuf.so)
     else()
-      message(FATAL_ERROR "${CMAKE_SHARED_LIBRARY_SUFFIX} not support for protobuf")
+      message(
+        FATAL_ERROR "${CMAKE_SHARED_LIBRARY_SUFFIX} not support for protobuf")
     endif()
     set(PROTOBUF_BUILD_SHARED_LIBS ON)
   else()
@@ -70,15 +73,17 @@ ExternalProject_Add(
     -Dprotobuf_DEBUG_POSTFIX:STRING=
     ${PROTOBUF_ADDITIONAL_CMAKE_OPTIONS})
 
-# add_library(protobuf UNKNOWN IMPORTED)
-# set_property(TARGET protobuf PROPERTY IMPORTED_LOCATION "${PROTOBUF_STATIC_LIBRARIES}")
+# add_library(protobuf UNKNOWN IMPORTED) set_property(TARGET protobuf PROPERTY
+# IMPORTED_LOCATION "${PROTOBUF_STATIC_LIBRARIES}")
 
 if(NOT PROTOBUF_GENERATE_CPP)
   set(PROTOBUF_GENERATE_CPP_APPEND_PATH TRUE)
 
   function(PROTOBUF_GENERATE_CPP SRCS HDRS)
     if(NOT ARGN)
-      message(SEND_ERROR "Error: PROTOBUF_GENERATE_CPP() called without any proto files")
+      message(
+        SEND_ERROR
+          "Error: PROTOBUF_GENERATE_CPP() called without any proto files")
       return()
     endif()
 
@@ -89,7 +94,7 @@ if(NOT PROTOBUF_GENERATE_CPP)
         get_filename_component(ABS_PATH ${ABS_FIL} PATH)
         list(FIND _protobuf_include_path ${ABS_PATH} _contains_already)
         if(${_contains_already} EQUAL -1)
-            list(APPEND _protobuf_include_path -I ${ABS_PATH})
+          list(APPEND _protobuf_include_path -I ${ABS_PATH})
         endif()
       endforeach()
     else()
@@ -101,7 +106,7 @@ if(NOT PROTOBUF_GENERATE_CPP)
         get_filename_component(ABS_PATH ${DIR} ABSOLUTE)
         list(FIND _protobuf_include_path ${ABS_PATH} _contains_already)
         if(${_contains_already} EQUAL -1)
-            list(APPEND _protobuf_include_path -I ${ABS_PATH})
+          list(APPEND _protobuf_include_path -I ${ABS_PATH})
         endif()
       endforeach()
     endif()
@@ -118,15 +123,19 @@ if(NOT PROTOBUF_GENERATE_CPP)
       add_custom_command(
         OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/${FIL_WE}.pb.cc"
                "${CMAKE_CURRENT_BINARY_DIR}/${FIL_WE}.pb.h"
-        COMMAND  ${PROTOBUF_PROTOC_EXECUTABLE}
-        ARGS --cpp_out  ${CMAKE_CURRENT_BINARY_DIR} ${_protobuf_include_path} ${ABS_FIL}
+        COMMAND ${PROTOBUF_PROTOC_EXECUTABLE} ARGS --cpp_out
+                ${CMAKE_CURRENT_BINARY_DIR} ${_protobuf_include_path} ${ABS_FIL}
         DEPENDS ${ABS_FIL} ${PROTOBUF_PROTOC_EXECUTABLE}
         COMMENT "Running C++ protocol buffer compiler on ${FIL}"
-        VERBATIM )
+        VERBATIM)
     endforeach()
 
     set_source_files_properties(${${SRCS}} ${${HDRS}} PROPERTIES GENERATED TRUE)
-    set(${SRCS} ${${SRCS}} PARENT_SCOPE)
-    set(${HDRS} ${${HDRS}} PARENT_SCOPE)
+    set(${SRCS}
+        ${${SRCS}}
+        PARENT_SCOPE)
+    set(${HDRS}
+        ${${HDRS}}
+        PARENT_SCOPE)
   endfunction()
 endif()

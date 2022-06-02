@@ -5,11 +5,20 @@ set(glog_URL_HASH 2368e3e0a95cce8b5b35a133271b480f)
 
 include(FetchContent)
 
-FetchContent_Declare(glog URL ${glog_URL} URL_HASH MD5=${glog_URL_HASH})
+FetchContent_Declare(
+  glog
+  URL ${glog_URL}
+  URL_HASH MD5=${glog_URL_HASH})
 
-set(WITH_GFLAGS OFF CACHE BOOL "")
-set(BUILD_SHARED_LIBS OFF CACHE BOOL "")
-set(WITH_GTEST OFF CACHE BOOL "")
+set(WITH_GFLAGS
+    OFF
+    CACHE BOOL "")
+set(BUILD_SHARED_LIBS
+    OFF
+    CACHE BOOL "")
+set(WITH_GTEST
+    OFF
+    CACHE BOOL "")
 FetchContent_MakeAvailable(glog)
 
 # just for tensorflow, DO NOT USE IN OTHER PLACE
