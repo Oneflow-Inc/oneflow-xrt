@@ -13,8 +13,12 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
+#include <ngraph/op/constant.hpp>
 #include <ngraph/op/convolution.hpp>
+#include <ngraph/op/group_conv.hpp>
+#include <ngraph/op/reshape.hpp>
 
+#include "absl/strings/str_cat.h"
 #include "oneflow_xrt/compiler/openvino/ops/op_context.h"
 #include "oneflow_xrt/compiler/openvino/ops/op_kernel.h"
 
@@ -39,12 +43,37 @@ class ConvolutionOp : public OpenvinoOpKernel {
     std::vector<size_t> dilation;
     dilation.assign(dilation_attr.begin(), dilation_attr.end());
 
-    std::shared_ptr<ngraph::Node> ngraph_node =
-        std::make_shared<ngraph::op::v1::Convolution>(
-            input, weight, ngraph::Strides(stride),
-            ngraph::CoordinateDiff({pads[0], pads[1]}),
-            ngraph::CoordinateDiff({pads[0], pads[1]}),
-            ngraph::Strides(dilation), pad_type);
+    std::shared_ptr<ngraph::Node> ngraph_node;
+
+    const size_t groups = ctx->Attr<int32_t>("groups");
+    if (groups == 1) {
+      ngraph_node = std::make_shared<ngraph::op::v1::Convolution>(
+          input, weight, ngraph::Strides(stride),
+          ngraph::CoordinateDiff({pads[0], pads[1]}),
+          ngraph::CoordinateDiff({pads[0], pads[1]}), ngraph::Strides(dilation),
+          pad_type);
+    } else {
+      // compute weight shape
+      // [c_out, c_in/groups, H, W] -> [groups, c_out/groups, c_in/groups, H, W]
+      Shape weight_shape = ctx->InputShape("weight_0");
+      std::vector<size_t> dims{groups, weight_shape.At(0) / groups};
+      for (int i = 1; i < weight_shape.NumAxes(); ++i) {
+        dims.emplace_back(weight_shape.At(i));
+      }
+      std::shared_ptr<ngraph::Node> shape_node =
+          std::make_shared<ngraph::op::Constant>(
+              ngraph::element::i32, ngraph::Shape({dims.size()}), dims);
+      weight =
+          std::make_shared<ngraph::op::v1::Reshape>(weight, shape_node, false);
+      weight->set_friendly_name(
+          absl::StrCat(ctx->op_name(), ".reshape_weight").c_str());
+
+      ngraph_node = std::make_shared<ngraph::op::v1::GroupConvolution>(
+          input, weight, ngraph::Strides(stride),
+          ngraph::CoordinateDiff({pads[0], pads[1]}),
+          ngraph::CoordinateDiff({pads[0], pads[1]}), ngraph::Strides(dilation),
+          pad_type);
+    }
     ngraph_node->set_friendly_name(ctx->op_name().c_str());
 
     ctx->SetOutput("out_0", ngraph_node);
