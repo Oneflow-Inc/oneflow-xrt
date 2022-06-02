@@ -22,7 +22,7 @@ file(GLOB_RECURSE XRT_SRCS
 add_library(oneflow_xrt SHARED ${XRT_SRCS})
 add_dependencies(oneflow_xrt ${XRT_THIRD_PARTY_DEPENDICES})
 target_link_libraries(oneflow_xrt PRIVATE oneflow_xrt_proto ${XRT_THIRD_PARTY_LIBRARIES}
-    -Wl,--version-script ${PROJECT_SOURCE_DIR}/version_script.lds)
+    -Wl,--version-script ${PROJECT_SOURCE_DIR}/oneflow_xrt/version_script.lds)
 target_include_directories(oneflow_xrt PRIVATE ${ONEFLOW_INCLUDE_DIR})
 
 if(BUILD_XLA)
