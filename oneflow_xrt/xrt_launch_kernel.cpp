@@ -16,7 +16,7 @@ limitations under the License.
 #include "absl/strings/str_cat.h"
 #include "google/protobuf/text_format.h"
 #include "oneflow/core/ep/cuda/cuda_stream.h"
-#include "oneflow_xrt/api/api.h"
+#include "oneflow_xrt/api/api_internal.h"
 #include "oneflow_xrt/common/device.h"
 #include "oneflow_xrt/compiler/compilation_cache.h"
 #include "oneflow_xrt/compiler/executable.h"

@@ -13,22 +13,25 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-#include "oneflow_xrt/api/api.h"
+#ifndef ONEFLOW_XRT_API_SERVING_H_
+#define ONEFLOW_XRT_API_SERVING_H_
 
-#include "oneflow_xrt/compiler/passes/build_subgraph_pass.h"
-#include "oneflow_xrt/compiler/passes/mark_cluster_id_pass.h"
-#include "oneflow_xrt/compiler/passes/trainable_propagation_pass.h"
+#include <string>
+#include <vector>
 
 namespace oneflow {
 namespace xrt {
 
-std::shared_ptr<XrtGraph> RunClusterSubGraphPass(
-    const XrtGraph* graph, const ClusteringOptions& options) {
-  std::shared_ptr<XrtGraph> new_graph;
-  new_graph = TrainablePropagationPass(graph);
-  new_graph = RunMarkClusterIdPass(new_graph.get(), options);
-  return RunBuildSubGraphPass(new_graph.get(), options);
-}
+std::string CompileJob(
+    const std::string& job, const std::vector<std::string>& engine,
+    bool use_fp16 = false, bool use_int8 = false, size_t max_batch_size = 1,
+    size_t max_workspace_size = -1, bool strict_types = false,
+    bool force_precision_constraints = true, bool force_compile = false,
+    size_t cluster_minimum_nodes = 1, size_t cluster_maximum_nodes = 0x7fffffff,
+    bool cluster_ignore_pipeline = true, size_t cluster_max_iteration = 20,
+    const std::string& dump_subgraph_dir = "");
 
 }  // namespace xrt
 }  // namespace oneflow
+
+#endif  // ONEFLOW_XRT_API_SERVING_H_

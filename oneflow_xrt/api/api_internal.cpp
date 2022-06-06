@@ -13,23 +13,22 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-#include <pybind11/pybind11.h>
-#include <pybind11/stl.h>
-
 #include "oneflow_xrt/api/api_internal.h"
 
-namespace py = pybind11;
+#include "oneflow_xrt/compiler/passes/build_subgraph_pass.h"
+#include "oneflow_xrt/compiler/passes/mark_cluster_id_pass.h"
+#include "oneflow_xrt/compiler/passes/trainable_propagation_pass.h"
 
-using namespace oneflow::xrt;
+namespace oneflow {
+namespace xrt {
 
-void InitXrtGraphApis(py::module_& m) {
-  py::class_<XrtGraph, std::shared_ptr<XrtGraph>>(m, "Graph")
-      .def(py::init([](const std::string& serialized_job) {
-        oneflow::Job job;
-        if (!job.ParseFromString(serialized_job)) {
-          PyErr_SetString(PyExc_RuntimeError,
-                          "the first argument is not a valid job");
-        }
-        return BuildGraph(job);
-      }));
+std::shared_ptr<XrtGraph> RunClusterSubGraphPass(
+    const XrtGraph* graph, const ClusteringOptions& options) {
+  std::shared_ptr<XrtGraph> new_graph;
+  new_graph = TrainablePropagationPass(graph);
+  new_graph = RunMarkClusterIdPass(new_graph.get(), options);
+  return RunBuildSubGraphPass(new_graph.get(), options);
 }
+
+}  // namespace xrt
+}  // namespace oneflow

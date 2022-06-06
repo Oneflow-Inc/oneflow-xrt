@@ -16,7 +16,7 @@ limitations under the License.
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
-#include "oneflow_xrt/api/api.h"
+#include "oneflow_xrt/api/api_internal.h"
 
 namespace py = pybind11;
 

@@ -16,7 +16,7 @@ limitations under the License.
 #include "absl/strings/str_cat.h"
 #include "google/protobuf/text_format.h"
 #include "oneflow/core/framework/framework.h"
-#include "oneflow_xrt/api/api.h"
+#include "oneflow_xrt/api/api_internal.h"
 #include "oneflow_xrt/common/typedef.h"
 
 using google::protobuf::TextFormat;
