@@ -13,6 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
+#if NV_TENSORRT_VERSION >= 8200
 #include "NvInfer.h"
 #include "oneflow_xrt/compiler/tensorrt/ops/op_context.h"
 #include "oneflow_xrt/compiler/tensorrt/ops/op_kernel.h"
@@ -87,3 +88,5 @@ REGISTER_TRT_OP_KERNEL(conv_data_grad, ConvDataGradOp).Finalize();
 }  // namespace tensorrt
 }  // namespace xrt
 }  // namespace oneflow
+
+#endif  // NV_TENSORRT_VERSION >= 8200

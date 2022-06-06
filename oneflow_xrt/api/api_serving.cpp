@@ -35,15 +35,18 @@ std::string CompileJob(const std::string& job,
     LOG(FATAL) << "invalid serialized job";
   }
   auto graph = BuildGraph(job_proto);
-
   ClusteringOptions cluster_options;
   cluster_options.minimum_nodes = cluster_minimum_nodes;
   cluster_options.maximum_nodes = cluster_maximum_nodes;
   cluster_options.ignore_pipeline = cluster_ignore_pipeline;
   cluster_options.max_iteration = cluster_max_iteration;
   cluster_options.dump_subgraph_dir = dump_subgraph_dir;
-
-  graph = RunClusterSubGraphPass(graph.get(), cluster_options);
+  for (const auto& e : engine) {
+    XrtEngine xrt_engine;
+    XrtEngine_Parse(e, &xrt_engine);
+    cluster_options.engine = xrt_engine;
+    graph = RunClusterSubGraphPass(graph.get(), cluster_options);
+  }
 
   ReBuildJobOptions options;
   options.use_fp16 = use_fp16;
