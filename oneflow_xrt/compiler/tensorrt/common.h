@@ -23,12 +23,11 @@ namespace oneflow {
 namespace xrt {
 namespace tensorrt {
 
-#ifdef NV_TENSORRT_MAJOR
+#define TRT_VERSION \
+  ((NV_TENSORRT_MAJOR * 1000) + (NV_TENSORRT_MINOR * 100) + NV_TENSORRT_PATCH)
+
 #if NV_TENSORRT_MAJOR > 7
 #define TRT_NOEXCEPT noexcept
-#else
-#define TRT_NOEXCEPT
-#endif
 #else
 #define TRT_NOEXCEPT
 #endif
