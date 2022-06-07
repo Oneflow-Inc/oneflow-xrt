@@ -1,6 +1,6 @@
 include(ExternalProject)
 
-set(PROTOBUF_INSTALL_DIR ${CMAKE_CURRENT_BINARY_DIR}/install/protobuf)
+set(PROTOBUF_INSTALL_DIR ${CMAKE_CURRENT_BINARY_DIR}/third_party_install/protobuf)
 set(PROTOBUF_INSTALL_INCLUDEDIR include)
 set(PROTOBUF_INSTALL_LIBDIR lib)
 set(PROTOBUF_INSTALL_BINDIR bin)

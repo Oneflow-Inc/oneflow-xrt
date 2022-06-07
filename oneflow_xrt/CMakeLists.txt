@@ -24,6 +24,9 @@ add_dependencies(oneflow_xrt ${XRT_THIRD_PARTY_DEPENDICES})
 target_link_libraries(oneflow_xrt PRIVATE oneflow_xrt_proto ${XRT_THIRD_PARTY_LIBRARIES}
     -Wl,--version-script ${PROJECT_SOURCE_DIR}/oneflow_xrt/version_script.lds)
 target_include_directories(oneflow_xrt PRIVATE ${ONEFLOW_INCLUDE_DIR})
+set_target_properties(oneflow_xrt PROPERTIES INSTALL_RPATH "$ORIGIN")
+
+set(XRT_INSTALL_TARGETS oneflow_xrt)
 
 if(BUILD_XLA)
   file(GLOB_RECURSE XRT_XLA_SRCS compiler/xla/*.cpp)
@@ -39,6 +42,8 @@ if(BUILD_XLA)
       ${XRT_XLA_THIRD_PARTY_LIBRARIES})
   target_include_directories(
       oneflow_xrt_xla PRIVATE ${TENSORFLOW_XLA_INCLUDE_INSTALL_DIR} ${ONEFLOW_INCLUDE_DIR})
+  set_target_properties(oneflow_xrt_xla PROPERTIES INSTALL_RPATH "$ORIGIN")
+  list(APPEND XRT_INSTALL_TARGETS oneflow_xrt_xla)
 endif()
 
 if(BUILD_TENSORRT)
@@ -56,6 +61,8 @@ if(BUILD_TENSORRT)
       ${XRT_TENSORRT_THIRD_PARTY_LIBRARIES})
   target_include_directories(
       oneflow_xrt_tensorrt PRIVATE ${TENSORRT_INCLUDE_DIR} ${ONEFLOW_INCLUDE_DIR})
+  set_target_properties(oneflow_xrt_tensorrt PROPERTIES INSTALL_RPATH "$ORIGIN")
+  list(APPEND XRT_INSTALL_TARGETS oneflow_xrt_tensorrt)
 endif()
 
 if(BUILD_OPENVINO)
@@ -72,8 +79,29 @@ if(BUILD_OPENVINO)
       ${XRT_OPENVINO_THIRD_PARTY_LIBRARIES})
   target_include_directories(
       oneflow_xrt_openvino PRIVATE ${ONEFLOW_INCLUDE_DIR})
+  set_target_properties(oneflow_xrt_openvino PROPERTIES INSTALL_RPATH "$ORIGIN")
+  list(APPEND XRT_INSTALL_TARGETS oneflow_xrt_openvino)
 endif()
 
 if(BUILD_PYTHON)
   add_subdirectory(python)
 endif()
+
+install(
+  TARGETS ${XRT_INSTALL_TARGETS}
+  COMPONENT oneflow_xrt_libs
+  LIBRARY DESTINATION lib
+  ARCHIVE DESTINATION lib
+  RUNTIME DESTINATION bin)
+
+install(
+  FILES api/api_serving.h
+  COMPONENT oneflow_xrt_headers
+  DESTINATION include/oneflow_xrt/api)
+
+add_custom_target(install_oneflow_xrt_libs_and_headers ALL
+  COMMAND "${CMAKE_COMMAND}" -DCMAKE_INSTALL_COMPONENT=oneflow_xrt_libs
+          -DCMAKE_INSTALL_PREFIX="${INSTALL_DIR}" -P "${CMAKE_BINARY_DIR}/cmake_install.cmake"
+  COMMAND "${CMAKE_COMMAND}" -DCMAKE_INSTALL_COMPONENT=oneflow_xrt_headers
+          -DCMAKE_INSTALL_PREFIX="${INSTALL_DIR}" -P "${CMAKE_BINARY_DIR}/cmake_install.cmake"
+  DEPENDS ${XRT_INSTALL_TARGETS})

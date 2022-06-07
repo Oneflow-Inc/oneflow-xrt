@@ -24,4 +24,5 @@ if(BUILD_OPENVINO)
   include(openvino)
 endif()
 
+set(INSTALL_DIR "${PROJECT_BINARY_DIR}/install" CACHE STRING "")
 add_subdirectory(oneflow_xrt)
