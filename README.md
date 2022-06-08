@@ -2,7 +2,7 @@
 
 OneFlow-XRT is an OneFlow extension that provides an easy to use, flexible and unified way to integrate third-party computing engines in OneFlow.
 
-OneFlow-XRT has support multiple third-party computing engines, such as XLA. Different engines support different backend hardware. For the same computing graph, XRT allows multiple computing engines to be used in combination to obtain better acceleration effects.
+OneFlow-XRT has support multiple third-party computing engines, such as XLA and TensorRT. Different engines support different backend hardware. For the same computing graph, XRT allows multiple computing engines to be used in combination to obtain better acceleration effects.
 
 | engine       | device         | inference | training                    |
 | ------------ | -------------- | --------- | --------------------------- |
