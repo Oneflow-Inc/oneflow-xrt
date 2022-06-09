@@ -39,7 +39,8 @@ class XRTModule(flow.nn.Module):
         - strict_types:
             It does not guarantee to use low precision if just set use_int8 or use_fp16, but you can set strict_types to enforce the engine to use low precision. Default: False
         - force_precision_constraints:
-            In order to reduce the computation precision loss, some ops specify a precision constraint, but this constraint is not mandatory, and the engine may still choose an appropriate precision based on it's tuning result. This option will make the constraint to be mandatory. Default: True
+            In order to reduce the computation precision loss, some ops specify a precision constraint, but this constraint is not mandatory, and the engine may still choose an appropriate precision based on it's tuning result.
+            This option will make the constraint to be mandatory. Default: True
         - force_compile:
             Force compile on every execution without using the cached results. Default: False
         - cluster_minimum_nodes:
@@ -219,12 +220,12 @@ class XRTModule(flow.nn.Module):
             self.clustering_options.engine = engine
             graph = ofrt.cluster_subgraph(graph, self.clustering_options)
 
-        compiled_job = ofrt.rebuild_job(graph, origin_job, self.execution_options)
+        job = ofrt.rebuild_job(graph, origin_job, self.execution_options)
 
         if self.verbose:
-            print("job after XRT compilation: ", compiled_job)
+            print("job after XRT compilation: ", job)
 
-        self.module._full_graph_proto = compiled_job
+        self.module._full_graph_proto = job
         self.module.finish_complie_and_init_runtime()
         self.is_compiled = True
         return self.module(*args, **kwargs)
