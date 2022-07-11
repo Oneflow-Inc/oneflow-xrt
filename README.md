@@ -14,7 +14,8 @@ OneFlow-XRT has support multiple third-party computing engines, such as XLA and 
 
 ## Architecture
 
-<img width="1046" alt="截屏2022-05-17 下午3 54 32" src="https://user-images.githubusercontent.com/13991173/168759503-a3ebda4b-af4c-4415-883a-8eb1c7814359.png">
+<img width="803" alt="XRT Architecture" src="https://user-images.githubusercontent.com/13991173/178210972-7e2edf05-8078-4045-8f72-290e78949f40.png">
+
 
 ## Installation
 
