@@ -77,8 +77,8 @@ Maybe<void> XrtLaunchOpInferLogicalTensorDesc(user_op::InferContext* ctx) {
              << ") logical tensor desc for xrt launch op " << ctx->op_name();
     }
     const auto& blob_desc = it->second;
-    auto* output_tensor_desc =
-        ctx->OutputTensorDesc(/*name*/ output.first, /*index*/ output.second);
+    auto* output_tensor_desc = ctx->MutOutputTensorDesc(
+        /*name*/ output.first, /*index*/ output.second);
     *(output_tensor_desc->mut_shape()) = Shape(blob_desc.shape());
     *(output_tensor_desc->mut_data_type()) = blob_desc.data_type();
     *(output_tensor_desc->mut_is_dynamic()) = blob_desc.is_dynamic();
@@ -117,8 +117,8 @@ Maybe<void> XrtLaunchOpInferPhysicalTensorDesc(user_op::InferContext* ctx) {
              << "failed to infer output (" << name
              << ") physical tensor desc for xrt launch op " << ctx->op_name();
     }
-    auto* output_tensor_desc =
-        ctx->OutputTensorDesc(/*name*/ output.first, /*index*/ output.second);
+    auto* output_tensor_desc = ctx->MutOutputTensorDesc(
+        /*name*/ output.first, /*index*/ output.second);
     *(output_tensor_desc->mut_shape()) = it->second.shape();
     *(output_tensor_desc->mut_data_type()) = it->second.data_type();
     *(output_tensor_desc->mut_is_dynamic()) = it->second.is_dynamic();

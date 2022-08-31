@@ -56,7 +56,7 @@ class XrtLaunchKernelState : public user_op::OpKernelState {
 static xrt::Parameter BuildParameter(const std::string& name,
                                      const user_op::Tensor* tensor) {
   Shape shape;
-  tensor->shape().ToShape(&shape);
+  tensor->shape_view().ToShape(&shape);
   return xrt::Parameter(name, const_cast<void*>(tensor->dptr()), shape,
                         tensor->data_type());
 }
