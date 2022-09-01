@@ -79,9 +79,9 @@ Maybe<void> XrtLaunchOpInferLogicalTensorDesc(user_op::InferContext* ctx) {
     const auto& blob_desc = it->second;
     auto* output_tensor_desc = ctx->MutOutputTensorDesc(
         /*name*/ output.first, /*index*/ output.second);
-    *(output_tensor_desc->mut_shape()) = Shape(blob_desc.shape());
-    *(output_tensor_desc->mut_data_type()) = blob_desc.data_type();
-    *(output_tensor_desc->mut_is_dynamic()) = blob_desc.is_dynamic();
+    output_tensor_desc->set_shape(Shape(blob_desc.shape()));
+    output_tensor_desc->set_data_type(blob_desc.data_type());
+    output_tensor_desc->set_is_dynamic(blob_desc.is_dynamic());
   }
   return Maybe<void>::Ok();
 }
@@ -119,9 +119,9 @@ Maybe<void> XrtLaunchOpInferPhysicalTensorDesc(user_op::InferContext* ctx) {
     }
     auto* output_tensor_desc = ctx->MutOutputTensorDesc(
         /*name*/ output.first, /*index*/ output.second);
-    *(output_tensor_desc->mut_shape()) = it->second.shape();
-    *(output_tensor_desc->mut_data_type()) = it->second.data_type();
-    *(output_tensor_desc->mut_is_dynamic()) = it->second.is_dynamic();
+    output_tensor_desc->set_shape(it->second.shape());
+    output_tensor_desc->set_data_type(it->second.data_type());
+    output_tensor_desc->set_is_dynamic(it->second.is_dynamic());
   }
   return Maybe<void>::Ok();
 }
