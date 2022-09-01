@@ -210,10 +210,9 @@ void FoldSubgraphBuilder::BuildXrtLaunchOps() {
     const XrtNode* node = launch_nodes_[i];
     {
       // make xrt launch op
-      OperatorConf op_conf;
+      OperatorConf op_conf = folded_nodes_[i][0]->conf();
       op_conf.set_name(node->name());
-      DeviceType device_type = XrtDeviceToOfDevice(node->device());
-      op_conf.set_device_tag(*CHECK_JUST(DeviceTag4DeviceType(device_type)));
+      op_conf.clear_op_type();
 
       UserOpConf* launch_conf = op_conf.mutable_user_conf();
       launch_conf->set_op_type_name(_XrtLaunchOpType);

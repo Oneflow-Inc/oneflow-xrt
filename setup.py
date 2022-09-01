@@ -94,7 +94,7 @@ def setup_extension(package_name, cmake_args=[], description=""):
 if env.build_xla:
     setup_extension(
         "oneflow_xrt_xla",
-        cmake_args=["-DBUILD_XLA=ON"],
+        cmake_args=["-DBUILD_XLA=ON", "-DBUILD_TENSORRT=OFF", "-DBUILD_OPENVINO=OFF"],
         description=("oneflow_xrt's xla extension"),
     )
 elif env.build_tensorrt:
@@ -103,7 +103,12 @@ elif env.build_tensorrt:
     ), "should specify TENSORRT_ROOT where TensorRT is installed when building TensorRT"
     setup_extension(
         "oneflow_xrt_tensorrt",
-        cmake_args=["-DBUILD_TENSORRT=ON", f"-DTENSORRT_ROOT={env.tensorrt_root}"],
+        cmake_args=[
+            "-DBUILD_TENSORRT=ON",
+            f"-DTENSORRT_ROOT={env.tensorrt_root}",
+            "-DBUILD_XLA=OFF",
+            "-DBUILD_OPENVINO=OFF",
+        ],
         description=("oneflow_xrt's tensorrt extension"),
     )
 elif env.build_openvino:
@@ -112,12 +117,18 @@ elif env.build_openvino:
     ), "should specify OPENVINO_ROOT where OpenVINO runtime is installed when building OpenVINO"
     setup_extension(
         "oneflow_xrt_openvino",
-        cmake_args=["-DBUILD_OPENVINO=ON", f"-DOPENVINO_ROOT={env.openvino_root}"],
+        cmake_args=[
+            "-DBUILD_OPENVINO=ON",
+            f"-DOPENVINO_ROOT={env.openvino_root}",
+            "-DBUILD_XLA=OFF",
+            "-DBUILD_TENSORRT=OFF",
+        ],
         description=("oneflow_xrt's openvino extension"),
     )
 else:
     setup_extension(
         "oneflow_xrt",
+        cmake_args=["-DBUILD_XLA=OFF", "-DBUILD_TENSORRT=OFF", "-DBUILD_OPENVINO=OFF"],
         description=(
             "an OneFlow extension that provides an easy to use, "
             "flexible and unified way to integrate third-party computing engines"
