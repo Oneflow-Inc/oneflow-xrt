@@ -28,6 +28,19 @@ bool IsCanbeCompiledNode(const XrtNode* node, const XrtEngine& engine,
                          const XrtDevice& device) {
   if (XRT_REGISTER_HAS(OpKernelRegId,
                        (OpKernelRegKey{node->type(), engine, device}))) {
+    // TODO(hjchen2): Refactor
+    if (engine == XrtEngine::TENSORRT) {
+      for (const auto* in_edge : node->in_edges()) {
+        if (in_edge->argument().data_type() == oneflow::kInt64) {
+          return false;
+        }
+      }
+      for (const auto* out_edge : node->out_edges()) {
+        if (out_edge->argument().data_type() == oneflow::kInt64) {
+          return false;
+        }
+      }
+    }
     if (!node->trainable()) {
       return true;
     }

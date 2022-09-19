@@ -13,8 +13,10 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
+#include "oneflow/core/common/shape_view.h"
 #include "oneflow_xrt/compiler/tensorrt/ops/op_context.h"
 #include "oneflow_xrt/compiler/tensorrt/ops/op_kernel.h"
+#include "oneflow_xrt/compiler/tensorrt/trt_helpers.h"
 
 namespace oneflow {
 namespace xrt {
@@ -34,13 +36,29 @@ class MatMulOp : public TrtOpKernel {
   void Compile(TrtOpContext* ctx) override {
     Shape a_shape = ctx->InputShape("a_0");
     Shape b_shape = ctx->InputShape("b_0");
-    CHECK_GE(a_shape.NumAxes(), 2);
-    CHECK_EQ(a_shape.NumAxes(), b_shape.NumAxes());
+    CHECK_GE(a_shape.NumAxes(), 1) << "Tensor a's dim should >= 1";
+    CHECK_GE(b_shape.NumAxes(), 1) << "Tensor b's dim should >= 1";
+
+    std::cout << ctx->op_name() << std::endl;
+    std::cout << a_shape.ToString() << ", " << b_shape.ToString() << std::endl;
 
     bool transpose_a = ctx->Attr<bool>("transpose_a");
     bool transpose_b = ctx->Attr<bool>("transpose_b");
     nvinfer1::ITensor* a = ctx->Input("a_0");
     nvinfer1::ITensor* b = ctx->Input("b_0");
+
+    if ((a_shape.NumAxes() > 2 || b_shape.NumAxes() > 2) &&
+        a_shape.NumAxes() != b_shape.NumAxes()) {
+      int64_t max_axes = std::max(a_shape.NumAxes(), b_shape.NumAxes());
+      if (a_shape.NumAxes() < max_axes) {
+        a = helpers::Reshape(ctx, a,
+                             CreateLeftExtendedShape(a_shape, max_axes));
+      }
+      if (b_shape.NumAxes() < max_axes) {
+        b = helpers::Reshape(ctx, b,
+                             CreateLeftExtendedShape(b_shape, max_axes));
+      }
+    }
 
     auto op0 = GetMatrixOperation(a, transpose_a);
     auto op1 = GetMatrixOperation(b, transpose_b);
@@ -61,6 +79,10 @@ class MatMulOp : public TrtOpKernel {
 };
 
 REGISTER_TRT_OP_KERNEL(matmul, MatMulOp).EnableTrainPhase().Finalize();
+REGISTER_TRT_OP_KERNEL(broadcast_matmul, MatMulOp)
+    .EnableTrainPhase()
+    .Finalize();
+REGISTER_TRT_OP_KERNEL(batch_matmul, MatMulOp).EnableTrainPhase().Finalize();
 
 }  // namespace tensorrt
 }  // namespace xrt

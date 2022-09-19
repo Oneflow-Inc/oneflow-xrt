@@ -83,6 +83,9 @@ class Argument {
   const Shape& shape() const { return shape_; }
   const DataType& data_type() const { return data_type_; }
 
+  void set_shape(const Shape& shape) { shape_ = shape; }
+  void set_data_type(const DataType& data_type) { data_type_ = data_type; }
+
   void set_meta_data(const ArgumentMetaData& meta_data) {
     meta_data_ = meta_data;
   }

@@ -53,6 +53,7 @@ class GraphBuilder {
  private:
   std::shared_ptr<XrtGraph> graph_;
   std::map<std::string, const XrtNode*> producers_;
+  std::map<std::string, BlobDesc> blob_descs_;
   std::map<const XrtNode*, NodeInfo> node_info_;
 };
 
@@ -64,8 +65,10 @@ GraphBuilder::GraphBuilder(const Job& job)
     XrtNode* node = graph_->AddNode(op.op_conf());
     auto& node_info = node_info_[node];
     for (const std::string& bn : op.output_bns()) {
-      std::string output = GenLogicalBlobName(op.BnInOp2Lbi(bn));
+      const auto& blob_id = op.BnInOp2Lbi(bn);
+      std::string output = GenLogicalBlobName(blob_id);
       producers_[output] = node;
+      blob_descs_.emplace(output, op_graph->GetLogicalBlobDesc(blob_id));
       node_info.input_output_keys[output] = bn;
       node_info.nd_sbp[output] = op_node->NdSbp4BnInOp(bn);
     }
@@ -151,6 +154,16 @@ void GraphBuilder::BuildGraphEdges() {
         graph_->Connect(it->second, node, argument);
       }
     }
+  }
+  if (blob_descs_.size() == 0) {
+    return;
+  }
+  for (XrtEdge* edge : graph_->Edges()) {
+    const std::string& name = edge->argument().name();
+    const auto& it = blob_descs_.find(name);
+    CHECK(it != blob_descs_.end());
+    edge->argument().set_shape(it->second.shape());
+    edge->argument().set_data_type(it->second.data_type());
   }
 }
 
