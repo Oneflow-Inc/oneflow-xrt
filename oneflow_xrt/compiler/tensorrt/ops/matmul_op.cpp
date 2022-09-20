@@ -39,9 +39,6 @@ class MatMulOp : public TrtOpKernel {
     CHECK_GE(a_shape.NumAxes(), 1) << "Tensor a's dim should >= 1";
     CHECK_GE(b_shape.NumAxes(), 1) << "Tensor b's dim should >= 1";
 
-    std::cout << ctx->op_name() << std::endl;
-    std::cout << a_shape.ToString() << ", " << b_shape.ToString() << std::endl;
-
     bool transpose_a = ctx->Attr<bool>("transpose_a");
     bool transpose_b = ctx->Attr<bool>("transpose_b");
     nvinfer1::ITensor* a = ctx->Input("a_0");

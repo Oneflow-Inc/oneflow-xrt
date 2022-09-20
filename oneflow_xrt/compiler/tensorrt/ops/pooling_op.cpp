@@ -13,18 +13,17 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-#include "NvInfer.h"
-#include "oneflow/core/operator/op_conf.pb.h"
+#include "oneflow_xrt/common/shape_util.h"
 #include "oneflow_xrt/compiler/tensorrt/ops/op_context.h"
 #include "oneflow_xrt/compiler/tensorrt/ops/op_kernel.h"
-#include "oneflow_xrt/compiler/tensorrt/trt_logger.h"
+#include "oneflow_xrt/compiler/tensorrt/trt_helpers.h"
 
 namespace oneflow {
 namespace xrt {
 namespace tensorrt {
 
 template <nvinfer1::PoolingType pooling_type>
-class PoolingOp : public TrtOpKernel {
+class TfPoolingOp : public TrtOpKernel {
  public:
   void Compile(TrtOpContext* ctx) override {
     Shape in_shape = ctx->SoleInputShape();
@@ -71,11 +70,81 @@ class PoolingOp : public TrtOpKernel {
   }
 };
 
-REGISTER_TRT_OP_KERNEL(tf_max_pool_2d, PoolingOp<nvinfer1::PoolingType::kMAX>)
+REGISTER_TRT_OP_KERNEL(tf_max_pool_2d, TfPoolingOp<nvinfer1::PoolingType::kMAX>)
     .EnableTrainPhase()
     .Finalize();
 REGISTER_TRT_OP_KERNEL(tf_avg_pool_2d,
-                       PoolingOp<nvinfer1::PoolingType::kAVERAGE>)
+                       TfPoolingOp<nvinfer1::PoolingType::kAVERAGE>)
+    .EnableTrainPhase()
+    .Finalize();
+
+template <nvinfer1::PoolingType pooling_type>
+class PoolingOp : public TrtOpKernel {
+ public:
+  void Compile(TrtOpContext* ctx) override {
+    Shape in_shape = ctx->SoleInputShape();
+    CHECK_GE(in_shape.NumAxes(), 3);
+    CHECK_LE(in_shape.NumAxes(), 5);
+
+    const std::string& data_format = ctx->Attr<std::string>("data_format");
+    std::vector<int32_t> padding = ctx->Attr<std::vector<int32_t>>("padding");
+    std::vector<int32_t> kernel_size =
+        ctx->Attr<std::vector<int32_t>>("kernel_size");
+    std::vector<int32_t> stride = ctx->Attr<std::vector<int32_t>>("stride");
+    const bool ceil_mode = ctx->Attr<bool>("ceil_mode");
+
+    if (kernel_size.size() == 1) {
+      kernel_size.emplace_back(1);
+    }
+    if (padding.size() == 1) {
+      padding.emplace_back(0);
+    }
+    if (stride.size() == 1) {
+      stride.emplace_back(1);
+    }
+
+    nvinfer1::ITensor* in = ctx->SoleInput();
+    if (in_shape.NumAxes() < 4) {
+      std::vector<int64_t> dims(4, 1);
+      for (int i = 0; i < in_shape.NumAxes(); ++i) {
+        dims[i] = in_shape.At(i);
+      }
+      in = helpers::Reshape(ctx, in, AsShape(dims));
+    }
+
+    nvinfer1::IPoolingLayer* layer = ctx->builder()->addPoolingNd(
+        *in, pooling_type, IntListToXrtDims(kernel_size));
+    if (pooling_type == nvinfer1::PoolingType::kMAX) {
+      std::vector<int32_t> dilation =
+          ctx->Attr<std::vector<int32_t>>("dilation");
+      CHECK(dilation == std::vector<int32_t>(dilation.size(), 1))
+          << "Pooling dilation is not supported in TensorRT";
+    } else {
+      const bool count_include_pad = ctx->Attr<bool>("count_include_pad");
+      layer->setAverageCountExcludesPadding(!count_include_pad);
+    }
+    layer->setName(ctx->op_name().c_str());
+
+    auto padding_mode = ceil_mode ? nvinfer1::PaddingMode::kEXPLICIT_ROUND_UP
+                                  : nvinfer1::PaddingMode::kEXPLICIT_ROUND_DOWN;
+    layer->setPaddingMode(padding_mode);
+    layer->setPaddingNd(IntListToXrtDims(padding));
+    layer->setStrideNd(IntListToXrtDims(stride));
+
+    auto* layer_out = layer->getOutput(0);
+    if (in_shape.NumAxes() < 4) {
+      auto out_shape = XrtDimsToShape(layer_out->getDimensions());
+      out_shape.resize(in_shape.NumAxes());
+      layer_out = helpers::Reshape(ctx, layer_out, out_shape);
+    }
+    ctx->SetSoleOutput(layer_out);
+  }
+};
+
+REGISTER_TRT_OP_KERNEL(max_pool_2d, PoolingOp<nvinfer1::PoolingType::kMAX>)
+    .EnableTrainPhase()
+    .Finalize();
+REGISTER_TRT_OP_KERNEL(avg_pool_2d, PoolingOp<nvinfer1::PoolingType::kAVERAGE>)
     .EnableTrainPhase()
     .Finalize();
 
