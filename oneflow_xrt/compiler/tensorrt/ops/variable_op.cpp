@@ -13,27 +13,27 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-#ifndef ONEFLOW_XRT_GRAPH_NODE_UTIL_H_
-#define ONEFLOW_XRT_GRAPH_NODE_UTIL_H_
-
-#include "oneflow_xrt/graph/node.h"
+#include "oneflow_xrt/api/api_internal.h"
+#include "oneflow_xrt/compiler/tensorrt/ops/op_context.h"
+#include "oneflow_xrt/compiler/tensorrt/ops/op_kernel.h"
 
 namespace oneflow {
 namespace xrt {
+namespace tensorrt {
 
-bool IsCanbeCompiledNode(const XrtNode* node, const XrtEngine& engine);
+class VariableOp : public TrtOpKernel {
+ public:
+  void Compile(TrtOpContext* ctx) override {
+    const auto& buffer = RegisteredBuffer(ctx->op_name());
+    xrt::Parameter param(ctx->op_name() + "/out",
+                         const_cast<void*>(buffer.first), buffer.second,
+                         DataType::kFloat);
+    ctx->SetVariable("out", TrtValue::Parameter(ctx->builder(), param));
+  }
+};
 
-bool IsCanbeCompiledNode(const XrtNode* node, const XrtEngine& engine,
-                         const XrtDevice& device);
-bool IsModelUpdateNode(const XrtNode* node);
+REGISTER_TRT_OP_KERNEL(Variable, VariableOp).Finalize();
 
-bool IsMutableVariable(const Argument& argument, const std::string& op_type,
-                       const XrtEngine& engine);
-
-bool IsNodeInput(const XrtNode* node, const Argument& argument);
-bool IsNodeOutput(const XrtNode* node, const Argument& argument);
-
+}  // namespace tensorrt
 }  // namespace xrt
 }  // namespace oneflow
-
-#endif  // ONEFLOW_XRT_GRAPH_NODE_UTIL_H_
