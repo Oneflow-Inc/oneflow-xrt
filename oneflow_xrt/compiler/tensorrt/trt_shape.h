@@ -61,6 +61,18 @@ inline Shape XrtDimsToShape(const nvinfer1::Dims& dims) {
   return Shape(shape);
 }
 
+template <typename T>
+inline nvinfer1::Dims IntListToXrtDims(const std::vector<T>& list) {
+  CHECK_LE(list.size(), 8)
+      << "The maximum dimensions is 8 supported by TensorRT.";
+  nvinfer1::Dims dims;
+  dims.nbDims = list.size();
+  for (int i = 0; i < dims.nbDims; ++i) {
+    dims.d[i] = static_cast<int64_t>(list[i]);
+  }
+  return dims;
+}
+
 class TrtShape {
  public:
   TrtShape() = default;

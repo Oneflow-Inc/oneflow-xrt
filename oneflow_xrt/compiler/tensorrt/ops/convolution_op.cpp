@@ -20,7 +20,8 @@ namespace oneflow {
 namespace xrt {
 namespace tensorrt {
 
-class ConvolutionOp : public TrtOpKernel {
+template <int Ndims>
+class ConvolutionNdOp : public TrtOpKernel {
  public:
   void Compile(TrtOpContext* ctx) override {
     nvinfer1::ITensor* in = ctx->Input("in_0");
@@ -37,28 +38,33 @@ class ConvolutionOp : public TrtOpKernel {
     CHECK_EQ(ctx->Attr<std::string>("data_format"), "channels_first");
     const auto& kernel_size = ctx->Attr<std::vector<int32_t>>("kernel_size");
     const auto& strides = ctx->Attr<std::vector<int32_t>>("strides");
+    const auto& pads = ctx->Attr<std::vector<int32_t>>("padding_before");
     const auto& dilation = ctx->Attr<std::vector<int32_t>>("dilation_rate");
     const int groups = ctx->Attr<int32_t>("groups");
+    CHECK_EQ(kernel_size.size(), Ndims);
+    CHECK_EQ(strides.size(), Ndims);
+    CHECK_EQ(pads.size(), Ndims);
+    CHECK_EQ(dilation.size(), Ndims);
 
     int filters = ctx->Attr<int32_t>("filters");
-    auto* layer = ctx->builder()->addConvolution(
-        *in, filters, nvinfer1::DimsHW(kernel_size[0], kernel_size[1]), weight,
-        bias);
+    auto* layer = ctx->builder()->addConvolutionNd(
+        *in, filters, IntListToXrtDims(kernel_size), weight, bias);
     layer->setName(ctx->op_name().c_str());
 
-    layer->setStride(nvinfer1::DimsHW(strides[0], strides[1]));
-    layer->setDilation(nvinfer1::DimsHW(dilation[0], dilation[1]));
+    layer->setStrideNd(IntListToXrtDims(strides));
+    layer->setDilationNd(IntListToXrtDims(dilation));
     layer->setNbGroups(groups);
 
-    const auto& pads = ctx->Attr<std::vector<int32_t>>("padding_before");
     layer->setPaddingMode(nvinfer1::PaddingMode::kEXPLICIT_ROUND_DOWN);
-    layer->setPrePadding(nvinfer1::DimsHW(pads[0], pads[1]));
-    layer->setPostPadding(nvinfer1::DimsHW(pads[0], pads[1]));
+    layer->setPrePadding(IntListToXrtDims(pads));
+    layer->setPostPadding(IntListToXrtDims(pads));
     ctx->SetOutput("out_0", layer->getOutput(0));
   }
 };
 
-REGISTER_TRT_OP_KERNEL(conv2d, ConvolutionOp).Finalize();
+REGISTER_TRT_OP_KERNEL(conv1d, ConvolutionNdOp<1>).Finalize();
+REGISTER_TRT_OP_KERNEL(conv2d, ConvolutionNdOp<2>).Finalize();
+REGISTER_TRT_OP_KERNEL(conv3d, ConvolutionNdOp<3>).Finalize();
 
 }  // namespace tensorrt
 }  // namespace xrt
