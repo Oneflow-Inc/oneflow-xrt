@@ -28,7 +28,9 @@ class VariableOp : public TrtOpKernel {
     xrt::Parameter param(ctx->op_name() + "/out",
                          const_cast<void*>(buffer.first), buffer.second,
                          DataType::kFloat);
-    ctx->SetVariable("out", TrtValue::Parameter(ctx->builder(), param));
+    auto value = TrtValue::Parameter(ctx->builder(), param);
+    value.AsWeight(ctx->builder());
+    ctx->SetVariable("out", value);
   }
 };
 
