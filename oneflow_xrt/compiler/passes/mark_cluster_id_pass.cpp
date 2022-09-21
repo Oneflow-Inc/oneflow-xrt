@@ -85,8 +85,9 @@ void MarkClusterIdPass::BuildClusterNodesAndEdges(XrtGraph* graph) {
 }
 
 void MarkClusterIdPass::ClusteringSubgraphs(const ClusteringOptions& options) {
-  for (int i = 0; i < options.max_iteration; ++i) {
-    bool has_changed = false;
+  bool has_changed = true;
+  while (has_changed) {
+    has_changed = false;
     std::vector<ClusterNode*> ordered_nodes;
     algorithm::TopologyVisit(*this, [&](ClusterNode* node) {
       if (!node->IsCompiled(options.engine) ||
@@ -111,9 +112,6 @@ void MarkClusterIdPass::ClusteringSubgraphs(const ClusteringOptions& options) {
           break;
         }
       }
-    }
-    if (!has_changed) {
-      break;
     }
   }
 }
