@@ -13,6 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
+#include <pybind11/numpy.h>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
@@ -41,6 +42,17 @@ PYBIND11_MODULE(_oneflow_xrt_internal, m) {
           return py::bytes(job->SerializeAsString());
         });
   m.def("cluster_subgraph", &RunClusterSubGraphPass);
+  m.def("register_buffer",
+        [](const std::string& op_name, const py::array& param) {
+          // TODO(hjchen2): check contiguous
+          CHECK(param.dtype().equal(py::dtype::of<float>()))
+              << "parameter/buffer should be float type";
+          Shape shape(param.ndim());
+          for (size_t i = 0; i < param.ndim(); ++i) {
+            shape[i] = param.shape(i);
+          }
+          RegisterBuffer(op_name, shape, param.data());
+        });
 
   InitXrtGraphApis(m);
   InitClusteringOptionsApis(m);

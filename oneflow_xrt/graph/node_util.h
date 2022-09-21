@@ -21,6 +21,8 @@ limitations under the License.
 namespace oneflow {
 namespace xrt {
 
+bool IsCanbeCompiledNode(const XrtNode* node, const XrtEngine& engine);
+
 bool IsCanbeCompiledNode(const XrtNode* node, const XrtEngine& engine,
                          const XrtDevice& device);
 bool IsModelUpdateNode(const XrtNode* node);

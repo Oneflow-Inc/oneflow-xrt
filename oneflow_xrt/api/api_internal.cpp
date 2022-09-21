@@ -15,6 +15,8 @@ limitations under the License.
 */
 #include "oneflow_xrt/api/api_internal.h"
 
+#include <unordered_map>
+
 #include "oneflow_xrt/compiler/passes/build_subgraph_pass.h"
 #include "oneflow_xrt/compiler/passes/mark_cluster_id_pass.h"
 #include "oneflow_xrt/compiler/passes/trainable_propagation_pass.h"
@@ -28,6 +30,30 @@ std::shared_ptr<XrtGraph> RunClusterSubGraphPass(
   new_graph = TrainablePropagationPass(graph);
   new_graph = RunMarkClusterIdPass(new_graph.get(), options);
   return RunBuildSubGraphPass(new_graph.get(), options);
+}
+
+namespace {
+
+std::unordered_map<std::string, std::pair<const void*, Shape>>*
+registered_buffers() {
+  static std::unordered_map<std::string, std::pair<const void*, Shape>>
+      registered_buffers;
+  return &registered_buffers;
+}
+
+}  // namespace
+
+void RegisterBuffer(const std::string& op_name, const Shape& shape,
+                    const void* data) {
+  registered_buffers()->emplace(op_name, std::make_pair(data, shape));
+}
+
+const std::pair<const void*, Shape>& RegisteredBuffer(
+    const std::string& op_name) {
+  const auto& it = registered_buffers()->find(op_name);
+  CHECK(it != registered_buffers()->end())
+      << "buffer not found which name is " << op_name;
+  return it->second;
 }
 
 }  // namespace xrt
