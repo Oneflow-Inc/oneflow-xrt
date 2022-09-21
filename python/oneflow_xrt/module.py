@@ -14,6 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 from typing import Dict, Optional, Union, List, Callable
+import numpy as np
 import oneflow as flow
 import oneflow_xrt as ofrt
 from .import_engine import try_import_engine
@@ -54,6 +55,8 @@ class XRTModule(flow.nn.Module):
             XRT will not strictly take execution dependencies into consideration when cluster subgraph. Default: True
         - cluster_max_iteration:
             The maximum iteration when cluster subgraph. Default: 20
+        - unsafe_transfer_unused_params_to_host:
+            Transfer unused parameter from device to host to save device memory. Default: False
         - dump_subgraph_dir:
             The subgraph clustered will be dumped in this directory. Default: None
         - verbose:
@@ -89,6 +92,7 @@ class XRTModule(flow.nn.Module):
         cluster_maximum_nodes=None,
         cluster_ignore_pipeline=True,
         cluster_max_iteration=20,
+        unsafe_transfer_unused_params_to_host=False,
         dump_subgraph_dir=None,
         verbose=False,
     ):
@@ -121,6 +125,7 @@ class XRTModule(flow.nn.Module):
             force_precision_constraints,
             force_compile,
         )
+        self.unsafe_transfer_unused_params_to_host = unsafe_transfer_unused_params_to_host
         self.verbose = verbose
 
     def __getattr__(self, name):
@@ -211,6 +216,7 @@ class XRTModule(flow.nn.Module):
         return options
 
     def register_subgraph_params(self, job):
+        self.registered_params = []
         alive_ops = set()
         for op in job.net.op:
             alive_ops.add(op.name)
@@ -218,10 +224,13 @@ class XRTModule(flow.nn.Module):
         for state_block in self.module._state():
             state_tensor = state_block.origin
             op_name = state_block.name_prefix + state_block.name
-            if op_name not in alive_ops and state_tensor.is_local:
-                with flow.no_grad():
-                    state_block.origin.data = state_tensor.to("cpu")
-                ofrt.register_buffer(op_name, state_block.origin.numpy())
+            if op_name not in alive_ops and isinstance(state_tensor, flow.nn.Parameter) and state_tensor.is_local:
+                param = np.copy(state_block.origin.detach().cpu().numpy())
+                self.registered_params.append(param)
+                if self.unsafe_transfer_unused_params_to_host:
+                    with flow.no_grad():
+                        state_block.origin.data = state_block.origin.to("cpu")
+                ofrt.register_buffer(op_name, param)
 
     def forward(self, *args, **kwargs):
         if self.is_compiled:
