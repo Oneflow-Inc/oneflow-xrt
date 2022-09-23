@@ -29,17 +29,18 @@ nvinfer1::ITensor* TrtBuilder::GetTensor(int64_t handle) {
   if (IsUndefKind(kind)) {
     CheckHasParameter(handle);
     const Parameter& param = params_.at(handle);
-    const char* name = param.name().c_str();
     // Convert data type and shape.
     TrtShape shape(param.shape(), param.data_type());
-    tensors_[handle] =
-        network_->addInput(name, shape.data_type(), shape.shape());
+    tensors_[handle] = network_->addInput(param.name().c_str(),
+                                          shape.data_type(), shape.shape());
     value_kinds_[handle] = TrtValueKind::kTensor;
   }
   if (IsWeightKind(kind) && !tensors_.count(handle)) {
     const Parameter& param = params_.at(handle);
     auto* layer =
         network_->addConstant(ShapeToXrtDims(param.shape()), GetWeight(handle));
+    layer->setName(param.name().c_str());
+    layer->getOutput(0)->setName(param.name().c_str());
     tensors_[handle] = layer->getOutput(0);
   }
   return tensors_.at(handle);
