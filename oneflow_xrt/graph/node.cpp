@@ -31,13 +31,7 @@ XrtNode::XrtNode(const OperatorConf& conf)
     type_ = user_conf.op_type_name();
     attrs_ = MakeAttrMapFromUserOpConf(user_conf);
   } else if (conf.has_variable_conf()) {
-    // Free eager variable can not be fused
-    if (conf.variable_conf().has_is_free_eager_tensor() &&
-        conf.variable_conf().is_free_eager_tensor()) {
-      type_ = _XrtUnsupportedOpType;
-    } else {
-      type_ = "Variable";
-    }
+    type_ = "Variable";
     trainable_ = conf.variable_conf().has_trainable() &&
                  conf.variable_conf().trainable();
   } else {
