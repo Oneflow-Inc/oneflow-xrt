@@ -24,23 +24,18 @@ namespace tensorrt {
 
 nvinfer1::ITensor* TrtBuilder::GetTensor(int64_t handle) {
   const TrtValueKind& kind = ValueKind(handle);
-  CHECK(IsUndefKind(kind) || IsTensorKind(kind) || IsWeightKind(kind))
-      << "Value should be undefined, tensor or weight for handle " << handle;
+  CHECK(IsUndefKind(kind) || IsTensorKind(kind))
+      << "Value should be undefined or tensor for handle " << handle;
+  nvinfer1::ITensor* tensor = nullptr;
   if (IsUndefKind(kind)) {
     CheckHasParameter(handle);
     const Parameter& param = params_.at(handle);
     const char* name = param.name().c_str();
     // Convert data type and shape.
     TrtShape shape(param.shape(), param.data_type());
-    tensors_[handle] =
-        network_->addInput(name, shape.data_type(), shape.shape());
+    tensor = network_->addInput(name, shape.data_type(), shape.shape());
+    tensors_[handle] = tensor;
     value_kinds_[handle] = TrtValueKind::kTensor;
-  }
-  if (IsWeightKind(kind) && !tensors_.count(handle)) {
-    const Parameter& param = params_.at(handle);
-    auto* layer =
-        network_->addConstant(ShapeToXrtDims(param.shape()), GetWeight(handle));
-    tensors_[handle] = layer->getOutput(0);
   }
   return tensors_.at(handle);
 }

@@ -210,7 +210,7 @@ class XRTModule(flow.nn.Module):
         options.force_compile = force_compile
         return options
 
-    def register_subgraph_params(self, job):
+    def register_unused_params(self, job):
         alive_ops = set()
         for op in job.net.op:
             alive_ops.add(op.name)
@@ -218,10 +218,9 @@ class XRTModule(flow.nn.Module):
         for state_block in self.module._state():
             state_tensor = state_block.origin
             op_name = state_block.name_prefix + state_block.name
-            if op_name not in alive_ops and state_tensor.is_local:
-                with flow.no_grad():
-                    state_block.origin.data = state_tensor.to("cpu")
-                ofrt.register_buffer(op_name, state_block.origin.numpy())
+            if op_name not in alive_ops:
+                state_tensor.to("cpu")
+                ofrt.register_buffer(op_name, state_tensor.numpy())
 
     def forward(self, *args, **kwargs):
         if self.is_compiled:
@@ -240,7 +239,7 @@ class XRTModule(flow.nn.Module):
             print("job after XRT compilation: ", job)
 
         if not self.module.training:
-            self.register_subgraph_params(job)
+            self.register_unused_params(job)
 
         self.module._full_graph_proto = job
         self.module.finish_complie_and_init_runtime()
