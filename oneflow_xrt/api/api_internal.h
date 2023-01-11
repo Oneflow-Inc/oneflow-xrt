@@ -40,12 +40,6 @@ extern std::shared_ptr<Job> RunRebuildJobPass(const XrtGraph* graph,
 extern void RunShapeInferencePass(const XrtGraph* graph,
                                   ShapeInferenceContext& context);
 
-void RegisterBuffer(const std::string& op_name, const Shape& shape,
-                    const void* data);
-
-const std::pair<const void*, Shape>& RegisteredBuffer(
-    const std::string& op_name);
-
 }  // namespace xrt
 }  // namespace oneflow
 

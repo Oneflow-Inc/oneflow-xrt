@@ -24,32 +24,22 @@ limitations under the License.
 namespace oneflow {
 namespace xrt {
 
-namespace {
-
-bool ExtraIsCanbeCompiledNode(const XrtNode* node, const XrtEngine& engine) {
-  if (engine == XrtEngine::TENSORRT) {
-    // TensorRT does not support int64
-    for (const auto* in_edge : node->in_edges()) {
-      if (in_edge->argument().data_type() == oneflow::kInt64) {
-        return false;
+bool IsCanbeCompiledNode(const XrtNode* node, const XrtEngine& engine,
+                         const XrtDevice& device) {
+  if (XRT_REGISTER_HAS(OpKernelRegId,
+                       (OpKernelRegKey{node->type(), engine, device}))) {
+    // TODO(hjchen2): Refactor
+    if (engine == XrtEngine::TENSORRT) {
+      for (const auto* in_edge : node->in_edges()) {
+        if (in_edge->argument().data_type() == oneflow::kInt64) {
+          return false;
+        }
       }
-    }
-    for (const auto* out_edge : node->out_edges()) {
-      if (out_edge->argument().data_type() == oneflow::kInt64) {
-        return false;
+      for (const auto* out_edge : node->out_edges()) {
+        if (out_edge->argument().data_type() == oneflow::kInt64) {
+          return false;
+        }
       }
-    }
-  }
-  return true;
-}
-
-}  // namespace
-
-bool IsCanbeCompiledNode(const XrtNode* node, const XrtEngine& engine) {
-  if (XRT_REGISTER_HAS(OpKernelAttrRegId,
-                       (OpKernelAttrRegKey{node->type(), engine}))) {
-    if (!ExtraIsCanbeCompiledNode(node, engine)) {
-      return false;
     }
     if (!node->trainable()) {
       return true;
@@ -57,15 +47,6 @@ bool IsCanbeCompiledNode(const XrtNode* node, const XrtEngine& engine) {
     const auto& kernel_attrs = XRT_REGISTER_LOOKUP(
         OpKernelAttrRegId, (OpKernelAttrRegKey{node->type(), engine}));
     return kernel_attrs.train_phase_enabled;
-  }
-  return false;
-}
-
-bool IsCanbeCompiledNode(const XrtNode* node, const XrtEngine& engine,
-                         const XrtDevice& device) {
-  if (XRT_REGISTER_HAS(OpKernelRegId,
-                       (OpKernelRegKey{node->type(), engine, device}))) {
-    return IsCanbeCompiledNode(node, engine);
   }
   return false;
 }

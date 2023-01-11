@@ -16,7 +16,6 @@ limitations under the License.
 import oneflow_xrt._oneflow_xrt_internal
 from oneflow_xrt._oneflow_xrt_internal import cluster_subgraph
 from oneflow_xrt._oneflow_xrt_internal import ClusteringOptions, ReBuildJobOptions
-from oneflow_xrt._oneflow_xrt_internal import register_buffer
 from .graph import Graph
 from .module import XRTModule
 from .calibration_mode import ptq_calibration_mode

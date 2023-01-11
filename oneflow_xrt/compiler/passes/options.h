@@ -36,9 +36,6 @@ struct ClusteringOptions {
   // ignore strict dependencies analysis
   bool ignore_pipeline = true;
 
-  // ignore operator node device
-  bool ignore_device = false;
-
   // maximum iteration count for iteratively clustering. -1 means
   // that it will always iteratively merge as much as possible until no
   // node can be merged

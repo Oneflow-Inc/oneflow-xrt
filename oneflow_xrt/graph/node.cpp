@@ -30,14 +30,13 @@ XrtNode::XrtNode(const OperatorConf& conf)
     const auto& user_conf = conf.user_conf();
     type_ = user_conf.op_type_name();
     attrs_ = MakeAttrMapFromUserOpConf(user_conf);
-  } else if (conf.has_variable_conf()) {
-    type_ = "Variable";
-    trainable_ = conf.variable_conf().has_trainable() &&
-                 conf.variable_conf().trainable();
   } else {
     type_ = _XrtUnsupportedOpType;
   }
   device_ = OfDeviceToXrtDevice(conf.device_tag());
+  if (conf.has_variable_conf() && conf.variable_conf().has_trainable()) {
+    trainable_ = conf.variable_conf().trainable();
+  }
 }
 
 void XrtNode::AddInEdge(const XrtEdge* edge) {
