@@ -116,7 +116,7 @@ std::shared_ptr<Executable> TrtGraphCompiler::Compile(
   }
   for (const auto& arg : arguments_) {
     TrtValue& value = operands_.at(arg.second);
-    if (!IsUndefKind(value.ValueKind(builder_.get()))) {
+    if (IsTensorKind(value.ValueKind(builder_.get()))) {
       value.AsTensor(builder_.get())->setName(arg.first.data());
     }
   }
