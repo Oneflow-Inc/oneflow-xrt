@@ -32,7 +32,8 @@ set(TENSORFLOW_SOURCES_DIR ${CMAKE_CURRENT_BINARY_DIR}/tensorflow)
 set(TENSORFLOW_SRCS_DIR ${TENSORFLOW_SOURCES_DIR}/src/tensorflow)
 set(TENSORFLOW_INC_DIR ${TENSORFLOW_SOURCES_DIR}/src/tensorflow)
 
-set(TENSORFLOW_INSTALL_DIR ${CMAKE_CURRENT_BINARY_DIR}/third_party_install/tensorflow)
+set(TENSORFLOW_INSTALL_DIR
+    ${CMAKE_CURRENT_BINARY_DIR}/third_party_install/tensorflow)
 
 set(PATCHES_DIR ${PROJECT_SOURCE_DIR}/patches)
 set(TENSORFLOW_JIT_DIR ${TENSORFLOW_SRCS_DIR}/tensorflow/compiler/jit)
@@ -136,8 +137,8 @@ add_custom_command(
 )
 
 list(APPEND XRT_XLA_THIRD_PARTY_LIBRARIES
-    ${TENSORFLOW_INSTALL_DIR}/lib/libtensorflow_framework.so.2
-    ${TENSORFLOW_INSTALL_DIR}/lib/libxla_core.so)
+     ${TENSORFLOW_INSTALL_DIR}/lib/libtensorflow_framework.so.2
+     ${TENSORFLOW_INSTALL_DIR}/lib/libxla_core.so)
 list(APPEND XRT_XLA_THIRD_PARTY_INCLUDE_DIRS
      ${TENSORFLOW_XLA_INCLUDE_INSTALL_DIR})
 list(APPEND XRT_XLA_THIRD_PARTY_DEPENDICES tensorflow_copy_libs_to_destination

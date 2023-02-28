@@ -50,10 +50,27 @@ find_library(
   PATHS ${OneFlow_LIBRARIE_DIR})
 
 if(NOT ONEFLOW_LIBRARIES)
-  message(
-    FATAL_ERROR
-      "can not find oneflow libraries in directory: ${OneFlow_LIBRARIE_DIR}")
+  execute_process(
+    COMMAND
+      ${Python_EXECUTABLE} -c
+      "import os; import glob; \
+               print(os.path.basename(glob.glob('/home/chenhoujiang/.local/lib/python3.8/site-packages/oneflow.libs/*oneflow-*')[0]));"
+    OUTPUT_VARIABLE OneFlow_LIBRARIES
+    OUTPUT_STRIP_TRAILING_WHITESPACE)
+
+  find_library(
+    ONEFLOW_LIBRARIES
+    NAMES ${OneFlow_LIBRARIES}
+    PATHS ${OneFlow_LIBRARIE_DIR})
+
+  if(NOT ONEFLOW_LIBRARIES)
+    message(
+      FATAL_ERROR
+        "can not find oneflow libraries in directory: ${OneFlow_LIBRARIE_DIR}")
+  endif()
 endif()
+
+message(STATUS "ONEFLOW_LIBRARIES: ${ONEFLOW_LIBRARIES}")
 
 add_library(oneflow UNKNOWN IMPORTED)
 set_property(TARGET oneflow PROPERTY IMPORTED_LOCATION ${ONEFLOW_LIBRARIES})
