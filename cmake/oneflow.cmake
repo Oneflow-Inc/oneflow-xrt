@@ -35,11 +35,19 @@ execute_process(
   OUTPUT_VARIABLE OneFlow_LIBRARIE_DIR
   OUTPUT_STRIP_TRAILING_WHITESPACE)
 
-if(OneFlow_LIBRARIE_DIR)
-  if(EXISTS "${OneFlow_LIBRARIE_DIR}/liboneflow.so")
-    set(OneFlow_LIBRARIES "oneflow")
+execute_process(
+  COMMAND
+    ${Python_EXECUTABLE} -c
+    "import oneflow.sysconfig; \
+                   print(oneflow.sysconfig.get_liboneflow_link_flags()[1].replace('-l:', ''))"
+  OUTPUT_VARIABLE OneFlow_LIBRARIE_NAME
+  OUTPUT_STRIP_TRAILING_WHITESPACE)
+
+if(OneFlow_LIBRARIE_DIR AND OneFlow_LIBRARIE_NAME)
+  if(EXISTS "${OneFlow_LIBRARIE_DIR}/lib${OneFlow_LIBRARIE_NAME}.so")
+    set(OneFlow_LIBRARIES "${OneFlow_LIBRARIE_NAME}")
   else()
-    file(GLOB OneFlow_LIBRARIE_PATH ${OneFlow_LIBRARIE_DIR}/liboneflow-*.so)
+    file(GLOB OneFlow_LIBRARIE_PATH "${OneFlow_LIBRARIE_DIR}/lib${OneFlow_LIBRARIE_NAME}-*.so")
 
     list(LENGTH OneFlow_LIBRARIE_PATH OneFlow_LIBRARIE_NUMS)
 
