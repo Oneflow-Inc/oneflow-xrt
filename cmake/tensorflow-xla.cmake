@@ -75,6 +75,7 @@ set(XRT_TF_DOWNLOAD_NO_EXTRACT OFF)
 set(XRT_TF_URL
     "https://github.com/Oneflow-Inc/tensorflow/archive/1f_dep_v2.3.0r5.zip"
     CACHE STRING "")
+use_mirror(VARIABLE XRT_TF_URL URL ${XRT_TF_URL})
 message(STATUS "XRT_TF_URL: ${XRT_TF_URL}")
 
 if(IS_DIRECTORY ${XRT_TF_URL})
