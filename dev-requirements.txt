@@ -1,3 +1,1 @@
---pre
--f https://staging.oneflow.info/branch/master/cpu
 oneflow
