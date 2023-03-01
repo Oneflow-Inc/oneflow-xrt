@@ -44,10 +44,13 @@ execute_process(
   OUTPUT_STRIP_TRAILING_WHITESPACE)
 
 if(OneFlow_LIBRARIE_DIR AND OneFlow_LIBRARIE_NAME)
-  if(EXISTS "${OneFlow_LIBRARIE_DIR}/lib${OneFlow_LIBRARIE_NAME}.so")
-    set(OneFlow_LIBRARIES "${OneFlow_LIBRARIE_NAME}")
-  else()
-    file(GLOB OneFlow_LIBRARIE_PATH "${OneFlow_LIBRARIE_DIR}/lib${OneFlow_LIBRARIE_NAME}-*.so")
+  find_library(
+    ONEFLOW_LIBRARIES
+    NAMES ${OneFlow_LIBRARIE_NAME}
+    PATHS ${OneFlow_LIBRARIE_DIR})
+  if(NOT ONEFLOW_LIBRARIES)
+    file(GLOB OneFlow_LIBRARIE_PATH
+         "${OneFlow_LIBRARIE_DIR}/lib${OneFlow_LIBRARIE_NAME}-*.*")
 
     list(LENGTH OneFlow_LIBRARIE_PATH OneFlow_LIBRARIE_NUMS)
 
@@ -61,15 +64,14 @@ if(OneFlow_LIBRARIE_DIR AND OneFlow_LIBRARIE_NAME)
           "There are more than one oneflow library, I dont't konw which one is better."
       )
     endif()
-    string(REGEX REPLACE ".+/lib(.+).so$" "\\1" OneFlow_LIBRARIES
+    string(REGEX REPLACE ".+/lib(.+)\\..*" "\\1" OneFlow_LIBRARIE_NEW_NAME
                          ${OneFlow_LIBRARIE_PATH})
+    find_library(
+      ONEFLOW_LIBRARIES
+      NAMES ${OneFlow_LIBRARIE_NEW_NAME}
+      PATHS ${OneFlow_LIBRARIE_DIR})
   endif()
 endif()
-
-find_library(
-  ONEFLOW_LIBRARIES
-  NAMES ${OneFlow_LIBRARIES}
-  PATHS ${OneFlow_LIBRARIE_DIR})
 
 if(NOT ONEFLOW_LIBRARIES)
   message(
