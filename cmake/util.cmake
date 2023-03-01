@@ -1,0 +1,27 @@
+function(use_mirror)
+  set(ALIYUN_URL_PREFIX
+      "https://oneflow-static.oss-cn-beijing.aliyuncs.com/third_party_mirror/https/"
+      CACHE STRING "URL prefix of Aliyun OSS mirror")
+  cmake_parse_arguments(PARSED_ARGS "" "VARIABLE;URL" "" ${ARGN})
+
+  if((NOT PARSED_ARGS_VARIABLE) OR (NOT PARSED_ARGS_URL))
+    message(FATAL_ERROR "VARIABLE or URL required")
+  endif()
+
+  if(PARSED_ARGS_URL MATCHES "file://")
+    set(${PARSED_ARGS_VARIABLE} ${PARSED_ARGS_URL} PARENT_SCOPE)
+    return()
+  endif()
+  if(DEFINED THIRD_PARTY_MIRROR)
+    if(THIRD_PARTY_MIRROR STREQUAL "aliyun")
+      if(NOT PARSED_ARGS_URL MATCHES "^https://")
+        message(FATAL_ERROR "URL should start with 'https://'")
+      endif()
+      string(REPLACE "https://" ${ALIYUN_URL_PREFIX} MIRRORED_URL ${PARSED_ARGS_URL})
+      set(${PARSED_ARGS_VARIABLE} ${MIRRORED_URL} PARENT_SCOPE)
+      message(NOTICE "-- fetch ${PARSED_ARGS_VARIABLE} using aliyun mirror ${MIRRORED_URL}")
+    elseif(NOT THIRD_PARTY_MIRROR STREQUAL "")
+      message(FATAL_ERROR "invalid key for third party mirror")
+    endif()
+  endif()
+endfunction()

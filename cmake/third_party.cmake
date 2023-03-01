@@ -1,4 +1,6 @@
+include(util)
 include(protobuf)
+include(python)
 include(oneflow)
 include(glog)
 include(absl)

@@ -32,7 +32,8 @@ set(TENSORFLOW_SOURCES_DIR ${CMAKE_CURRENT_BINARY_DIR}/tensorflow)
 set(TENSORFLOW_SRCS_DIR ${TENSORFLOW_SOURCES_DIR}/src/tensorflow)
 set(TENSORFLOW_INC_DIR ${TENSORFLOW_SOURCES_DIR}/src/tensorflow)
 
-set(TENSORFLOW_INSTALL_DIR ${CMAKE_CURRENT_BINARY_DIR}/third_party_install/tensorflow)
+set(TENSORFLOW_INSTALL_DIR
+    ${CMAKE_CURRENT_BINARY_DIR}/third_party_install/tensorflow)
 
 set(PATCHES_DIR ${PROJECT_SOURCE_DIR}/patches)
 set(TENSORFLOW_JIT_DIR ${TENSORFLOW_SRCS_DIR}/tensorflow/compiler/jit)
@@ -74,6 +75,7 @@ set(XRT_TF_DOWNLOAD_NO_EXTRACT OFF)
 set(XRT_TF_URL
     "https://github.com/Oneflow-Inc/tensorflow/archive/1f_dep_v2.3.0r5.zip"
     CACHE STRING "")
+use_mirror(VARIABLE XRT_TF_URL URL ${XRT_TF_URL})
 message(STATUS "XRT_TF_URL: ${XRT_TF_URL}")
 
 if(IS_DIRECTORY ${XRT_TF_URL})
@@ -136,8 +138,8 @@ add_custom_command(
 )
 
 list(APPEND XRT_XLA_THIRD_PARTY_LIBRARIES
-    ${TENSORFLOW_INSTALL_DIR}/lib/libtensorflow_framework.so.2
-    ${TENSORFLOW_INSTALL_DIR}/lib/libxla_core.so)
+     ${TENSORFLOW_INSTALL_DIR}/lib/libtensorflow_framework.so.2
+     ${TENSORFLOW_INSTALL_DIR}/lib/libxla_core.so)
 list(APPEND XRT_XLA_THIRD_PARTY_INCLUDE_DIRS
      ${TENSORFLOW_XLA_INCLUDE_INSTALL_DIR})
 list(APPEND XRT_XLA_THIRD_PARTY_DEPENDICES tensorflow_copy_libs_to_destination

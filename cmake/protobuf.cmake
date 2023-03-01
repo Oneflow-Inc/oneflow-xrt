@@ -1,6 +1,7 @@
 include(ExternalProject)
 
-set(PROTOBUF_INSTALL_DIR ${CMAKE_CURRENT_BINARY_DIR}/third_party_install/protobuf)
+set(PROTOBUF_INSTALL_DIR
+    ${CMAKE_CURRENT_BINARY_DIR}/third_party_install/protobuf)
 set(PROTOBUF_INSTALL_INCLUDEDIR include)
 set(PROTOBUF_INSTALL_LIBDIR lib)
 set(PROTOBUF_INSTALL_BINDIR bin)
@@ -11,6 +12,7 @@ set(PROTOBUF_BINARY_DIR ${PROTOBUF_INSTALL_DIR}/${PROTOBUF_INSTALL_BINDIR})
 set(PROTOBUF_SRC_DIR ${CMAKE_CURRENT_BINARY_DIR}/protobuf/src/protobuf/src)
 set(PROTOBUF_URL
     "https://github.com/protocolbuffers/protobuf/archive/v3.9.2.zip")
+use_mirror(VARIABLE PROTOBUF_URL URL ${PROTOBUF_URL})
 set(PROTOBUF_MD5 cf02c32870a1f78c860039e0f63a6343)
 
 if(WIN32)
