@@ -87,7 +87,7 @@ class XRTModule(flow.nn.Module):
         cluster_minimum_nodes=1,
         cluster_maximum_nodes=None,
         cluster_ignore_pipeline=True,
-        cluster_max_iteration=20,
+        cluster_max_iteration=100,
         dump_subgraph_dir=None,
         verbose=False,
     ):
