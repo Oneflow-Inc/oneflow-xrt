@@ -23,6 +23,17 @@ using google::protobuf::TextFormat;
 
 namespace oneflow {
 
+namespace {
+
+#if (__cplusplus >= 201703L || _MSVC_LANG + 0L >= 201703L)
+constexpr std::string_view kUserSourceOpTickInputArgName =
+    "UserSourceOpTickInput";
+#else
+const char* kUserSourceOpTickInputArgName = "UserSourceOpTickInput";
+#endif
+
+}  // namespace
+
 Maybe<void> XrtLaunchOpInferNdSbp(user_op::InferNdSbpFnContext* ctx) {
   const auto& string_proto = ctx->user_op_conf().attr<std::string>("proto");
   xrt::XrtLaunchProto proto;
@@ -38,24 +49,32 @@ Maybe<void> XrtLaunchOpInferNdSbp(user_op::InferNdSbpFnContext* ctx) {
   }
   const auto& nd_sbp_signature = it->second.bn_in_op2nd_sbp();
   for (const auto& input : ctx->inputs()) {
+    // skip tick input, since it's sbp is added after infer nd-sbp
+    if (input.first == kUserSourceOpTickInputArgName) {
+      continue;
+    }
     std::string name = absl::StrCat(input.first, "_", input.second);
-    const auto& it = nd_sbp_signature.find(name);
-    if (it == nd_sbp_signature.end()) {
-      return Error::RuntimeError() << "missing input (" << name
-                                   << ") nd sbp for xrt launch op " << op_name;
+    const auto& input_nd_sbp_it = nd_sbp_signature.find(name);
+    if (input_nd_sbp_it == nd_sbp_signature.end()) {
+      return Error::RuntimeError()
+             << "missing input (" << name << ": "
+             << ctx->user_op_conf().input(input.first, input.second)
+             << ") nd sbp for xrt launch op " << op_name;
     }
     *(ctx->NdSbp4ArgNameAndIndex(/*name*/ input.first,
-                                 /*index*/ input.second)) = it->second;
+                                 /*index*/ input.second)) =
+        input_nd_sbp_it->second;
   }
   for (const auto& output : ctx->outputs()) {
     std::string name = absl::StrCat(output.first, "_", output.second);
-    const auto& it = nd_sbp_signature.find(name);
-    if (it == nd_sbp_signature.end()) {
+    const auto& output_nd_sbp_it = nd_sbp_signature.find(name);
+    if (output_nd_sbp_it == nd_sbp_signature.end()) {
       return Error::RuntimeError() << "missing output (" << name
                                    << ") nd sbp for xrt launch op " << op_name;
     }
     *(ctx->NdSbp4ArgNameAndIndex(/*name*/ output.first,
-                                 /*index*/ output.second)) = it->second;
+                                 /*index*/ output.second)) =
+        output_nd_sbp_it->second;
   }
   return Maybe<void>::Ok();
 }
