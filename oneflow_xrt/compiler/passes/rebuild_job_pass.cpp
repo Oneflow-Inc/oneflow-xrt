@@ -343,13 +343,12 @@ void FoldSubgraphBuilder::FixupControlInOpNames() {
 
   for (const XrtNode* node : graph_->Nodes()) {
     auto* op_conf = CHECK_JUST(builder_->MutableOpConf4OpName(node->name()));
-    if (!node->sub_graph()) {
-      auto ctrl_in_op_names = op_conf->ctrl_in_op_name();
-      op_conf->clear_ctrl_in_op_name();
-      for (const auto& op_name : ctrl_in_op_names) {
-        AddControlInOpName(op_conf, op_name);
-      }
-    } else {
+    auto ctrl_in_op_names = op_conf->ctrl_in_op_name();
+    op_conf->clear_ctrl_in_op_name();
+    for (const auto& op_name : ctrl_in_op_names) {
+      AddControlInOpName(op_conf, op_name);
+    }
+    if (node->sub_graph()) {
       for (const XrtNode* sub_node : node->sub_graph()->Nodes()) {
         if (sub_node->IsEntryNode() || sub_node->IsReturnNode()) {
           continue;
