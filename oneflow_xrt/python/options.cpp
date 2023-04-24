@@ -77,6 +77,13 @@ void InitClusteringOptionsApis(py::module_& m) {
             opt.max_iteration = max_iteration;
           })
       .def_property(
+          "strict_sbp_policy", /*getter*/
+          [](const ClusteringOptions& opt) { return opt.strict_sbp_policy; },
+          /*setter*/
+          [](ClusteringOptions& opt, bool strict_sbp_policy) {
+            opt.strict_sbp_policy = strict_sbp_policy;
+          })
+      .def_property(
           "dump_subgraph_dir", /*getter*/
           [](const ClusteringOptions& opt) { return opt.dump_subgraph_dir; },
           /*setter*/
@@ -146,5 +153,12 @@ void InitReBuildJobOptionsApis(py::module_& m) {
           /*setter*/
           [](ReBuildJobOptions& opt, const int64_t& max_workspace_size) {
             opt.max_workspace_size = max_workspace_size;
+          })
+      .def_property(
+          "dump_subgraph_dir", /*getter*/
+          [](const ReBuildJobOptions& opt) { return opt.dump_subgraph_dir; },
+          /*setter*/
+          [](ReBuildJobOptions& opt, const std::string& dump_subgraph_dir) {
+            opt.dump_subgraph_dir = dump_subgraph_dir;
           });
 }

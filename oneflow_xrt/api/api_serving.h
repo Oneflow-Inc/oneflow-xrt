@@ -29,6 +29,7 @@ std::string CompileJob(
     bool force_precision_constraints = true, bool force_compile = false,
     size_t cluster_minimum_nodes = 1, size_t cluster_maximum_nodes = 0x7fffffff,
     bool cluster_ignore_pipeline = true, size_t cluster_max_iteration = 20,
+    bool cluster_strict_sbp_policy = true,
     const std::string& dump_subgraph_dir = "");
 
 }  // namespace xrt

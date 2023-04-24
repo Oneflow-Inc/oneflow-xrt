@@ -99,7 +99,7 @@ class ClusterNode {
   }
 
   void Merge(ClusterNode& other);
-  bool TryMerge(ClusterNode& other);
+  bool TryMerge(ClusterNode& other, bool strict_sbp_policy);
   bool IsReachable(const ClusterNode& target) const;
   bool IsSatisfySbpPolicy() const;
   bool IsSourceNode() const { return in_edges_.empty(); }

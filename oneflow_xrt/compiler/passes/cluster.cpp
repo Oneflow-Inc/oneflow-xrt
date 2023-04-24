@@ -161,9 +161,13 @@ void ClusterNode::Merge(ClusterNode& other) {
   FoldNodes(other.folded_nodes());
 }
 
-bool ClusterNode::TryMerge(ClusterNode& other) {
+bool ClusterNode::TryMerge(ClusterNode& other, bool strict_sbp_policy = true) {
   ClusterMergeNode node(this, &other);
-  if (!node.IsSatisfySbpPolicy() || node.IsReachable(node)) {
+  bool is_satisfy_sbp_policy = true;
+  if (strict_sbp_policy) {
+    is_satisfy_sbp_policy = node.IsSatisfySbpPolicy();
+  }
+  if (!is_satisfy_sbp_policy || node.IsReachable(node)) {
     // explicit fallback
     node.Fallback();
     return false;

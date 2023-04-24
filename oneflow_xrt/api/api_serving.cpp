@@ -29,6 +29,7 @@ std::string CompileJob(const std::string& job,
                        size_t cluster_maximum_nodes,
                        bool cluster_ignore_pipeline,
                        size_t cluster_max_iteration,
+                       bool cluster_strict_sbp_policy,
                        const std::string& dump_subgraph_dir) {
   Job job_proto;
   if (!job_proto.ParseFromString(job)) {
@@ -40,6 +41,7 @@ std::string CompileJob(const std::string& job,
   cluster_options.maximum_nodes = cluster_maximum_nodes;
   cluster_options.ignore_pipeline = cluster_ignore_pipeline;
   cluster_options.max_iteration = cluster_max_iteration;
+  cluster_options.strict_sbp_policy = cluster_strict_sbp_policy;
   cluster_options.dump_subgraph_dir = dump_subgraph_dir;
   for (const auto& e : engine) {
     XrtEngine xrt_engine;
@@ -56,6 +58,7 @@ std::string CompileJob(const std::string& job,
   options.strict_types = strict_types;
   options.force_precision_constraints = force_precision_constraints;
   options.force_compile = force_compile;
+  options.dump_subgraph_dir = dump_subgraph_dir;
 
   auto new_job = RunRebuildJobPass(graph.get(), job_proto, options);
   return new_job->SerializeAsString();

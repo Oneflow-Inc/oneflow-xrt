@@ -35,6 +35,8 @@ struct ClusteringOptions {
 
   // ignore strict dependencies analysis
   bool ignore_pipeline = true;
+  // check is satisfy strict sbp policy
+  bool strict_sbp_policy = true;
 
   // maximum iteration count for iteratively clustering. -1 means
   // that it will always iteratively merge as much as possible until no
@@ -56,6 +58,8 @@ struct ReBuildJobOptions {
 
   int64_t max_batch_size = 1;
   int64_t max_workspace_size = -1;
+
+  std::string dump_subgraph_dir = "";
 };
 
 }  // namespace xrt
