@@ -53,6 +53,9 @@ class XRTModule(flow.nn.Module):
             XRT will not strictly take execution dependencies into consideration when cluster subgraph. Default: True
         - cluster_max_iteration:
             The maximum iteration when cluster subgraph. Default: 20
+        - cluster_strict_sbp_policy:
+            More strict sbp check when merging cluster node. Default: True
+            When merging cluster node, ensure the merged node's in edges and out edges are for each either all identity or all non-identity.
         - dump_subgraph_dir:
             The subgraph clustered will be dumped in this directory. Default: None
         - verbose:
@@ -88,6 +91,7 @@ class XRTModule(flow.nn.Module):
         cluster_maximum_nodes=None,
         cluster_ignore_pipeline=True,
         cluster_max_iteration=100,
+        cluster_strict_sbp_policy=True,
         dump_subgraph_dir=None,
         verbose=False,
     ):
@@ -108,6 +112,7 @@ class XRTModule(flow.nn.Module):
             cluster_maximum_nodes,
             cluster_ignore_pipeline,
             cluster_max_iteration,
+            cluster_strict_sbp_policy,
             dump_subgraph_dir,
         )
         self.execution_options = self.make_execution_options(
@@ -119,6 +124,7 @@ class XRTModule(flow.nn.Module):
             strict_types,
             force_precision_constraints,
             force_compile,
+            dump_subgraph_dir,
         )
         self.verbose = verbose
 
@@ -173,6 +179,7 @@ class XRTModule(flow.nn.Module):
         maximum_nodes=None,
         ignore_pipeline=True,
         max_iteration=20,
+        strict_sbp_policy=True,
         dump_subgraph_dir=None,
     ):
         options = ofrt.ClusteringOptions()
@@ -181,6 +188,7 @@ class XRTModule(flow.nn.Module):
             options.maximum_nodes = maximum_nodes
         options.ignore_pipeline = ignore_pipeline
         options.max_iteration = max_iteration
+        options.strict_sbp_policy = strict_sbp_policy
         if dump_subgraph_dir is not None:
             options.dump_subgraph_dir = dump_subgraph_dir
         return options
@@ -195,6 +203,7 @@ class XRTModule(flow.nn.Module):
         strict_types=False,
         force_precision_constraints=True,
         force_compile=False,
+        dump_subgraph_dir=None,
     ):
         options = ofrt.ReBuildJobOptions()
         options.use_fp16 = use_fp16
@@ -207,6 +216,8 @@ class XRTModule(flow.nn.Module):
         options.strict_types = strict_types
         options.force_precision_constraints = force_precision_constraints
         options.force_compile = force_compile
+        if dump_subgraph_dir is not None:
+            options.dump_subgraph_dir = dump_subgraph_dir
         return options
 
     def forward(self, *args, **kwargs):
@@ -214,18 +225,24 @@ class XRTModule(flow.nn.Module):
             return self.module(*args, **kwargs)
 
         origin_job, _ = self.module.build_graph(*args, **kwargs)
-        graph = ofrt.Graph(origin_job)
 
-        for engine in self.engine:
-            self.clustering_options.engine = engine
-            graph = ofrt.cluster_subgraph(graph, self.clustering_options)
+        # compile on master rank only
+        if flow.env.get_rank() == 0:
+            graph = ofrt.Graph(origin_job)
 
-        job = ofrt.rebuild_job(graph, origin_job, self.execution_options)
+            for engine in self.engine:
+                self.clustering_options.engine = engine
+                graph = ofrt.cluster_subgraph(graph, self.clustering_options)
 
-        if self.verbose:
-            print("job after XRT compilation: ", job)
+            job = ofrt.rebuild_job(graph, origin_job, self.execution_options)
 
-        self.module._full_graph_proto = job
+            if self.verbose:
+                print("job after XRT compilation: ", job)
+                with open("job_after_XRT", "w") as f:
+                    f.write(str(job))
+
+            self.module._full_graph_proto = job
+
         self.module.finish_compile_and_init_runtime()
         self.is_compiled = True
         return self.module(*args, **kwargs)

@@ -21,6 +21,7 @@ limitations under the License.
 #include "absl/strings/str_cat.h"
 #include "glog/logging.h"
 #include "google/protobuf/text_format.h"
+#include "google/protobuf/io/zero_copy_stream_impl.h"
 #include "oneflow/core/job/job_builder.h"
 #include "oneflow/core/operator/op_conf.pb.h"
 #include "oneflow/core/operator/operator.h"
@@ -314,6 +315,15 @@ void FoldSubgraphBuilder::BuildXrtLaunchOps() {
     auto* op_conf = CHECK_JUST(builder_->MutableOpConf4OpName(node->name()));
     std::string xrt_launch_attr;
     google::protobuf::TextFormat::PrintToString(proto, &xrt_launch_attr);
+    if (!options_.dump_subgraph_dir.empty()) {
+      std::string dump_file_path = absl::StrCat(options_.dump_subgraph_dir, "/", node->name());
+      std::ofstream ofs(dump_file_path.c_str(), std::ofstream::out);
+      CHECK(ofs.good())
+              << "can not dump subgraph, please check if the directory (" << dump_file_path
+              << ") exists";
+      ofs << xrt_launch_attr;
+      ofs.close();
+    }
     auto* attr = op_conf->mutable_user_conf()->mutable_attr();
     (*attr)["proto"].set_at_string(xrt_launch_attr);
   }

@@ -139,7 +139,7 @@ bool MarkClusterIdPass::TryToFuseWithParent(ClusterNode* children,
     }
   }
   if (can_be_fusion) {
-    return parent->TryMerge(*children);
+    return parent->TryMerge(*children, options.strict_sbp_policy);
   }
   return false;
 }
